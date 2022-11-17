@@ -3,51 +3,38 @@
 """
 Discord Bot based on PolygonScan API and Disnake lib for web scrapping data from PolygonScan. 
 
-"""
-
-import os 
-import json
-import requests
-from datetime import datetime
-from dotenv import load_dotenv
+"""   
 import disnake
-from disnake.ext import commands
+from disnake.ext import commands 
+from config import DiscordToken
+import os, traceback
 
-load_dotenv()
-API_KEY = os.getenv('API_KEY') # PolygonScan API Key
 intents = disnake.Intents.default()
 intents.members = True
 intents.message_content = True
 
-bot = commands.Bot(command_prefix=commands.when_mentioned_or("."), intents=intents)
-  
-# Define getTrx - get transactions function that will fetch all normal transactions for specific address
-# Maximum of 10000 records
-@bot.command()
-async def getTrx(ctx: commands.Context, address: str, key=API_KEY, counter=0): 
-    trx = []
-    endpoint = 'https://api.polygonscan.com/api?module=account&action=txlist&address=' + str(address) + '&startblock=0&endblock=99999999&page=1&offset=10&sort=desc&apikey=' + str(key)
-    response = requests.get(endpoint)  
-    data = json.loads(response.text) 
-    for each in data['result']:
-        counter += 1
-        print(each['value'])
-        ts = each['timeStamp']
-        print(ts)
-        # dt = datetime.fromtimestamp(ts) 
-        string = 'Transaction #' + str(counter) + '\nFrom: ' + str(each['from']) + ' nTo: ' + str(each['to']) + '\n--------'
-        await ctx.send(string)
+bot = commands.Bot(command_prefix=commands.when_mentioned_or("ps-"), intents=intents)
 
-    """ Return Normal Transactions """
-    # string = "Transaction Hash: " + data['result']['hash']
-    # await ctx.send('Done')
+# Ping command that returns bot latency
+@bot.command()
+async def ping(ctx):
+    await ctx.send (f"📶 {round(bot.latency * 1000)}ms") 
 
 # Print the message in Python console once bot is ready for usage
 @bot.event
 async def on_ready():
     print(f"Welcome to the PolygonScan Tracker Bot!")
-    print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
+    print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------------------------------------")
+
+for file in os.listdir('./cogs'):
+    if file.endswith('.py') and file != '__init__.py':
+        try:
+            bot.load_extension("cogs."+file[:-3])
+            print(f"{file[:-3]} Loaded successfully.")
+        except:
+            print(f"Unable to load {file[:-3]}.")
+            print(traceback.format_exc())
 
 
 if __name__ == "__main__":
-    bot.run(os.getenv('DISCORD_TOKEN')) 
+    bot.run(str(DiscordToken))
