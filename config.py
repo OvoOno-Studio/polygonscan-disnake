@@ -1,0 +1,5 @@
+AppId = 'APP_ID'
+GuildId = 'GUILD_ID'
+DiscordToken = 'DISCORD_TOKEN'
+PublicKey = 'PUBLIC_KEY'
+APIKey = 'API_KEY' 
