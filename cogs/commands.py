@@ -5,13 +5,10 @@ from disnake.ext import commands
 from datetime import datetime, timedelta
 from config import APIKey
 
-key = str(APIKey)
-print(key)
-
 intents = disnake.Intents.default()
 intents.members = True
 intents.message_content = True
- 
+key = str(APIKey)  
 bot = commands.Bot(command_prefix=commands.when_mentioned_or("ps-"), intents=intents)
 
 

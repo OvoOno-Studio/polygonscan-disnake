@@ -23,7 +23,7 @@ async def ping(ctx):
 # Print the message in Python console once bot is ready for usage
 @bot.event
 async def on_ready():
-    print(f"Welcome to the PolygonScan Tracker Bot!")
+    print("Welcome to the PolygonScan Tracker Bot!")
     print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------------------------------------")
 
 for file in os.listdir('./cogs'):
