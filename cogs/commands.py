@@ -33,5 +33,17 @@ class Commands(commands.Cog):
             string = 'Transaction #' + str(counter) + '\nFrom: ' + str(each['from']) + ' \nTo: ' + str(each['to']) + '\nWhen: ' + str(dt) + '\n--------'
             await ctx.send(string)
 
+    """
+    Define getBalance() - get amount in WEI for single address. 
+    """
+    @commands.command()
+    async def getBalance(self, ctx: commands.Context, address: str, key=key): 
+        endpoint = 'https://api.polygonscan.com/api?module=account&action=balance&address=' + str(address) + '&apikey=' + str(key)
+        response = requests.get(endpoint)  
+        data = json.loads(response.text) 
+        amount = float(data['result']) / ( 10 ** 18 ) # Convert WEI to MATIC
+        await ctx.send("Amount in MATIC: " + str(amount)) 
+
 def setup(bot):
     bot.add_cog(Commands(bot))
+
