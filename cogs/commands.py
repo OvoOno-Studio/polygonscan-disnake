@@ -27,8 +27,7 @@ class Commands(commands.Cog):
         await ctx.send(f'https://polygonscan.com/tx/{str(hash)}')        
 
     """
-    Define getTrx() - function that will fetch all normal transactions for specific address.
-    - Return 10 transaction.
+    Define getTrx() - function that will fetch all normal transactions for specific address. 
     """
     @commands.command()
     async def getTrx(self, ctx: commands.Context, address: str, offset: str, key=key, counter=0):    

@@ -45,6 +45,5 @@ for file in os.listdir('./cogs'):
             print(f"Unable to load {file[:-3]}.")
             print(traceback.format_exc())
 
-
 if __name__ == "__main__":
     bot.run(str(DiscordToken))
