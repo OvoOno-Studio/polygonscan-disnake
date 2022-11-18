@@ -16,6 +16,17 @@ class Commands(commands.Cog):
         self.bot = bot
 
     """
+    Define getTrxHash() - return a link to for specific transaction hash.
+    """
+
+    @commands.command()
+    async def getTrxHash(self, ctx: commands.Context, hash: str, key=key):
+        endpoint = f'https://api.polygonscan.com/api?module=account&action=txlistinternal&txhash={str(hash)}&apikey={str(key)}'
+        response = requests.get(endpoint)
+        data = json.loads(response.text) 
+        await ctx.send(f'https://polygonscan.com/tx/{str(hash)}')        
+
+    """
     Define getTrx() - function that will fetch all normal transactions for specific address.
     - Return 10 transaction.
     """
@@ -29,7 +40,7 @@ class Commands(commands.Cog):
             counter += 1     
             ts = int(each['timeStamp'])  
             dt = datetime.fromtimestamp(ts)   
-            string = '**Transaction #' + str(counter) + '**\nFrom: ' + str(each['from']) + ' \nTo: ' + str(each['to']) + '\nWhen: ' + str(dt) + '\n--------------------------------------------------------------------'
+            string = '**Transaction #' + str(counter) + '**\nTransaction Hash: ' + str(each['hash']) + '\nFrom: ' + str(each['from']) + ' \nTo: ' + str(each['to']) + '\nWhen: ' + str(dt) + '\n--------------------------------------------------------------------'
             await ctx.send(string)
 
     """

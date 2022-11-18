@@ -24,7 +24,7 @@ async def ping(ctx):
 @bot.event
 async def on_ready():
     print("Welcome to the PolygonScan Tracker Bot!")
-    print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------------------------------------")
+    print(f"Logged in as {bot.user} (ID: {bot.user.id})\n--------------------------------------------------------------------")
 
 # Display error on command
 @bot.event
