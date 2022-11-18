@@ -1,8 +1,8 @@
-# PolygonScan Tracker Discord Bot
-
 """
+Copyright © DevEmel 2022 - https://github.com/ml350 
+Description:
 Discord Bot based on PolygonScan API and Disnake lib for web scrapping data from PolygonScan. 
-
+Version: 1.0
 """   
 import disnake
 from disnake.ext import commands 
