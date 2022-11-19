@@ -8,8 +8,8 @@ from config import APIKey
 intents = disnake.Intents.default()
 intents.members = True
 intents.message_content = True
-key = str(APIKey)  
-bot = commands.Bot(command_prefix=commands.when_mentioned_or("ps-"), intents=intents)
+key = str(APIKey)   
+bot = commands.Bot(command_prefix=commands.when_mentioned_or("ps-"), intents=intents, help_command=help_cmd)
 
 class Commands(commands.Cog):
     def __init__(self, bot):
@@ -18,12 +18,11 @@ class Commands(commands.Cog):
     """
     Define getTrxHash() - return a link to for specific transaction hash.
     """
-
     @commands.command()
     async def getTrxHash(self, ctx: commands.Context, hash: str, key=key):
-        endpoint = f'https://api.polygonscan.com/api?module=account&action=txlistinternal&txhash={str(hash)}&apikey={str(key)}'
-        response = requests.get(endpoint)
-        data = json.loads(response.text) 
+        # endpoint = f'https://api.polygonscan.com/api?module=account&action=txlistinternal&txhash={str(hash)}&apikey={str(key)}'
+        # response = requests.get(endpoint)
+        # data = json.loads(response.text) 
         await ctx.send(f'https://polygonscan.com/tx/{str(hash)}')        
 
     """
@@ -90,5 +89,20 @@ class Commands(commands.Cog):
             string = '**Transaction #' + str(counter) + '**\nToken Name: ' + str(each['tokenName']) + '\nToken ID:' + str(each['tokenID']) + '\nFrom: ' + str(each['from']) + '\nTo: ' + str(each['to']) + '\nWhen' + str(dt)
             await ctx.send(string)
 
+    """
+    Define getErc1155() - return list of ERC-721 (NFT) transactions, can be filtered by specific smart contract address. 
+    """
+    @commands.command()
+    async def getErc1155(self, ctx: commands.Context, address: str, contract: str, offset: str, key=key, counter=0):
+        endpoint = f'https://api.etherscan.io/api?module=account&action=token1155tx&contractaddress={str(contract)}&address={str(address)}&page=1&{str(offset)}=100&startblock=0&endblock=99999999&sort=asc&apikey={str(key)}'
+        response = requests.get(endpoint)
+        data = json.loads(response.text)
+        for each in data['result']:
+            counter += 1 
+            ts = int(each['timeStamp'])
+            dt = datetime.fromtimestamp(ts)
+            string = '**Transaction #' + str(counter) + '**\nToken Name: ' + str(each['tokenName']) + '\nToken ID:' + str(each['tokenID']) + '\nFrom: ' + str(each['from']) + '\nTo: ' + str(each['to']) + '\nWhen' + str(dt)
+            await ctx.send(string)
+    
 def setup(bot):
     bot.add_cog(Commands(bot))
