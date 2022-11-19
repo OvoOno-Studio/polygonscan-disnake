@@ -14,12 +14,13 @@ bot = commands.Bot(command_prefix=commands.when_mentioned_or("ps-"), intents=int
 class Commands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.key = str(APIKey)
 
     """
     Define getTrxHash() - return a link to for specific transaction hash.
     """
     @commands.command()
-    async def getTrxHash(self, ctx: commands.Context, hash: str, key=key):
+    async def getTrxHash(self, ctx: commands.Context, hash: str):
         # endpoint = f'https://api.polygonscan.com/api?module=account&action=txlistinternal&txhash={str(hash)}&apikey={str(key)}'
         # response = requests.get(endpoint)
         # data = json.loads(response.text) 
@@ -29,8 +30,10 @@ class Commands(commands.Cog):
     Define getTrx() - function that will fetch all normal transactions for specific address. 
     """
     @commands.command()
-    async def getTrx(self, ctx: commands.Context, address: str, offset: str, key=key, counter=0):    
-        endpoint = f'https://api.polygonscan.com/api?module=account&action=txlist&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(key)}'
+    async def getTrx(self, ctx: commands.Context, address: str, offset: str):
+        counter = 0
+        api_key = self.key    
+        endpoint = f'https://api.polygonscan.com/api?module=account&action=txlist&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(api_key)}'
         response = requests.get(endpoint)  
         data = json.loads(response.text)
         
