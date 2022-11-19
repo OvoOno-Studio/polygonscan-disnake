@@ -9,7 +9,7 @@ intents = disnake.Intents.default()
 intents.members = True
 intents.message_content = True
 key = str(APIKey)   
-bot = commands.Bot(command_prefix=commands.when_mentioned_or("ps-"), intents=intents, help_command=help_cmd)
+bot = commands.Bot(command_prefix=commands.when_mentioned_or("ps-"), intents=intents)
 
 class Commands(commands.Cog):
     def __init__(self, bot):
