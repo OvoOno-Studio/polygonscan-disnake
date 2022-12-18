@@ -27,7 +27,7 @@ class Commands(commands.Cog):
         await ctx.send(f"Generating link for transaction with {str(hash)} - sent DM to {author}")
         embed = disnake.Embed(
             title="Get transaction by hash ID",
-            description="Return a link to for specific transaction hash,",
+            description="Return a link to for specific transaction hash.",
             color=0x9C84EF,
             timestamp=datetime.now()
         ) 
@@ -45,6 +45,10 @@ class Commands(commands.Cog):
     """
     @commands.command()
     async def getTrx(self, ctx: commands.Context, address: str, offset: str):
+        if(int(offset) > 25):
+            await ctx.send(f"Maximum offset must be lower then 25! Aborting the command.")
+            return
+        
         author = ctx.author.mention
         api_key = self.key    
         counter = 0
@@ -56,7 +60,7 @@ class Commands(commands.Cog):
         await ctx.send(f"Listing last {offset} internal transactions for **{address}** - sent DM to {author}")
         embed = disnake.Embed(
             title=f"{str(offset)} transactions of {str(address)}",
-            description="Return list of normal transaction",
+            description="Return list of normal transaction.",
             color=0x9C84EF,
             timestamp=datetime.now()
         )   
@@ -132,7 +136,7 @@ class Commands(commands.Cog):
             await ctx.send(string) 
     
     """
-    Define getErc721() - return list of ERC-721 (NFT) transactions, can be filtered by specific smart contract address. 
+    Define getErc721() - return list of ERC-721(NFT) transactions, can be filtered by specific smart contract address. 
     """
     @commands.command()
     async def getErc721(self, ctx: commands.Context, address: str, contract: str, offset: str, counter=0):
