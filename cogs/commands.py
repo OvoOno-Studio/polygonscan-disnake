@@ -116,25 +116,45 @@ class Commands(commands.Cog):
     Define getErc20() - return list of ERC-20 transactions, can be filtered by specific smart contract address. 
     """
     @commands.command()
-    async def getErc20(self, ctx: commands.Context, address: str, contract: str, offset: str, counter=0):
-        api_key = self.key   
+    async def getErc20(self, ctx: commands.Context, address: str, contract: str, offset: str, counter=0): 
+        if(int(offset) > 25):
+            await ctx.send(f"Maximum offset must be lower then 25! Aborting the command.")
+            return
+           
         if(contract == 'SAND'):
             contract = '0xbbba073c31bf03b8acf7c28ef0738decf3695683' 
         
+        author = ctx.author.mention
+        api_key = self.key
         endpoint = f'https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={str(contract)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(api_key)}'
         response = requests.get(endpoint)  
         data = json.loads(response.text) 
-        author = ctx.author.mention
         print(f"User - {author} trigger command getErc20 for {address} wallet address.")
-        await ctx.send(f"Listing last {offset} ERC-20 transactions for **{address}** - by {author}") 
+        await ctx.send(f"Listing last {offset} ERC-20 transactions for **{address}** - sent DM to {author}")
+        embed = disnake.Embed(
+            title=f"{str(offset)} ERC-20 transactions of {str(address)}",
+            description="Return list of ERC-20 transaction.",
+            color=0x9C84EF,
+            timestamp=datetime.now()
+        ) 
         for each in data['result']:
             counter += 1     
             value = int(each['value']) / 10 ** 18 # Convert WEI to SAND
             ts = int(each['timeStamp'])  
             dt = datetime.fromtimestamp(ts)   
-            string = '**Transaction #' + str(counter) + '**\nFrom: ' + str(each['from']) + ' \nTo: ' + str(each['to']) + '\nWhen: ' + str(dt) + '\nValue: ' + str(value) + '\n--------------------------------------------------------------------'
-            await ctx.send(string) 
-    
+            # string = '**Transaction #' + str(counter) + '**\nFrom: ' + str(each['from']) + ' \nTo: ' + str(each['to']) + '\nWhen: ' + str(dt) + '\nValue: ' + str(value) + '\n--------------------------------------------------------------------'
+            embed.add_field(
+                name=f"Transaction #{str(counter)}",
+                value=f'\nTransaction Hash: {str(each["hash"])} \nFrom: {str(each["from"])} \nTo: {str(each["to"])} \nWhen: {str(dt)} \nValue: {str(value)}',
+                inline=False 
+            )
+        
+        embed.set_footer(
+            text=f"Requested by {ctx.author}"
+        ) 
+        
+        await ctx.author.send(embed=embed) 
+
     """
     Define getErc721() - return list of ERC-721(NFT) transactions, can be filtered by specific smart contract address. 
     """
