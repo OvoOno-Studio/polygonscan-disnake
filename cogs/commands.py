@@ -28,34 +28,32 @@ class Commands(commands.Cog):
         response = requests.get(endpoint)  
         data = json.loads(response.text)
         print(f"User - {author} trigger command checkTrx for {hash} transaction.")
-        await ctx.send(f"Return status of transaction with {str(hash)} - sent DM to {author}")
+        await ctx.send(f"Return status of transaction with {str(hash)} - sent DM to {author}") 
+
+        status = ''
+        if int(data['status']) == 1:
+            status = 'Successful.'
+        else:
+            status = 'Failed.'
+        
         embed = disnake.Embed(
             title=f"Status of transaction with hash {str(hash)}",
-            description="Return list of ERC-20 transaction.",
+            description="Return status code of transaction.",
             color=0x9C84EF,
             timestamp=datetime.now()
         )
 
-        for each in data['result']:
-            counter += 1 
-            status = ''     
-            if(each['status'] == 1):
-                status = 'Successful'
-            if(each['status'] == 0):
-                status = "Failed"
+        embed.add_field(
+            name="Status transaction: ",
+            value=f'\n {str(status)}',
+            inline=False 
+        )
 
-            embed.add_field(
-                name=f"Status transaction: ",
-                value=f'\n {str(status)}',
-                inline=False 
-            )
-        
         embed.set_footer(
             text=f"Requested by {ctx.author}"
-        )  
-
+        )
+         
         await ctx.author.send(embed=embed) 
-
     """
     Define getTrxHash() - return a link to for specific transaction hash.
     """
