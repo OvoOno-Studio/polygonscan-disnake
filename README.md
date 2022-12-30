@@ -12,6 +12,8 @@ Prefix command: ```ps-```
 - Return a link to for specific transaction hash. ```ps-getTrxHash <transaction hash>```
 - Return a list of normal transaction for specific address. ```ps-getTrx <wallet address> <offset>``` 
 - Get amount in MATIC for single address. ```ps-getBalance <wallet address>``` 
-- Return list of ERC-20 transactions, can be filtered by specific smart contract address. ```ps-getErc20 <wallet address> <contract address> <offset>``` 
-- Return list of ERC-721 (NFT) transactions, can be filtered by specific smart contract address. ```ps-getErc721 <wallet address> <contract address> <offset>```  
+- Return list of ERC-20 transactions, 
+can be filtered by specific smart contract address. ```ps-getErc20 <wallet address> <contract address> <offset>``` 
+- Return list of ERC-721 (NFT) transactions, 
+can be filtered by specific smart contract address. ```ps-getErc721 <wallet address> <contract address> <offset>```  
 
