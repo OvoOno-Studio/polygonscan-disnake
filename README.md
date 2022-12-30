@@ -1,7 +1,9 @@
 # PolygonScan Web Scraper Discord bot
-= disnake and polygonscan api
+A Discord bot that uses the [Polygonscan API](https://polygonscan.com/apis) to provide access to various blockchain data and functionality, such as querying the state of a contract, retrieving transaction history, or submitting transactions.
 
-## Comands
+This bot uses the [Polygonscan API](https://polygonscan.com/apis) and [Disnake](https://docs.disnake.dev/en/stable/)
+
+## Commands
 
 ```
 Prefix command: ps-
