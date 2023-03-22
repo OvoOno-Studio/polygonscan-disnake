@@ -65,7 +65,7 @@ class Crypto(commands.Cog):
                 return await response.json()
 
     async def fetch_wallet_transactions(self):
-        url = f"{self.polygon_scan_api_url}&address={self.wallet_address}&contractaddress={self.sand_contract_address}"
+        url = f"{self.polygon_scan_api_url}&address={self.wallet_address}&contractaddress={self.sand_contract_address}&sort=desc"
         try:
             json_data = await self.limited_get(url)
             # print(f"fetch_wallet_transactions response: {json_data}")  # Log the response for debugging
@@ -105,7 +105,7 @@ class Crypto(commands.Cog):
 
                 print(f"Checking transactions for wallet {self.wallet_address}")
                 print(f"Transaction hash: {transactions[0]['hash']}")
-                
+
                 last_transaction = transactions[0]
 
                 if self.last_known_transaction is None:
