@@ -16,8 +16,7 @@ class Crypto(commands.Cog):
         self.price_alert_channel_id = 944377385682341921
         self.threshold = 0.05 # 5% threshhold
         self.previous_matic_price = None
-        self.last_known_transaction = None
-        self.semaphore = asyncio.Semaphore(4)  # Create a Semaphore with a maximum of 4 concurrent tasks
+        self.last_known_transaction = None 
         self.bot.loop.create_task(self.update_crypto_presence())
         self.bot.loop.create_task(self.monitor_wallet_transactions())
         'FT4NWBTMQNZ7NV4ZBJINCRRCSYH7VC2QQ4'
@@ -58,12 +57,7 @@ class Crypto(commands.Cog):
             except Exception as e:
                 print(f"Error updating presence: {e}")
 
-            await asyncio.sleep(60)  # Update the presence every 60 seconds
-
-    async def limited_get(self, url):
-        async with self.semaphore:  # Limit the number of concurrent requests
-            async with self.session.get(url) as response:
-                return await response.json()
+            await asyncio.sleep(60)  # Update the presence every 60 seconds 
 
     async def fetch_wallet_transactions(self):
         url = f"{self.polygon_scan_api_url}&address={self.wallet_address}&contractaddress={self.sand_contract_address}"
