@@ -1,13 +1,12 @@
 import disnake
 from disnake.ext import commands
-import aiohttp
-from aiohttp_throttle import Throttle
+import aiohttp 
 import asyncio
 from config import APIKey
 
 class Crypto(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot = bot 
         self.session = aiohttp.ClientSession()
         self.api_url = "https://api.binance.com/api/v3/ticker/price?symbol="
         self.polygon_scan_api_url = f"https://api.polygonscan.com/api?module=account&action=tokentx&apikey={APIKey}"
@@ -18,7 +17,7 @@ class Crypto(commands.Cog):
         self.threshold = 0.05 # 5% threshhold
         self.previous_matic_price = None
         self.last_known_transaction = None
-        self.throttle = Throttle(rate=4, period=1)  # Set the rate limit, e.g., 4 requests per 1 second
+        self.semaphore = asyncio.Semaphore(4)  # Create a Semaphore with a maximum of 4 concurrent tasks
         self.bot.loop.create_task(self.update_crypto_presence())
         self.bot.loop.create_task(self.monitor_wallet_transactions())
 
@@ -60,11 +59,15 @@ class Crypto(commands.Cog):
 
             await asyncio.sleep(60)  # Update the presence every 60 seconds
 
+    async def limited_get(self, url):
+        async with self.semaphore:  # Limit the number of concurrent requests
+            async with self.session.get(url) as response:
+                return await response.json()
+
     async def fetch_wallet_transactions(self):
         url = f"{self.polygon_scan_api_url}&address={self.wallet_address}&contractaddress={self.sand_contract_address}"
-        async with self.throttle.limit(self.session.get(url)) as response:  # Use the Throttle to limit the request rate
-            json_data = await response.json()
-            return json_data["result"]
+        json_data = await self.limited_get(url)
+        return json_data["result"]
 
     async def send_transaction_message(self, transaction):
         channel = self.bot.get_channel(self.transaction_channel_id)
