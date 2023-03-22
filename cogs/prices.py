@@ -111,6 +111,9 @@ class Crypto(commands.Cog):
                     # Update the last_known_transaction as you process transactions
                     self.last_known_transaction = transaction
 
+                    # Add a delay between each request
+                    await asyncio.sleep(0.25)  # 0.25 seconds delay to limit requests per second
+
             except Exception as e:
                 print(f"Error monitoring wallet transactions: {e}")
 
