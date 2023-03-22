@@ -110,8 +110,6 @@ class Crypto(commands.Cog):
 
                 print(f"Checking transactions for wallet {self.wallet_address}")
 
-                transactions.reverse()
-
                 new_transactions = []
 
                 for transaction in transactions:
@@ -126,9 +124,7 @@ class Crypto(commands.Cog):
                             print(f"Sending transaction message for {transaction['hash']}")
                             await self.send_transaction_message(transaction)
                             last_sent_transaction_hash = transaction["hash"]
-
                         self.last_known_transaction = transaction
-                        await asyncio.sleep(1)
                 else:
                     print(f"No new transactions found for wallet {self.wallet_address}")
 
@@ -136,7 +132,7 @@ class Crypto(commands.Cog):
                 print(f"Error monitoring wallet transactions: {e}")
 
             await asyncio.sleep(60)
-
+            
     async def send_no_transactions_message(self):
         channel = self.bot.get_channel(self.transaction_channel_id)
 
