@@ -104,7 +104,8 @@ class Crypto(commands.Cog):
                     continue
 
                 print(f"Checking transactions for wallet {self.wallet_address}")
-
+                print(f"Transaction hash: {transactions[0]['hash']}")
+                
                 last_transaction = transactions[0]
 
                 if self.last_known_transaction is None:
