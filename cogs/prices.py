@@ -20,6 +20,7 @@ class Crypto(commands.Cog):
         self.semaphore = asyncio.Semaphore(4)  # Create a Semaphore with a maximum of 4 concurrent tasks
         self.bot.loop.create_task(self.update_crypto_presence())
         self.bot.loop.create_task(self.monitor_wallet_transactions())
+        'FT4NWBTMQNZ7NV4ZBJINCRRCSYH7VC2QQ4'
 
     async def get_crypto_price(self, symbol: str):
         async with self.session.get(self.api_url + symbol.upper()) as response:
