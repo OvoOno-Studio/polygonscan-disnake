@@ -13,7 +13,7 @@ class Crypto(commands.Cog):
         self.wallet_address = "0x0ece356189Ba7106Fe3F02ed05fFB1A5F5a366De"  # Replace this with the wallet address you want to monitor
         self.sand_contract_address = "0xbbba073c31bf03b8acf7c28ef0738decf3695683"  # SAND token contract address on Polygon
         self.transaction_channel_id = 944377385682341921  # Replace this with the channel ID where you want to send transaction messages
-
+        self.threshold = 0.05 # 5% threshhold
         self.previous_matic_price = None
         self.last_known_transaction = None
 
