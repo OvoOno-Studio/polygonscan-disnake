@@ -33,9 +33,9 @@ class Crypto(commands.Cog):
             self.previous_matic_price = current_price
             return
 
-        price_change = (current_price - self.previous_matic_price) / self.previous_matic_price
+        price_change = (current_price - self.previous_matic_price) / self.previous_matic_price * 100
 
-        if abs(price_change) >= self.threshold:
+        if abs(price_change) >= self.threshold * 100:
             channel = self.bot.get_channel(self.price_alert_channel_id)
 
             if channel:
