@@ -44,20 +44,38 @@ class Crypto(commands.Cog):
             self.previous_matic_price = current_price
 
     async def update_crypto_presence(self):
-        await self.bot.wait_until_ready()  # Add this line
+        await self.bot.wait_until_ready()
 
         while not self.bot.is_closed():
             try:
-                price = await self.get_crypto_price('MATICUSDT')  # Fetch the price for MATIC
+                price = await self.get_crypto_price('MATICUSDT')
+                price_change = 0
+
+                if self.previous_matic_price is not None:
+                    price_change = ((price - self.previous_matic_price) / self.previous_matic_price) * 100
+
+                color = disnake.Color.green() if price_change >= 0 else disnake.Color.red()
+
+                arrow_emoji = "🟢" if price_change > 0 else "🔴"
+                price_change = abs(price_change)
+                status_text = f"MATIC: {arrow_emoji} {price_change:.2f}% (${price:.2f})"
+
                 await self.check_and_send_alert(price)
+
                 await self.bot.change_presence(
                     status=disnake.Status.online,
-                    activity=disnake.Activity(type=disnake.ActivityType.watching, name=f"MATIC: ${price:.2f}")
+                    activity=disnake.Activity(
+                        type=disnake.ActivityType.watching,
+                        name=status_text,
+                    ),
                 )
+
+                self.previous_matic_price = price
+
             except Exception as e:
                 print(f"Error updating presence: {e}")
 
-            await asyncio.sleep(60)  # Update the presence every 60 seconds
+            await asyncio.sleep(60)
 
     async def limited_get(self, url):
         async with self.semaphore:  # Limit the number of concurrent requests
@@ -81,7 +99,7 @@ class Crypto(commands.Cog):
     async def send_transaction_message(self, transaction):
         channel = self.bot.get_channel(self.transaction_channel_id) 
         if channel:
-            message = (
+            message = ( 
                 f"🚨 New incoming SAND token transaction to `{self.wallet_address}` 🚨\n"
                 f"💰 Value: {float(transaction['value']) / (10 ** 18):.2f} SAND\n"
                 f"🧑 From: `{transaction['from']}`\n"
