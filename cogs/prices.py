@@ -1,6 +1,7 @@
 import disnake
 from disnake.ext import commands
 import aiohttp
+from aiohttp_throttle import Throttle
 import asyncio
 from config import APIKey
 
@@ -17,7 +18,7 @@ class Crypto(commands.Cog):
         self.threshold = 0.05 # 5% threshhold
         self.previous_matic_price = None
         self.last_known_transaction = None
-
+        self.throttle = Throttle(rate=4, period=1)  # Set the rate limit, e.g., 4 requests per 1 second
         self.bot.loop.create_task(self.update_crypto_presence())
         self.bot.loop.create_task(self.monitor_wallet_transactions())
 
@@ -61,7 +62,7 @@ class Crypto(commands.Cog):
 
     async def fetch_wallet_transactions(self):
         url = f"{self.polygon_scan_api_url}&address={self.wallet_address}&contractaddress={self.sand_contract_address}"
-        async with self.session.get(url) as response:
+        async with self.throttle.limit(self.session.get(url)) as response:  # Use the Throttle to limit the request rate
             json_data = await response.json()
             return json_data["result"]
 
