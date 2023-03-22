@@ -106,25 +106,25 @@ class Crypto(commands.Cog):
                 print(f"Checking transactions for wallet {self.wallet_address}")
 
                 if self.last_known_transaction is None:
-                    self.last_known_transaction = transactions[0]
+                    self.last_known_transaction = transactions[0]["hash"]
 
                 new_transactions = []
 
                 for transaction in reversed(transactions):
-                    if transaction["hash"] == self.last_known_transaction["hash"]:
+                    if transaction["hash"] == self.last_known_transaction:
                         break
                     new_transactions.append(transaction)
 
                 if not new_transactions:
                     print(f"No new transactions found for wallet {self.wallet_address}")
                 else:
-                    new_transactions.reverse()
                     for transaction in new_transactions:
                         if transaction["to"].lower() == self.wallet_address.lower():
                             print(f"New transaction found: {transaction}")
                             print(f"Sending transaction message for {transaction['hash']}")
                             await self.send_transaction_message(transaction)
-                        self.last_known_transaction = transaction
+
+                    self.last_known_transaction = new_transactions[0]["hash"]
 
             except Exception as e:
                 print(f"Error monitoring wallet transactions: {e}")
