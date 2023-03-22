@@ -10,7 +10,7 @@ class Crypto(commands.Cog):
         self.session = aiohttp.ClientSession()
         self.api_url = "https://api.binance.com/api/v3/ticker/price?symbol="
         self.polygon_scan_api_url = f"https://api.polygonscan.com/api?module=account&action=tokentx&apikey={APIKey}"
-        self.wallet_address = "0x0ece356189Ba7106Fe3F02ed05fFB1A5F5a366De"  # Replace this with the wallet address you want to monitor
+        self.wallet_address = "0x214d52880b1e4e17d020908cd8eaa988ffdd4020"  # Replace this with the wallet address you want to monitor
         self.sand_contract_address = "0xBbba073C31bF03b8ACf7c28EF0738DeCF3695683"  # SAND token contract address on Polygon
         self.transaction_channel_id = 944377385682341921  # Replace this with the channel ID where you want to send transaction messages
         self.price_alert_channel_id = 944377385682341921
@@ -82,13 +82,13 @@ class Crypto(commands.Cog):
         channel = self.bot.get_channel(self.transaction_channel_id) 
         if channel:
             message = (
-                f"New incoming SAND token transaction to {self.wallet_address}:\n"
-                f"Transaction Hash: {transaction['hash']}\n"
-                f"From: {transaction['from']}\n"
-                f"To: {transaction['to']}\n"
-                f"Value: {float(transaction['value']) / (10 ** 18)} SAND\n"
-                f"Block Number: {transaction['blockNumber']}\n"
-                f"Transaction Index: {transaction['transactionIndex']}"
+                f"🚨 New incoming SAND token transaction to `{self.wallet_address}` 🚨\n"
+                f"💰 Value: {float(transaction['value']) / (10 ** 18):.2f} SAND\n"
+                f"🧑 From: `{transaction['from']}`\n"
+                f"👉 To: `{transaction['to']}`\n"
+                f"🔗 Transaction Hash: [`{transaction['hash']}`](https://polygonscan.com/tx/{transaction['hash']})\n"
+                f"🧱 Block Number: `{transaction['blockNumber']}`\n"
+                f"🔢 Transaction Index: `{transaction['transactionIndex']}`"
             )
             await channel.send(message)
 
@@ -103,21 +103,29 @@ class Crypto(commands.Cog):
                     print(f"Error in transactions response: {transactions}")
                     continue
 
-                print(f"Checking transactions for wallet {self.wallet_address}")
+                print(f"Checking IN transactions for wallet {self.wallet_address}")
                 print(f"Transaction hash: {transactions[0]['hash']}")
 
-                last_transaction = transactions[0]
+                last_transaction = None
+                for transaction in transactions:
+                    if transaction["to"].lower() == self.wallet_address.lower():
+                        last_transaction = transaction
+                        break
+
+                if last_transaction is None:
+                    print(f"No incoming transactions found for wallet {self.wallet_address}")
+                    continue
 
                 if self.last_known_transaction is None:
                     self.last_known_transaction = last_transaction
                 else:
                     if self.last_known_transaction["hash"] != last_transaction["hash"]:
-                        print(f"New transaction found: {last_transaction}")
+                        print(f"New incoming transaction found: {last_transaction}")
                         print(f"Sending transaction message for {last_transaction['hash']}")
                         await self.send_transaction_message(last_transaction)
                         self.last_known_transaction = last_transaction
                     else:
-                        print(f"No new transactions found for wallet {self.wallet_address}")
+                        print(f"No new incoming transactions found for wallet {self.wallet_address}")
 
             except Exception as e:
                 print(f"Error monitoring wallet transactions: {e}")
