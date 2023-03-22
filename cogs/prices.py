@@ -112,24 +112,24 @@ class Crypto(commands.Cog):
 
                 transactions.reverse()
 
-                no_changes = True  # Add a flag to track if there are no changes
+                new_transactions = []
 
                 for transaction in transactions:
                     if last_sent_transaction_hash and transaction["hash"] == last_sent_transaction_hash:
-                        print(f"Transaction already processed: {transaction['hash']}")
                         break
+                    new_transactions.append(transaction)
 
-                    if transaction["to"].lower() == self.wallet_address.lower():
-                        print(f"New transaction found: {transaction}")
-                        print(f"Sending transaction message for {transaction['hash']}")
-                        await self.send_transaction_message(transaction)
-                        last_sent_transaction_hash = transaction["hash"]
-                        no_changes = False  # Set the flag to False if there is a new transaction
+                if new_transactions:
+                    for transaction in reversed(new_transactions):
+                        if transaction["to"].lower() == self.wallet_address.lower():
+                            print(f"New transaction found: {transaction}")
+                            print(f"Sending transaction message for {transaction['hash']}")
+                            await self.send_transaction_message(transaction)
+                            last_sent_transaction_hash = transaction["hash"]
 
-                    self.last_known_transaction = transaction
-                    await asyncio.sleep(1)
-
-                if no_changes:  # Print a message if there are no changes
+                        self.last_known_transaction = transaction
+                        await asyncio.sleep(1)
+                else:
                     print(f"No new transactions found for wallet {self.wallet_address}")
 
             except Exception as e:
