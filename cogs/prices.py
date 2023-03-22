@@ -95,11 +95,11 @@ class Crypto(commands.Cog):
 
     async def monitor_wallet_transactions(self):
         await self.bot.wait_until_ready()
+        last_sent_transaction_hash = None
 
         while not self.bot.is_closed():
             try:
                 transactions = await self.fetch_wallet_transactions()
-                print(f"Fetched transactions: {transactions}")
 
                 if not transactions or isinstance(transactions, str):
                     print(f"Error in transactions response: {transactions}")
@@ -109,11 +109,13 @@ class Crypto(commands.Cog):
                     self.last_known_transaction = transactions[0]
 
                 print(f"Checking transactions for wallet {self.wallet_address}")
-                
-                transactions.reverse()  # Reverse the order of transactions
+
+                transactions.reverse()
+
+                no_changes = True  # Add a flag to track if there are no changes
 
                 for transaction in transactions:
-                    if transaction["hash"] == self.last_known_transaction["hash"]:
+                    if last_sent_transaction_hash and transaction["hash"] == last_sent_transaction_hash:
                         print(f"Transaction already processed: {transaction['hash']}")
                         break
 
@@ -121,17 +123,19 @@ class Crypto(commands.Cog):
                         print(f"New transaction found: {transaction}")
                         print(f"Sending transaction message for {transaction['hash']}")
                         await self.send_transaction_message(transaction)
-                    
-                    # Update the last_known_transaction as you process transactions
-                    self.last_known_transaction = transaction
+                        last_sent_transaction_hash = transaction["hash"]
+                        no_changes = False  # Set the flag to False if there is a new transaction
 
-                    # Add a delay between each request
-                    await asyncio.sleep(1)  # 1 seconds delay to limit requests per second
+                    self.last_known_transaction = transaction
+                    await asyncio.sleep(1)
+
+                if no_changes:  # Print a message if there are no changes
+                    print(f"No new transactions found for wallet {self.wallet_address}")
 
             except Exception as e:
                 print(f"Error monitoring wallet transactions: {e}")
 
-            await asyncio.sleep(60)  # Check for new transactions every 60 seconds
+            await asyncio.sleep(60)
 
     async def send_no_transactions_message(self):
         channel = self.bot.get_channel(self.transaction_channel_id)
