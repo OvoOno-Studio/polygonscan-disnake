@@ -11,7 +11,7 @@ class Crypto(commands.Cog):
         self.api_url = "https://api.binance.com/api/v3/ticker/price?symbol="
         self.polygon_scan_api_url = f"https://api.polygonscan.com/api?module=account&action=tokentx&apikey={APIKey}"
         self.wallet_address = "0xbdd6477fc6f742d37d1A8e5C3C5b069f237b6aFe"  # Replace this with the wallet address you want to monitor
-        self.sand_contract_address = "0xbbba073c31bf03b8acf7c28ef0738decf3695683"  # SAND token contract address on Polygon
+        self.sand_contract_address = "0xC6d54D2f624bc83815b49d9c2203b1330B841cA0"  # SAND token contract address on Polygon
         self.transaction_channel_id = 944377385682341921  # Replace this with the channel ID where you want to send transaction messages
         self.price_alert_channel_id = 944377385682341921
         self.threshold = 0.05 # 5% threshhold
@@ -92,14 +92,17 @@ class Crypto(commands.Cog):
 
                 print(f"Checking transactions for wallet {self.wallet_address}")
                 for transaction in transactions:
-                    if transaction["hash"] == self.last_known_transaction["hash"]:
+                    print(f"Looping: {transaction['hash']}")
+                    if transaction["hash"] == self.last_known_transaction["hash"]: 
                         break
 
                     if transaction["to"].lower() == self.wallet_address.lower():
                         print(f"Sending transaction message for {transaction['hash']}")
                         await self.send_transaction_message(transaction)
+                    
+                    # Update the last_known_transaction as you process transactions
+                    self.last_known_transaction = transaction
 
-                self.last_known_transaction = transactions[0]
             except Exception as e:
                 print(f"Error monitoring wallet transactions: {e}")
 
