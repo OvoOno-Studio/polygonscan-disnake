@@ -99,7 +99,7 @@ class Crypto(commands.Cog):
         while not self.bot.is_closed():
             try:
                 transactions = await self.fetch_wallet_transactions()
-                print(f"Fetched transactions: {transactions}")  # Added print statement
+                print(f"Fetched transactions: {transactions}")
 
                 if not transactions or isinstance(transactions, str):
                     print(f"Error in transactions response: {transactions}")
@@ -109,9 +109,12 @@ class Crypto(commands.Cog):
                     self.last_known_transaction = transactions[0]
 
                 print(f"Checking transactions for wallet {self.wallet_address}")
+                
+                transactions.reverse()  # Reverse the order of transactions
+
                 for transaction in transactions:
                     if transaction["hash"] == self.last_known_transaction["hash"]:
-                        print(f"Transaction already processed: {transaction['hash']}")  # Added print statement
+                        print(f"Transaction already processed: {transaction['hash']}")
                         break
 
                     if transaction["to"].lower() == self.wallet_address.lower():
