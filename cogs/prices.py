@@ -87,13 +87,15 @@ class Crypto(commands.Cog):
             try:
                 transactions = await self.fetch_wallet_transactions()
 
+                if not transactions:  # Add this line to check if the transactions list is empty
+                    continue
+
                 if self.last_known_transaction is None:
                     self.last_known_transaction = transactions[0]
 
                 print(f"Checking transactions for wallet {self.wallet_address}")
                 for transaction in transactions:
-                    print(f"Looping: {transaction['hash']}")
-                    if transaction["hash"] == self.last_known_transaction["hash"]: 
+                    if transaction["hash"] == self.last_known_transaction["hash"]:
                         break
 
                     if transaction["to"].lower() == self.wallet_address.lower():
