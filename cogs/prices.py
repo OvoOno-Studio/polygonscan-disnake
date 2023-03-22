@@ -19,8 +19,7 @@ class Crypto(commands.Cog):
         self.last_known_transaction = None
         self.semaphore = asyncio.Semaphore(4)  # Create a Semaphore with a maximum of 4 concurrent tasks
         self.bot.loop.create_task(self.update_crypto_presence())
-        self.bot.loop.create_task(self.monitor_wallet_transactions())
-        'FT4NWBTMQNZ7NV4ZBJINCRRCSYH7VC2QQ4'
+        self.bot.loop.create_task(self.monitor_wallet_transactions()) 
 
     async def get_crypto_price(self, symbol: str):
         async with self.session.get(self.api_url + symbol.upper()) as response:
@@ -106,18 +105,26 @@ class Crypto(commands.Cog):
 
                 print(f"Checking transactions for wallet {self.wallet_address}")
 
-                last_transaction = transactions[0]
-
                 if self.last_known_transaction is None:
-                    self.last_known_transaction = last_transaction
-                elif self.last_known_transaction["hash"] != last_transaction["hash"]:
-                    if last_transaction["to"].lower() == self.wallet_address.lower():
-                        print(f"New transaction found: {last_transaction}")
-                        print(f"Sending transaction message for {last_transaction['hash']}")
-                        await self.send_transaction_message(last_transaction)
-                    self.last_known_transaction = last_transaction
-                else:
+                    self.last_known_transaction = transactions[0]
+
+                new_transactions = []
+
+                for transaction in reversed(transactions):
+                    if transaction["hash"] == self.last_known_transaction["hash"]:
+                        break
+
+                    new_transactions.append(transaction)
+
+                if not new_transactions:
                     print(f"No new transactions found for wallet {self.wallet_address}")
+                else:
+                    for transaction in reversed(new_transactions):
+                        if transaction["to"].lower() == self.wallet_address.lower():
+                            print(f"New transaction found: {transaction}")
+                            print(f"Sending transaction message for {transaction['hash']}")
+                            await self.send_transaction_message(transaction)
+                        self.last_known_transaction = transaction
 
             except Exception as e:
                 print(f"Error monitoring wallet transactions: {e}")
