@@ -56,5 +56,47 @@ class Crypto(commands.Cog):
 
             await asyncio.sleep(60)  # Update the presence every 60 seconds
 
+    async def fetch_wallet_transactions(self):
+        url = f"{self.polygon_scan_api_url}&address={self.wallet_address}&contractaddress={self.sand_contract_address}"
+        async with self.session.get(url) as response:
+            json_data = await response.json()
+            return json_data["result"]
+
+    async def send_transaction_message(self, transaction):
+        channel = self.bot.get_channel(self.transaction_channel_id)
+
+        if channel:
+            message = (
+                f"New incoming SAND token transaction to {self.wallet_address}:\n"
+                f"Transaction Hash: {transaction['hash']}\n"
+                f"From: {transaction['from']}\n"
+                f"To: {transaction['to']}\n"
+                f"Value: {float(transaction['value']) / (10 ** 18)} SAND\n"
+                f"Block Number: {transaction['blockNumber']}\n"
+                f"Transaction Index: {transaction['transactionIndex']}"
+            )
+            await channel.send(message)
+
+    async def monitor_wallet_transactions(self):
+        while True:
+            try:
+                transactions = await self.fetch_wallet_transactions()
+
+                if self.last_known_transaction is None:
+                    self.last_known_transaction = transactions[0]
+
+                for transaction in transactions:
+                    if transaction["hash"] == self.last_known_transaction["hash"]:
+                        break
+
+                    if transaction["to"].lower() == self.wallet_address.lower():
+                        await self.send_transaction_message(transaction)
+
+                self.last_known_transaction = transactions[0]
+            except Exception as e:
+                print(f"Error monitoring wallet transactions: {e}")
+
+            await asyncio.sleep(60)  # Check for new transactions every 60 seconds
+
 def setup(bot):
     bot.add_cog(Crypto(bot))
