@@ -43,7 +43,9 @@ class Crypto(commands.Cog):
             self.previous_matic_price = current_price
 
     async def update_crypto_presence(self):
-        while True:
+        await self.bot.wait_until_ready()  # Add this line
+
+        while not self.bot.is_closed():
             try:
                 price = await self.get_crypto_price('MATICUSDT')  # Fetch the price for MATIC
                 await self.check_and_send_alert(price)
@@ -78,7 +80,9 @@ class Crypto(commands.Cog):
             await channel.send(message)
 
     async def monitor_wallet_transactions(self):
-        while True:
+        await self.bot.wait_until_ready()
+
+        while not self.bot.is_closed():
             try:
                 transactions = await self.fetch_wallet_transactions()
 
