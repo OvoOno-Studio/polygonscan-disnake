@@ -11,7 +11,7 @@ class Crypto(commands.Cog):
         self.api_url = "https://api.binance.com/api/v3/ticker/price?symbol="
         self.polygon_scan_api_url = f"https://api.polygonscan.com/api?module=account&action=tokentx&apikey={APIKey}"
         self.wallet_address = "0x0ece356189Ba7106Fe3F02ed05fFB1A5F5a366De"  # Replace this with the wallet address you want to monitor
-        self.sand_contract_address = "0xC6d54D2f624bc83815b49d9c2203b1330B841cA0"  # SAND token contract address on Polygon
+        self.sand_contract_address = "0xBbba073C31bF03b8ACf7c28EF0738DeCF3695683"  # SAND token contract address on Polygon
         self.transaction_channel_id = 944377385682341921  # Replace this with the channel ID where you want to send transaction messages
         self.price_alert_channel_id = 944377385682341921
         self.threshold = 0.05 # 5% threshhold
@@ -101,8 +101,14 @@ class Crypto(commands.Cog):
             try:
                 transactions = await self.fetch_wallet_transactions()
 
-                if not transactions or isinstance(transactions, str):  # Add this line to check if the transactions list is empty or a string (error message)
+                if not transactions or isinstance(transactions, str):
                     print(f"Error in transactions response: {transactions}")
+                    continue
+
+                if not transactions:
+                    print(f"No transactions found for wallet {self.wallet_address}")
+                    await self.send_no_transactions_message()
+                    await asyncio.sleep(60)
                     continue
 
                 if self.last_known_transaction is None:
@@ -127,6 +133,13 @@ class Crypto(commands.Cog):
                 print(f"Error monitoring wallet transactions: {e}")
 
             await asyncio.sleep(60)  # Check for new transactions every 60 seconds
+            
+    async def send_no_transactions_message(self):
+        channel = self.bot.get_channel(self.transaction_channel_id)
+
+        if channel:
+            message = f"No transactions found for wallet {self.wallet_address}."
+            await channel.send(message)
 
 def setup(bot):
     bot.add_cog(Crypto(bot))
