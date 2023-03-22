@@ -69,7 +69,7 @@ class Crypto(commands.Cog):
         url = f"{self.polygon_scan_api_url}&address={self.wallet_address}&contractaddress={self.sand_contract_address}"
         try:
             json_data = await self.limited_get(url)
-            print(f"fetch_wallet_transactions response: {json_data}")  # Log the response for debugging
+            # print(f"fetch_wallet_transactions response: {json_data}")  # Log the response for debugging
             if json_data and "result" in json_data:
                 return json_data["result"]
             else:
@@ -80,8 +80,7 @@ class Crypto(commands.Cog):
             return None
 
     async def send_transaction_message(self, transaction):
-        channel = self.bot.get_channel(self.transaction_channel_id)
-
+        channel = self.bot.get_channel(self.transaction_channel_id) 
         if channel:
             message = (
                 f"New incoming SAND token transaction to {self.wallet_address}:\n"
@@ -95,6 +94,40 @@ class Crypto(commands.Cog):
             await channel.send(message)
 
     async def monitor_wallet_transactions(self):
+        await self.bot.wait_until_ready()
+
+        while not self.bot.is_closed():
+            try:
+                transactions = await self.fetch_wallet_transactions()
+
+                if not transactions or isinstance(transactions, str):
+                    print(f"Error in transactions response: {transactions}")
+                    continue
+
+                if self.last_known_transaction is None:
+                    self.last_known_transaction = transactions[0]
+
+                print(f"Checking transactions for wallet {self.wallet_address}")
+                for transaction in transactions:
+                    if transaction["hash"] == self.last_known_transaction["hash"]:
+                        break
+
+                    if transaction["to"].lower() == self.wallet_address.lower():
+                        print(f"New transaction found: {transaction}")  # Added print statement
+                        print(f"Sending transaction message for {transaction['hash']}")
+                        await self.send_transaction_message(transaction)
+                    
+                    # Update the last_known_transaction as you process transactions
+                    self.last_known_transaction = transaction
+
+                    # Add a delay between each request
+                    await asyncio.sleep(1)  # 1 seconds delay to limit requests per second
+
+            except Exception as e:
+                print(f"Error monitoring wallet transactions: {e}")
+
+            await asyncio.sleep(60)  # Check for new transactions every 60 seconds
+
         await self.bot.wait_until_ready()
 
         while not self.bot.is_closed():
@@ -133,7 +166,7 @@ class Crypto(commands.Cog):
                 print(f"Error monitoring wallet transactions: {e}")
 
             await asyncio.sleep(60)  # Check for new transactions every 60 seconds
-            
+
     async def send_no_transactions_message(self):
         channel = self.bot.get_channel(self.transaction_channel_id)
 
