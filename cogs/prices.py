@@ -95,7 +95,6 @@ class Crypto(commands.Cog):
 
     async def monitor_wallet_transactions(self):
         await self.bot.wait_until_ready()
-        last_sent_transaction_hash = None
 
         while not self.bot.is_closed():
             try:
@@ -105,26 +104,18 @@ class Crypto(commands.Cog):
                     print(f"Error in transactions response: {transactions}")
                     continue
 
-                if self.last_known_transaction is None:
-                    self.last_known_transaction = transactions[0]
-
                 print(f"Checking transactions for wallet {self.wallet_address}")
 
-                new_transactions = []
+                last_transaction = transactions[0]
 
-                for transaction in transactions:
-                    if last_sent_transaction_hash and transaction["hash"] == last_sent_transaction_hash:
-                        break
-                    new_transactions.append(transaction)
-
-                if new_transactions:
-                    for transaction in reversed(new_transactions):
-                        if transaction["to"].lower() == self.wallet_address.lower():
-                            print(f"New transaction found: {transaction}")
-                            print(f"Sending transaction message for {transaction['hash']}")
-                            await self.send_transaction_message(transaction)
-                            last_sent_transaction_hash = transaction["hash"]
-                        self.last_known_transaction = transaction
+                if self.last_known_transaction is None:
+                    self.last_known_transaction = last_transaction
+                elif self.last_known_transaction["hash"] != last_transaction["hash"]:
+                    if last_transaction["to"].lower() == self.wallet_address.lower():
+                        print(f"New transaction found: {last_transaction}")
+                        print(f"Sending transaction message for {last_transaction['hash']}")
+                        await self.send_transaction_message(last_transaction)
+                    self.last_known_transaction = last_transaction
                 else:
                     print(f"No new transactions found for wallet {self.wallet_address}")
 
@@ -132,7 +123,7 @@ class Crypto(commands.Cog):
                 print(f"Error monitoring wallet transactions: {e}")
 
             await asyncio.sleep(60)
-            
+
     async def send_no_transactions_message(self):
         channel = self.bot.get_channel(self.transaction_channel_id)
 
