@@ -10,9 +10,10 @@ class Crypto(commands.Cog):
         self.session = aiohttp.ClientSession()
         self.api_url = "https://api.binance.com/api/v3/ticker/price?symbol="
         self.polygon_scan_api_url = f"https://api.polygonscan.com/api?module=account&action=tokentx&apikey={APIKey}"
-        self.wallet_address = "0x0ece356189Ba7106Fe3F02ed05fFB1A5F5a366De"  # Replace this with the wallet address you want to monitor
+        self.wallet_address = "0xbdd6477fc6f742d37d1A8e5C3C5b069f237b6aFe"  # Replace this with the wallet address you want to monitor
         self.sand_contract_address = "0xbbba073c31bf03b8acf7c28ef0738decf3695683"  # SAND token contract address on Polygon
         self.transaction_channel_id = 944377385682341921  # Replace this with the channel ID where you want to send transaction messages
+        self.price_alert_channel_id = 944377385682341921
         self.threshold = 0.05 # 5% threshhold
         self.previous_matic_price = None
         self.last_known_transaction = None
@@ -89,11 +90,13 @@ class Crypto(commands.Cog):
                 if self.last_known_transaction is None:
                     self.last_known_transaction = transactions[0]
 
+                print(f"Checking transactions for wallet {self.wallet_address}")
                 for transaction in transactions:
                     if transaction["hash"] == self.last_known_transaction["hash"]:
                         break
 
                     if transaction["to"].lower() == self.wallet_address.lower():
+                        print(f"Sending transaction message for {transaction['hash']}")
                         await self.send_transaction_message(transaction)
 
                 self.last_known_transaction = transactions[0]
