@@ -10,7 +10,7 @@ class Crypto(commands.Cog):
         self.session = aiohttp.ClientSession()
         self.api_url = "https://api.binance.com/api/v3/ticker/price?symbol="
         self.polygon_scan_api_url = f"https://api.polygonscan.com/api?module=account&action=tokentx&apikey={APIKey}"
-        self.wallet_address = "0xbdd6477fc6f742d37d1A8e5C3C5b069f237b6aFe"  # Replace this with the wallet address you want to monitor
+        self.wallet_address = "0x0ece356189Ba7106Fe3F02ed05fFB1A5F5a366De"  # Replace this with the wallet address you want to monitor
         self.sand_contract_address = "0xC6d54D2f624bc83815b49d9c2203b1330B841cA0"  # SAND token contract address on Polygon
         self.transaction_channel_id = 944377385682341921  # Replace this with the channel ID where you want to send transaction messages
         self.price_alert_channel_id = 944377385682341921
