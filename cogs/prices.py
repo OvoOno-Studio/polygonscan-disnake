@@ -8,24 +8,25 @@ class Crypto(commands.Cog):
     def __init__(self, bot):
         self.bot = bot 
         self.session = aiohttp.ClientSession()
-        self.api_url = "https://api.binance.com/api/v3/ticker/price?symbol="
+        self.api_url = "https://api.binance.com/api/v3/ticker/24hr?symbol="
         self.polygon_scan_api_url = f"https://api.polygonscan.com/api?module=account&action=tokentx&apikey={APIKey}"
         self.wallet_address = "0x214d52880b1e4e17d020908cd8eaa988ffdd4020"  # Replace this with the wallet address you want to monitor
         self.sand_contract_address = "0xBbba073C31bF03b8ACf7c28EF0738DeCF3695683"  # SAND token contract address on Polygon
         self.transaction_channel_id = 944377385682341921  # Replace this with the channel ID where you want to send transaction messages
         self.price_alert_channel_id = 944377385682341921
-        self.threshold = 0.05 # 5% threshhold
+        self.threshold = 0.02 # 2% threshhold
         self.previous_matic_price = None
         self.last_known_transaction = None
         self.semaphore = asyncio.Semaphore(4)  # Create a Semaphore with a maximum of 4 concurrent tasks
         self.bot.loop.create_task(self.update_crypto_presence())
         self.bot.loop.create_task(self.monitor_wallet_transactions()) 
 
-    async def get_crypto_price(self, symbol: str):
+    async def get_crypto_price_data(self, symbol: str):
         async with self.session.get(self.api_url + symbol.upper()) as response:
             json_data = await response.json()
-            price = float(json_data['price'])
-            return price
+            price = float(json_data['lastPrice'])
+            price_change_percent = float(json_data['priceChangePercent'])
+            return price, price_change_percent
 
     async def check_and_send_alert(self, current_price):
         if self.previous_matic_price is None:
@@ -39,7 +40,8 @@ class Crypto(commands.Cog):
 
             if channel:
                 direction = "up" if price_change > 0 else "down"
-                await channel.send(f"@everyone MATIC price has changed by more than 5%! It's now {direction} to ${current_price:.2f}")
+                arrow_emoji = "🟢" if price_change > 0 else "🔴"
+                await channel.send(f"📢 @everyone 📢\n**MATIC price has changed by more than 2%!**\n\nIt's now **{direction.upper()}** to **${current_price:.2f}** {arrow_emoji}\n")
 
             self.previous_matic_price = current_price
 
@@ -48,17 +50,12 @@ class Crypto(commands.Cog):
 
         while not self.bot.is_closed():
             try:
-                price = await self.get_crypto_price('MATICUSDT')
-                price_change = 0
+                price, price_change_percent = await self.get_crypto_price_data('MATICUSDT')
 
-                if self.previous_matic_price is not None:
-                    price_change = ((price - self.previous_matic_price) / self.previous_matic_price) * 100
+                color = disnake.Color.green() if price_change_percent >= 0 else disnake.Color.red()
 
-                color = disnake.Color.green() if price_change >= 0 else disnake.Color.red()
-
-                arrow_emoji = "🟢" if price_change > 0 else "🔴"
-                price_change = abs(price_change)
-                status_text = f"MATIC: ${price:.2f} {arrow_emoji} ({price_change:.2f}%)"
+                arrow_emoji = "🟢" if price_change_percent > 0 else "🔴"
+                status_text = f"MATIC: ${price:.2f} {arrow_emoji}({price_change_percent:.2f}%)"
 
                 await self.check_and_send_alert(price)
 
