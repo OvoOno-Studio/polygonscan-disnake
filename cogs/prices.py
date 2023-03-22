@@ -58,7 +58,7 @@ class Crypto(commands.Cog):
 
                 arrow_emoji = "🟢" if price_change > 0 else "🔴"
                 price_change = abs(price_change)
-                status_text = f"MATIC: {arrow_emoji} {price_change:.2f}% (${price:.2f})"
+                status_text = f"MATIC: {arrow_emoji} (${price:.2f} {price_change:.2f}% )"
 
                 await self.check_and_send_alert(price)
 
