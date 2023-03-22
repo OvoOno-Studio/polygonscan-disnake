@@ -113,13 +113,13 @@ class Crypto(commands.Cog):
                 for transaction in reversed(transactions):
                     if transaction["hash"] == self.last_known_transaction["hash"]:
                         break
-
                     new_transactions.append(transaction)
 
                 if not new_transactions:
                     print(f"No new transactions found for wallet {self.wallet_address}")
                 else:
-                    for transaction in reversed(new_transactions):
+                    new_transactions.reverse()
+                    for transaction in new_transactions:
                         if transaction["to"].lower() == self.wallet_address.lower():
                             print(f"New transaction found: {transaction}")
                             print(f"Sending transaction message for {transaction['hash']}")
