@@ -87,7 +87,8 @@ class Crypto(commands.Cog):
             try:
                 transactions = await self.fetch_wallet_transactions()
 
-                if not transactions:  # Add this line to check if the transactions list is empty
+                if not transactions or isinstance(transactions, str):  # Add this line to check if the transactions list is empty or a string (error message)
+                    print(f"Error in transactions response: {transactions}")
                     continue
 
                 if self.last_known_transaction is None:
