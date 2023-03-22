@@ -16,7 +16,8 @@ class Crypto(commands.Cog):
         self.price_alert_channel_id = 944377385682341921
         self.threshold = 0.05 # 5% threshhold
         self.previous_matic_price = None
-        self.last_known_transaction = None 
+        self.last_known_transaction = None
+        self.semaphore = asyncio.Semaphore(4)  # Create a Semaphore with a maximum of 4 concurrent tasks
         self.bot.loop.create_task(self.update_crypto_presence())
         self.bot.loop.create_task(self.monitor_wallet_transactions())
         'FT4NWBTMQNZ7NV4ZBJINCRRCSYH7VC2QQ4'
@@ -57,12 +58,26 @@ class Crypto(commands.Cog):
             except Exception as e:
                 print(f"Error updating presence: {e}")
 
-            await asyncio.sleep(60)  # Update the presence every 60 seconds 
+            await asyncio.sleep(60)  # Update the presence every 60 seconds
+
+    async def limited_get(self, url):
+        async with self.semaphore:  # Limit the number of concurrent requests
+            async with self.session.get(url) as response:
+                return await response.json()
 
     async def fetch_wallet_transactions(self):
         url = f"{self.polygon_scan_api_url}&address={self.wallet_address}&contractaddress={self.sand_contract_address}"
-        json_data = await self.limited_get(url)
-        return json_data["result"]
+        try:
+            json_data = await self.limited_get(url)
+            print(f"fetch_wallet_transactions response: {json_data}")  # Log the response for debugging
+            if json_data and "result" in json_data:
+                return json_data["result"]
+            else:
+                print(f"Error in fetch_wallet_transactions: {json_data}")
+                return None
+        except Exception as e:
+            print(f"Error in fetch_wallet_transactions: {e}")
+            return None
 
     async def send_transaction_message(self, transaction):
         channel = self.bot.get_channel(self.transaction_channel_id)
