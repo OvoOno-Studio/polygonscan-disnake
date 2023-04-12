@@ -1,8 +1,10 @@
 import disnake
 from disnake.ext import commands
+from disnake.ext.commands import has_permissions
+from config import set_transaction_channel, set_price_alert_channel, set_wallet_address
 import aiohttp 
 import asyncio
-from config import APIKey
+from config import APIKey, transaction_channel_id, price_alert_channel_id, wallet_address
 
 class Crypto(commands.Cog):
     def __init__(self, bot):
@@ -10,16 +12,37 @@ class Crypto(commands.Cog):
         self.session = aiohttp.ClientSession()
         self.api_url = "https://api.binance.com/api/v3/ticker/24hr?symbol="
         self.polygon_scan_api_url = f"https://api.polygonscan.com/api?module=account&action=tokentx&apikey={APIKey}"
-        self.wallet_address = "0x214d52880b1e4e17d020908cd8eaa988ffdd4020"  # Replace this with the wallet address you want to monitor
-        self.sand_contract_address = "0xBbba073C31bF03b8ACf7c28EF0738DeCF3695683"  # SAND token contract address on Polygon
-        self.transaction_channel_id = 944377385682341921  # Replace this with the channel ID where you want to send transaction messages
-        self.price_alert_channel_id = 944377385682341921
+        self.wallet_address = wallet_address # Replace this with the wallet address you want to monitor # Set up this with command
+        self.sand_contract_address = "0xBbba073C31bF03b8ACf7c28EF0738DeCF3695683" # SAND token contract address on Polygon
+        self.transaction_channel_id = transaction_channel_id # Set up this with command
+        self.price_alert_channel_id = price_alert_channel_id # Set up this with command
         self.threshold = 0.02 # 2% threshhold
         self.previous_matic_price = None
         self.last_known_transaction = None
         self.semaphore = asyncio.Semaphore(4)  # Create a Semaphore with a maximum of 4 concurrent tasks
         self.bot.loop.create_task(self.update_crypto_presence())
         self.bot.loop.create_task(self.monitor_wallet_transactions()) 
+
+    @commands.command(name="set_transaction_channel")
+    @has_permissions(administrator=True)
+    async def set_transaction_channel(self, ctx, channel: disnake.TextChannel):
+        set_transaction_channel(channel.id)
+        self.transaction_channel_id = channel.id
+        await ctx.send(f"Transaction channel has been set to {channel.mention}")
+
+    @commands.command(name="set_price_alert_channel")
+    @has_permissions(administrator=True)
+    async def set_price_alert_channel(self, ctx, channel: disnake.TextChannel):
+        set_price_alert_channel(channel.id)
+        self.price_alert_channel_id = channel.id
+        await ctx.send(f"Price alert channel has been set to {channel.mention}")
+
+    @commands.command(name="set_wallet_address")
+    @has_permissions(administrator=True)
+    async def set_wallet_address(self, ctx, address: str):
+        set_wallet_address(address)
+        self.wallet_address = address
+        await ctx.send(f"Wallet address has been set to `{address}`")
 
     async def get_crypto_price_data(self, symbol: str):
         async with self.session.get(self.api_url + symbol.upper()) as response:
