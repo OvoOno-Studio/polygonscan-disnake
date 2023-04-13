@@ -46,7 +46,11 @@ class Crypto(commands.Cog):
 
     async def get_crypto_price_data(self, symbol: str):
         async with self.session.get(self.api_url + symbol.upper()) as response:
+            status_code = response.status
             json_data = await response.json()
+            if 'lastPrice' not in json_data or 'priceChangePercent' not in json_data:
+                print(f"Error in get_crypto_price_data (status code: {status_code}): {json_data}")
+                return None, None
             price = float(json_data['lastPrice'])
             price_change_percent = float(json_data['priceChangePercent'])
             return price, price_change_percent
