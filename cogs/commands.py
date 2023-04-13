@@ -61,11 +61,11 @@ class Commands(commands.Cog):
             elif contract_type == 'ERC721' or contract_type == 'ERC1155':
                 value = f"Token Name: **{each['tokenName']}** | Token ID: **{each['tokenID']}**"
 
-            line = f"**{counter}.** `{each['hash'][:6]}...{each['hash'][-4:]}`\nFrom: `{each['from'][:6]}...{each['from'][-4:]}` | To: `{each['to'][:6]}...{each['to'][-4:]}` | When: **{dt}** | {value}"
+            line = f"**{counter}.** `{each['hash']}`\nFrom: `{each['from']}` | To: `{each['to']}` \nWhen: **{dt}** | {value}"
             message_lines.append(line)
 
         # Split the message into chunks of 4000 characters or fewer
-        def split_message(lines, max_length=4000):
+        def split_message(lines, max_length=2000):
             chunks = []
             current_chunk = []
             current_length = 0
