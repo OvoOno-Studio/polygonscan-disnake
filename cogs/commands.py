@@ -20,58 +20,6 @@ class Commands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.key = str(APIKey)
-
-    """
-    Define generate_csv() - check CSV file for transaction.
-    """
-    async def generate_csv(self, data, contract_type):
-        print("Generating CSV...")  # Add this print statement
-
-        csvfile = io.StringIO()
-        fieldnames = ['Transaction #', 'Transaction Hash', 'From', 'To', 'When', 'Value']
-
-        if contract_type == 'ERC721':
-            fieldnames = ['Transaction #', 'Transaction Hash', 'Token Name', 'Token ID', 'From', 'To', 'When']
-        elif contract_type == 'ERC1155':
-            fieldnames = ['Transaction #', 'Transaction Hash', 'Token Name', 'Token ID', 'From', 'To', 'When']
-
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-
-        counter = 0
-        for each in data['result']:
-            counter += 1
-            ts = int(each['timeStamp'])
-            dt = datetime.fromtimestamp(ts)
-            row = {
-                'Transaction #': counter,
-                'Transaction Hash': each['hash'],
-                'From': each['from'],
-                'To': each['to'],
-                'When': dt
-            }
-
-            if contract_type == 'ERC20':
-                value = int(each['value']) / 10 ** 18
-                row['Value'] = value
-            elif contract_type == 'ERC721':
-                row['Token Name'] = each['tokenName']
-                row['Token ID'] = each['tokenID']
-            elif contract_type == 'ERC1155':
-                row['Token Name'] = each['tokenName']
-                row['Token ID'] = each['tokenID']
-            
-            writer.writerow(row)
-
-        csvfile.seek(0)
-        
-        # Print the content of the CSV file
-        csv_content = csvfile.read()
-        print(csv_content)
-        csvfile.seek(0)
-
-        print("CSV generated")  # Add this print statement
-        return disnake.File(csvfile, f'{contract_type}_transactions.csv')
     
     """
     Define handle_erc_transactions - check CSV file for transaction.
@@ -92,20 +40,16 @@ class Commands(commands.Cog):
             endpoint = f'https://api.polygonscan.com/api?module=account&action=token1155tx&contractaddress={str(contract)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(self.key)}'
 
         r = requests.get(endpoint)
-        data = json.loads(r.text)
-
-        print(f"API call made, status: {data['status']}")
+        data = json.loads(r.text) 
 
         if data['status'] != '1':
             return await ctx.send(f":x: Error fetching {contract_type} transactions for {address}")
-
-        print(data['result'])  # Add this print statement
 
         # Create an embed object
         embed = Embed(title=f":sparkles: Here are the latest **{contract_type}** transactions for {address}:", color=0x00FF00) 
         
         # Add fields to the embed
-        for each in data['result'][:30]:
+        for each in data['result']:
             counter += 1
             ts = int(each['timeStamp'])
             dt = datetime.fromtimestamp(ts)
@@ -117,15 +61,7 @@ class Commands(commands.Cog):
 
             field_name = f"{counter}. {each['hash'][:6]}...{each['hash'][-4:]}"
             field_value = f"From: `{each['from'][:6]}...{each['from'][-4:]}` | To: `{each['to'][:6]}...{each['to'][-4:]}` | When: {dt} | {value}"
-            embed.add_field(name=field_name, value=field_value, inline=False)
-
-        if is_donator(ctx.author.id):
-            try:
-                csvfile = await self.generate_csv(ctx, data, contract_type)
-                await ctx.author.send(f"Here is a CSV file with the last {offset} {contract_type} transactions for {address}:", file=csvfile)
-                embed.set_footer(text="A CSV file with the last 100 transactions has been sent to your DMs.")
-            except Exception as e:
-                print(f"Error while generating and sending CSV: {e}")
+            embed.add_field(name=field_name, value=field_value, inline=False) 
 
         try:
             await ctx.author.send(embed=embed)
@@ -270,8 +206,10 @@ class Commands(commands.Cog):
     """
     Define getErc20() - return list of ERC-20 transactions, can be filtered by specific smart contract address. 
     """
+    @has_permissions(administrator=True)
+    @is_donator()
     @commands.command() 
-    async def getErc20(self, ctx, address: str, contract: str = 'SAND', offset: int = 30):
+    async def getErc20(self, ctx, address: str, contract: str = 'SAND', offset: int = 100):
         await self.handle_erc_transactions(ctx, address, contract, offset, 'ERC20')
 
     """
