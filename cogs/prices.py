@@ -2,6 +2,9 @@ import disnake
 from disnake.ext import commands
 from disnake.ext.commands import has_permissions
 from config import set_transaction_channel, set_price_alert_channel, set_wallet_address
+import io
+import csv
+import datetime
 import aiohttp 
 import asyncio
 from config import APIKey, transaction_channel_id, price_alert_channel_id, wallet_address
@@ -42,8 +45,8 @@ class Crypto(commands.Cog):
     async def set_wallet_address(self, ctx, address: str):
         set_wallet_address(address)
         self.wallet_address = address
-        await ctx.send(f"Wallet address has been set to `{address}`")
-
+        await ctx.send(f"Wallet address has been set to `{address}`") 
+    
     async def get_crypto_price_data(self):
         url = f"https://api.coingecko.com/api/v3/simple/price?ids=matic-network&vs_currencies=usd&include_24hr_change=true"
         async with self.session.get(url) as response:
