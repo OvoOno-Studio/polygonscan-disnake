@@ -64,7 +64,7 @@ class Commands(commands.Cog):
             line = f"**{counter}.** `{each['hash']}`\nFrom: `{each['from']}` | To: `{each['to']}` \nWhen: **{dt}** | {value}"
             message_lines.append(line)
 
-        # Split the message into chunks of 4000 characters or fewer
+        # Split the message into chunks of 2000 characters or fewer
         def split_message(lines, max_length=2000):
             chunks = []
             current_chunk = []
@@ -232,7 +232,6 @@ class Commands(commands.Cog):
     """
     Define getErc20() - return list of ERC-20 transactions, can be filtered by specific smart contract address. 
     """
-    @has_permissions(administrator=True)
     @is_donator()
     @commands.command() 
     async def getErc20(self, ctx, address: str, contract: str = 'SAND', offset: int = 100):
