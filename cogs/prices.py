@@ -50,8 +50,8 @@ class Crypto(commands.Cog):
             if response.status != 200:
                 raise Exception(f"Error in get_crypto_price_data (status code: {response.status}): {await response.text()}")
             json_data = await response.json()
-            price = json_data['polygon']['usd']
-            price_change_percent = json_data['polygon']['usd_24h_change']
+            price = json_data['matic-network']['usd']
+            price_change_percent = json_data['matic-network']['usd_24h_change']
             return price, price_change_percent
 
     async def check_and_send_alert(self, current_price):
