@@ -25,7 +25,7 @@ class Commands(commands.Cog):
     Define generate_csv() - generate csv file for donators.
     """
     async def generate_csv(self, ctx, data, contract_type, address):
-        print(f'Generating CSV file... for {contract_type}')
+        print(f'Generating CSV file... for {address}')
         csvfile = io.StringIO()
         fieldnames = ['Transaction #', 'Transaction Hash', 'From', 'To', 'When', 'Value']
 
@@ -38,8 +38,7 @@ class Commands(commands.Cog):
         writer.writeheader()
 
         counter = 0
-        for each in data['result']:
-            print(f"Looping through CSV {counter}...")
+        for each in data['result']: 
             counter += 1
             ts = int(each['timeStamp'])
             dt = datetime.fromtimestamp(ts)
@@ -135,7 +134,7 @@ class Commands(commands.Cog):
             print("Calling generate_csv...")
             # Call the generate_csv() method to create the CSV file
             csv_file = await self.generate_csv(ctx, data, contract_type, address) 
-            await ctx.author.send(content="User donator ..sending CSV file as DM!") 
+            await ctx.send(content="User donator ..sending CSV file as DM!") 
             # Send the CSV file as an attachment
             await ctx.author.send(file=csv_file) 
 

@@ -62,8 +62,7 @@ class Crypto(commands.Cog):
             self.previous_matic_price = current_price
             return
 
-        price_change = (current_price - self.previous_matic_price) / self.previous_matic_price * 100
-        print(f"Price change: {price_change:.2f}%")  # Add print statement for debugging
+        price_change = (current_price - self.previous_matic_price) / self.previous_matic_price * 100 
 
         if price_change <= -5:  # Check if the price is down by 5% or more
             print("Sending price alert")  # Add print statement for debugging
