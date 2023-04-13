@@ -14,18 +14,7 @@ intents = disnake.Intents.default()
 intents.members = True
 intents.message_content = True
 
-bot = commands.Bot(command_prefix=commands.when_mentioned_or("ps-"), intents=intents)
-
-# Define is donator to separate free and paied version
-def is_donator():
-    async def predicate(ctx):
-        donator_role = disnake.utils.get(ctx.guild.roles, name="OvoDonator")
-        if donator_role in ctx.author.roles:
-            return True
-        else:
-            await ctx.send("You need to be a Donator to use this bot's commands.")
-            return False
-    return commands.check(predicate) 
+bot = commands.Bot(command_prefix=commands.when_mentioned_or("ps-"), intents=intents) 
 
 # Ping command that returns bot latency
 @bot.command()

@@ -8,7 +8,7 @@ from datetime import datetime
 import csv
 import io
 from config import APIKey
-from main import is_donator
+from checks import is_donator
 
 intents = disnake.Intents.default()
 intents.members = True
@@ -24,8 +24,8 @@ class Commands(commands.Cog):
     """
     Define generate_csv() - check CSV file for transaction.
     """
-
     async def generate_csv(self, ctx, data, contract_type):
+        print("generating csv...")
         csvfile = io.StringIO()
         fieldnames = ['Transaction #', 'Transaction Hash', 'From', 'To', 'When', 'Value']
 
@@ -61,6 +61,7 @@ class Commands(commands.Cog):
             writer.writerow(row)
 
         csvfile.seek(0)
+        print('return csv file..')
         return disnake.File(csvfile, f'{contract_type}_transactions.csv')
     
     """
@@ -89,8 +90,8 @@ class Commands(commands.Cog):
         if data['status'] != '1':
             return await ctx.send(f":x: Error fetching {contract_type} transactions for {address}")
 
-        print("Data status is '1'")  # Add this print statement
-        
+        print(data['result'])  # Add this print statement
+
         # Create an embed object
         embed = Embed(title=f":sparkles: Here are the latest **{contract_type}** transactions for {address}:", color=0x00FF00) 
         
