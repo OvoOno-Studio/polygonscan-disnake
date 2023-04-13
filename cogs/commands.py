@@ -1,7 +1,7 @@
 import json
 import requests
 import disnake
-from disnake import Embed
+# from disnake import Embed
 from disnake.ext import commands
 from disnake.ext.commands import has_permissions
 from datetime import datetime
@@ -45,28 +45,31 @@ class Commands(commands.Cog):
         if data['status'] != '1':
             return await ctx.send(f":x: Error fetching {contract_type} transactions for {address}")
 
-        # Create an embed object
-        embed = Embed(title=f":sparkles: Here are the latest **{contract_type}** transactions for {address}:", color=0x00FF00) 
-        
-        # Add fields to the embed
+        # Build the message with Markdown formatting
+        message_lines = [
+            f"**__{contract_type} Transactions for {address}__** :sparkles:",
+            "",  # Empty line for spacing
+        ]
+
         for each in data['result']:
             counter += 1
             ts = int(each['timeStamp'])
-            dt = datetime.fromtimestamp(ts)
+            dt = datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
             value = ''
             if contract_type == 'ERC20':
-                value = f"Value: {int(each['value']) / 10 ** 18:.8f}"
+                value = f"Value: **{int(each['value']) / 10 ** 18:.8f}**"
             elif contract_type == 'ERC721' or contract_type == 'ERC1155':
-                value = f"Token Name: {each['tokenName']} | Token ID: {each['tokenID']}"
+                value = f"Token Name: **{each['tokenName']}** | Token ID: **{each['tokenID']}**"
 
-            field_name = f"{counter}. {each['hash'][:6]}...{each['hash'][-4:]}"
-            field_value = f"From: `{each['from'][:6]}...{each['from'][-4:]}` | To: `{each['to'][:6]}...{each['to'][-4:]}` | When: {dt} | {value}"
-            embed.add_field(name=field_name, value=field_value, inline=False) 
+            line = f"**{counter}.** `{each['hash'][:6]}...{each['hash'][-4:]}`\nFrom: `{each['from'][:6]}...{each['from'][-4:]}` | To: `{each['to'][:6]}...{each['to'][-4:]}` | When: **{dt}** | {value}"
+            message_lines.append(line)
+
+        message = "\n".join(message_lines)
 
         try:
-            await ctx.author.send(embed=embed)
+            await ctx.author.send(content=message)
         except Exception as e:
-            print(f"Error while sending embed: {e}")
+            print(f"Error while sending formatted message: {e}")
 
     """
     Define checkTrx() - check status of transaction by hash.
