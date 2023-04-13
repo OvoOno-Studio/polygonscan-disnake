@@ -72,7 +72,7 @@ class Crypto(commands.Cog):
 
         while not self.bot.is_closed():
             try:
-                price, price_change_percent = await self.get_crypto_price_data('MATICUSDT')
+                price, price_change_percent = await self.get_crypto_price_data()
                 if price is None or price_change_percent is None:
                     await asyncio.sleep(60)
                     continue
