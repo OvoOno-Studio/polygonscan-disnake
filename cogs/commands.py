@@ -132,6 +132,7 @@ class Commands(commands.Cog):
         message_chunks = split_message(message_lines)
 
         if is_donator(ctx.author.id):
+            print("Calling generate_csv...")
             # Call the generate_csv() method to create the CSV file
             csv_file = await self.generate_csv(ctx, data, contract_type) 
             await ctx.author.send(content="User donator ..sending CSV file as DM!") 
