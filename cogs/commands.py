@@ -131,7 +131,7 @@ class Commands(commands.Cog):
 
         message_chunks = split_message(message_lines)
 
-        if is_donator(ctx.author.id):
+        if is_donator():
             print("Calling generate_csv...")
             # Call the generate_csv() method to create the CSV file
             csv_file = await self.generate_csv(ctx, data, contract_type) 
