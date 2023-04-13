@@ -106,11 +106,17 @@ class Commands(commands.Cog):
             embed.add_field(name=field_name, value=field_value, inline=False)
 
         if is_donator(ctx.author.id):
-            csvfile = await self.generate_csv(ctx, data, contract_type)
-            await ctx.author.send(f"Here is a CSV file with the last {offset} {contract_type} transactions for {address}:", file=csvfile)
-            embed.set_footer(text="A CSV file with the last 100 transactions has been sent to your DMs.")
+            try:
+                csvfile = await self.generate_csv(ctx, data, contract_type)
+                await ctx.author.send(f"Here is a CSV file with the last {offset} {contract_type} transactions for {address}:", file=csvfile)
+                embed.set_footer(text="A CSV file with the last 100 transactions has been sent to your DMs.")
+            except Exception as e:
+                print(f"Error while generating and sending CSV: {e}")
 
-        await ctx.author.send(embed=embed)
+        try:
+            await ctx.author.send(embed=embed)
+        except Exception as e:
+            print(f"Error while sending embed: {e}")
 
     """
     Define checkTrx() - check status of transaction by hash.
