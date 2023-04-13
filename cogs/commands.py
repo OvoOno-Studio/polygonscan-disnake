@@ -84,9 +84,13 @@ class Commands(commands.Cog):
         r = requests.get(endpoint)
         data = json.loads(r.text)
 
+        print(f"API call made, status: {data['status']}")
+
         if data['status'] != '1':
             return await ctx.send(f":x: Error fetching {contract_type} transactions for {address}")
 
+        print("Data status is '1'")  # Add this print statement
+        
         # Create an embed object
         embed = Embed(title=f":sparkles: Here are the latest **{contract_type}** transactions for {address}:", color=0x00FF00) 
         
