@@ -1,9 +1,11 @@
 import json
 import requests
 import disnake
-from disnake.ext import commands  
+from disnake.ext import commands
+from disnake.ext.commands import has_permissions
 from datetime import datetime
 from config import APIKey
+from main import is_donator
 
 intents = disnake.Intents.default()
 intents.members = True
@@ -20,6 +22,8 @@ class Commands(commands.Cog):
     Define checkTrx() - check status of transaction by hash.
     """
     @commands.command()
+    @has_permissions(administrator=True)
+    @is_donator()
     async def checkTrx(self, ctx: commands.Context, hash: str): 
         author = ctx.author.mention
         api_key = self.key
