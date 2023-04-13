@@ -134,7 +134,7 @@ class Commands(commands.Cog):
         if is_donator(ctx.author.id):
             # Call the generate_csv() method to create the CSV file
             csv_file = await self.generate_csv(ctx, data, contract_type) 
-            await ctx.author.sent(content="User donator ..sending CSV file as DM!") 
+            await ctx.author.send(content="User donator ..sending CSV file as DM!") 
             # Send the CSV file as an attachment
             await ctx.author.send(file=csv_file) 
 
