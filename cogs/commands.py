@@ -68,13 +68,17 @@ class Commands(commands.Cog):
         def split_message(lines, max_length=4000):
             chunks = []
             current_chunk = []
+            current_length = 0
 
             for line in lines:
-                if len("\n".join(current_chunk + [line])) <= max_length:
+                line_length = len(line) + 1  # Add 1 for the newline character
+                if current_length + line_length <= max_length:
                     current_chunk.append(line)
+                    current_length += line_length
                 else:
                     chunks.append("\n".join(current_chunk))
                     current_chunk = [line]
+                    current_length = line_length
 
             if current_chunk:
                 chunks.append("\n".join(current_chunk))
