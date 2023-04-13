@@ -4,6 +4,8 @@ import disnake
 from disnake.ext import commands
 from disnake.ext.commands import has_permissions
 from datetime import datetime
+import csv
+import io
 from config import APIKey
 from main import is_donator
 
@@ -17,13 +19,95 @@ class Commands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.key = str(APIKey)
+
+    """
+    Define generate_csv() - check CSV file for transaction.
+    """
+
+    async def generate_csv(self, ctx, data, contract_type):
+        csvfile = io.StringIO()
+        fieldnames = ['Transaction #', 'Transaction Hash', 'From', 'To', 'When', 'Value']
+
+        if contract_type == 'ERC721':
+            fieldnames = ['Transaction #', 'Transaction Hash', 'Token Name', 'Token ID', 'From', 'To', 'When']
+        elif contract_type == 'ERC1155':
+            fieldnames = ['Transaction #', 'Transaction Hash', 'Token Name', 'Token ID', 'From', 'To', 'When']
+
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+
+        counter = 0
+        for each in data['result']:
+            counter += 1
+            ts = int(each['timeStamp'])
+            dt = datetime.fromtimestamp(ts)
+            row = {
+                'Transaction #': counter,
+                'Transaction Hash': each['hash'],
+                'From': each['from'],
+                'To': each['to'],
+                'When': dt
+            }
+            if contract_type == 'ERC20':
+                value = int(each['value']) / 10 ** 18
+                row['Value'] = value
+            elif contract_type == 'ERC721':
+                row['Token Name'] = each['tokenName']
+                row['Token ID'] = each['tokenID']
+            elif contract_type == 'ERC1155':
+                row['Token Name'] = each['tokenName']
+                row['Token ID'] = each['tokenID']
+            writer.writerow(row)
+
+        csvfile.seek(0)
+        return disnake.File(csvfile, f'{contract_type}_transactions.csv')
     
+    """
+    Define handle_erc_transactions - check CSV file for transaction.
+    """
+    async def handle_erc_transactions(self, ctx, address, contract, offset, contract_type, counter=0):
+        if contract_type == 'ERC20':
+            if contract == 'SAND':
+                contract = '0xbbba073c31bf03b8acf7c28ef0738decf3695683'
+            endpoint = f'https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={str(contract)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(self.key)}'
+        elif contract_type == 'ERC721':
+            if contract == 'LAND':
+                contract = '0x9d305a42A3975Ee4c1C57555BeD5919889D9aB1F'
+            endpoint = f'https://api.polygonscan.com/api?module=account&action=tokennfttx&contractaddress={str(contract)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(self.key)}'
+        elif contract_type == 'ERC1155':
+            if contract == 'ITEMS':
+                contract = '0x10162c83AfcE2cA121eCA75A6Ae32A28D1d0145C'
+            endpoint = f'https://api.polygonscan.com/api?module=account&action=token1155tx&contractaddress={str(contract)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(self.key)}'
+
+        r = requests.get(endpoint)
+        data = json.loads(r.text)
+
+        if data['status'] != '1':
+            return await ctx.send(f":x: Error fetching {contract_type} transactions for {address}")
+
+        message = f":sparkles: Here are the latest **{contract_type}** transactions for {address}:\n"
+        for each in data['result'][:30]:
+            counter += 1
+            ts = int(each['timeStamp'])
+            dt = datetime.fromtimestamp(ts)
+            value = ''
+            if contract_type == 'ERC20':
+                value = f" | Value: {int(each['value']) / 10 ** 18:.8f}"
+            elif contract_type == 'ERC721' or contract_type == 'ERC1155':
+                value = f" | Token Name: {each['tokenName']} | Token ID: {each['tokenID']}"
+            message += f"\n`{counter}.` [{each['hash'][:6]}...{each['hash'][-4:]}](https://polygonscan.com/tx/{each['hash']}) | From: `{each['from'][:6]}...{each['from'][-4:]}` | To: `{each['to'][:6]}...{each['to'][-4:]}` | When: {dt}{value}"
+
+        if is_donator(ctx.author.id):
+            csvfile = await self.generate_csv(ctx, data, contract_type)
+            await ctx.author.send(f"Here is a CSV file with the last {offset} {contract_type} transactions for {address}:", file=csvfile)
+            message += "\n\n:file_folder: A CSV file with the last 100 transactions has been sent to your DMs."
+
+        await ctx.author.send(message)
+
     """
     Define checkTrx() - check status of transaction by hash.
     """
-    @commands.command()
-    @has_permissions(administrator=True)
-    @is_donator()
+    @commands.command() 
     async def checkTrx(self, ctx: commands.Context, hash: str): 
         author = ctx.author.mention
         api_key = self.key
@@ -158,122 +242,23 @@ class Commands(commands.Cog):
     """
     Define getErc20() - return list of ERC-20 transactions, can be filtered by specific smart contract address. 
     """
-    @commands.command()
-    async def getErc20(self, ctx: commands.Context, address: str, contract: str, offset: str, counter=0): 
-        if(int(offset) > 25):
-            await ctx.send(f"Maximum offset must be lower then 25! Aborting the command.")
-            return
-           
-        if(contract == 'SAND'):
-            contract = '0xbbba073c31bf03b8acf7c28ef0738decf3695683' 
-        
-        author = ctx.author.mention
-        api_key = self.key
-        endpoint = f'https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={str(contract)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(api_key)}'
-        response = requests.get(endpoint)  
-        data = json.loads(response.text) 
-        print(f"User - {author} trigger command getErc20 for {address} wallet address.")
-        await ctx.send(f"Listing last {offset} ERC-20 transactions for **{address}** - sent DM to {author}")
-        embed = disnake.Embed(
-            title=f"{str(offset)} ERC-20 transactions of {str(address)}",
-            description="Return list of ERC-20 transaction.",
-            color=0x9C84EF,
-            timestamp=datetime.now()
-        ) 
-        for each in data['result']:
-            counter += 1     
-            value = int(each['value']) / 10 ** 18 # Convert WEI to SAND
-            ts = int(each['timeStamp'])  
-            dt = datetime.fromtimestamp(ts)   
-            # string = '**Transaction #' + str(counter) + '**\nFrom: ' + str(each['from']) + ' \nTo: ' + str(each['to']) + '\nWhen: ' + str(dt) + '\nValue: ' + str(value) + '\n--------------------------------------------------------------------'
-            embed.add_field(
-                name=f"Transaction #{str(counter)}",
-                value=f'\nTransaction Hash: {str(each["hash"])} \nFrom: {str(each["from"])} \nTo: {str(each["to"])} \nWhen: {str(dt)} \nValue: {str(value)}',
-                inline=False 
-            )
-        
-        embed.set_footer(
-            text=f"Requested by {ctx.author}"
-        ) 
-        
-        await ctx.author.send(embed=embed) 
+    @commands.command() 
+    async def getErc20(self, ctx, address: str, contract: str = 'SAND', offset: int = 30):
+        await self.handle_erc_transactions(ctx, address, contract, offset, 'ERC20')
 
     """
     Define getErc721() - return list of ERC-721(NFT) transactions, can be filtered by specific smart contract address. 
     """
     @commands.command()
-    async def getErc721(self, ctx: commands.Context, address: str, contract: str, offset: str, counter=0):
-        if(int(offset) > 25):
-            await ctx.send(f"Maximum offset must be lower then 25! Aborting the command.")
-            return
-
-        if(contract == 'LAND'):
-            contract = '0x9d305a42A3975Ee4c1C57555BeD5919889DCE63F'
-
-        api_key = self.key
-        endpoint = f'https://api.polygonscan.com/api?module=account&action=tokennfttx&contractaddress={str(contract)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(api_key)}'
-        response = requests.get(endpoint)
-        data = json.loads(response.text)
-        author = ctx.author.mention
-        print(f"User - {author} trigger command getErc721 for {address} wallet address.")
-        await ctx.send(f"Listing last {offset} ERC-20 transactions for **{address}** - sent DM to {author}") 
-        embed = disnake.Embed(
-            title=f"{str(offset)} ERC-721 transactions of {str(address)}",
-            description="Return list of ERC-721 transaction.",
-            color=0x9C84EF,
-            timestamp=datetime.now()
-        ) 
-        for each in data['result']:
-            counter += 1 
-            ts = int(each['timeStamp'])
-            dt = datetime.fromtimestamp(ts)
-            #string = '**Transaction #' + str(counter) + '**\nToken Name: ' + str(each['tokenName']) + '\nToken ID:' + str(each['tokenID']) + '\nFrom: ' + str(each['from']) + '\nTo: ' + str(each['to']) + '\nWhen' + str(dt)
-            embed.add_field(
-                name=f"Transaction #{str(counter)}",
-                value=f'\nTransaction Name: {str(each["tokenName"])} \nToken ID: {str(each["tokenID"])} \nFrom: {str(each["from"])} \nTo: {str(each["to"])} \nWhen: {str(dt)}',
-                inline=False 
-            )
-
-        embed.set_footer(
-            text=f"Requested by {ctx.author}"
-        ) 
-        
-        await ctx.send(embed=embed)
+    async def getErc721(self, ctx, address: str, contract: str = 'LAND', offset: int = 30):
+        await self.handle_erc_transactions(ctx, address, contract, offset, 'ERC721')
 
     """
     Define getErc1155() - return list of ERC-721 (NFT) transactions, can be filtered by specific smart contract address. 
     """
     @commands.command()
-    async def getErc1155(self, ctx: commands.Context, address: str, contract: str, offset: str, counter=0):
-        if(int(offset) > 25):
-            await ctx.send(f"Maximum offset must be lower then 25! Aborting the command.")
-            return
-        
-        api_key = self.key
-        endpoint = f'https://api.etherscan.io/api?module=account&action=token1155tx&contractaddress={str(contract)}&address={str(address)}&page=1&{str(offset)}=100&startblock=0&endblock=99999999&sort=asc&apikey={str(api_key)}'
-        response = requests.get(endpoint)
-        data = json.loads(response.text)
-        author = ctx.author.mention
-        print(f"User - {author} trigger command getErc721 for {address} wallet address.")
-        await ctx.send(f"Listing last {offset} ERC-1155 transactions for **{address}** - sent DM to {author}") 
-        embed = disnake.Embed(
-            title=f"{str(offset)} ERC-1155 transactions of {str(address)}",
-            description="Return list of ERC-1155 transaction.",
-            color=0x9C84EF,
-            timestamp=datetime.now()
-        ) 
-        for each in data['result']:
-            counter += 1 
-            ts = int(each['timeStamp'])
-            dt = datetime.fromtimestamp(ts)
-            #string = '**Transaction #' + str(counter) + '**\nToken Name: ' + str(each['tokenName']) + '\nToken ID:' + str(each['tokenID']) + '\nFrom: ' + str(each['from']) + '\nTo: ' + str(each['to']) + '\nWhen' + str(dt)
-            embed.add_field(
-                name=f"Transaction #{str(counter)}",
-                value=f'\nTransaction Name: {str(each["tokenName"])} \nToken ID: {str(each["tokenID"])} \nFrom: {str(each["from"])} \nTo: {str(each["to"])} \nWhen: {str(dt)}',
-                inline=False 
-            )
-            
-        await ctx.send(embed=embed)
+    async def getErc1155(self, ctx, address: str, contract: str = 'ITEMS', offset: int = 30):
+        await self.handle_erc_transactions(ctx, address, contract, offset, 'ERC1155')
     
 def setup(bot):
     bot.add_cog(Commands(bot))
