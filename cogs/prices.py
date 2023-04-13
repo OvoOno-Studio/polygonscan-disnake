@@ -63,12 +63,15 @@ class Crypto(commands.Cog):
             return
 
         price_change = (current_price - self.previous_matic_price) / self.previous_matic_price * 100
-        if abs(price_change) >= self.threshold * 100:
+        print(f"Price change: {price_change:.2f}%")  # Add print statement for debugging
+
+        if price_change <= -5:  # Check if the price is down by 5% or more
+            print("Sending price alert")  # Add print statement for debugging
             channel = self.bot.get_channel(self.price_alert_channel_id)
             if channel:
-                direction = "up" if price_change > 0 else "down"
-                arrow_emoji = "🟢" if price_change > 0 else "🔴"
-                await channel.send(f"📢 @everyone 📢\n**MATIC price has changed by more than 2%!**\n\nIt's now **{direction.upper()}** to **${current_price:.2f}** {arrow_emoji}\n")
+                direction = "down"
+                arrow_emoji = "🔴"
+                await channel.send(f"📢 @everyone 📢\n**MATIC price has dropped by 5% or more!**\n\nIt's now **{direction.upper()}** to **${current_price:.2f}** {arrow_emoji}\n")
             self.previous_matic_price = current_price
         else:
             self.previous_matic_price = current_price
