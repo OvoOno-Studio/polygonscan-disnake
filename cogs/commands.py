@@ -24,8 +24,9 @@ class Commands(commands.Cog):
     """
     Define generate_csv() - check CSV file for transaction.
     """
-    async def generate_csv(self, ctx, data, contract_type):
-        print("generating csv...")
+    async def generate_csv(self, data, contract_type):
+        print("Generating CSV...")  # Add this print statement
+
         csvfile = io.StringIO()
         fieldnames = ['Transaction #', 'Transaction Hash', 'From', 'To', 'When', 'Value']
 
@@ -49,6 +50,7 @@ class Commands(commands.Cog):
                 'To': each['to'],
                 'When': dt
             }
+
             if contract_type == 'ERC20':
                 value = int(each['value']) / 10 ** 18
                 row['Value'] = value
@@ -58,10 +60,17 @@ class Commands(commands.Cog):
             elif contract_type == 'ERC1155':
                 row['Token Name'] = each['tokenName']
                 row['Token ID'] = each['tokenID']
+            
             writer.writerow(row)
 
         csvfile.seek(0)
-        print('return csv file..')
+        
+        # Print the content of the CSV file
+        csv_content = csvfile.read()
+        print(csv_content)
+        csvfile.seek(0)
+
+        print("CSV generated")  # Add this print statement
         return disnake.File(csvfile, f'{contract_type}_transactions.csv')
     
     """
