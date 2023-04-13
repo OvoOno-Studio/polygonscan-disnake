@@ -1,7 +1,7 @@
 import json
 import requests
 import disnake
-from discord import Embed
+from disnake import Embed
 from disnake.ext import commands
 from disnake.ext.commands import has_permissions
 from datetime import datetime
