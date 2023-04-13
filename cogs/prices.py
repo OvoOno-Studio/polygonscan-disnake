@@ -10,7 +10,7 @@ class Crypto(commands.Cog):
     def __init__(self, bot):
         self.bot = bot 
         self.session = aiohttp.ClientSession()
-        self.api_url = "https://api.binance.com/api/v3/ticker/24hr?symbol="
+        self.api_url = "https://api.coingecko.com/api/v3/simple/price?ids=polygon&vs_currencies=usd&include_24hr_change=true"
         self.polygon_scan_api_url = f"https://api.polygonscan.com/api?module=account&action=tokentx&apikey={APIKey}"
         self.wallet_address = wallet_address # Replace this with the wallet address you want to monitor # Set up this with command
         self.sand_contract_address = "0xBbba073C31bF03b8ACf7c28EF0738DeCF3695683" # SAND token contract address on Polygon
@@ -44,15 +44,11 @@ class Crypto(commands.Cog):
         self.wallet_address = address
         await ctx.send(f"Wallet address has been set to `{address}`")
 
-    async def get_crypto_price_data(self, symbol: str):
-        async with self.session.get(self.api_url + symbol.upper()) as response:
-            status_code = response.status
+    async def get_crypto_price_data(self):
+        async with self.session.get(self.api_url) as response:
             json_data = await response.json()
-            if 'lastPrice' not in json_data or 'priceChangePercent' not in json_data:
-                print(f"Error in get_crypto_price_data (status code: {status_code}): {json_data}")
-                return None, None
-            price = float(json_data['lastPrice'])
-            price_change_percent = float(json_data['priceChangePercent'])
+            price = json_data['polygon']['usd']
+            price_change_percent = json_data['polygon']['usd_24h_change']
             return price, price_change_percent
 
     async def check_and_send_alert(self, current_price):
