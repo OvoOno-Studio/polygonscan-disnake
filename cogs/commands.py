@@ -24,7 +24,7 @@ class Commands(commands.Cog):
     """
     Define generate_csv() - generate csv file for donators.
     """
-    async def generate_csv(self, ctx, data, contract_type):
+    async def generate_csv(self, ctx, data, contract_type, address):
         print(f'Generating CSV file... for {contract_type}')
         csvfile = io.StringIO()
         fieldnames = ['Transaction #', 'Transaction Hash', 'From', 'To', 'When', 'Value']
@@ -34,7 +34,7 @@ class Commands(commands.Cog):
         elif contract_type == 'ERC1155':
             fieldnames = ['Transaction #', 'Transaction Hash', 'Token Name', 'Token ID', 'From', 'To', 'When']
 
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=',')  # Specify the delimiter
         writer.writeheader()
 
         counter = 0
@@ -63,7 +63,7 @@ class Commands(commands.Cog):
 
         csvfile.seek(0)
         print("CSV generated.")
-        return disnake.File(csvfile, f'{contract_type}_transactions.csv')
+        return disnake.File(csvfile, f'{contract_type}_transactions_{address}.csv')
     
     """
     Define handle_erc_transactions - check CSV file for transaction.
@@ -134,7 +134,7 @@ class Commands(commands.Cog):
         if is_donator():
             print("Calling generate_csv...")
             # Call the generate_csv() method to create the CSV file
-            csv_file = await self.generate_csv(ctx, data, contract_type) 
+            csv_file = await self.generate_csv(ctx, data, contract_type, address) 
             await ctx.author.send(content="User donator ..sending CSV file as DM!") 
             # Send the CSV file as an attachment
             await ctx.author.send(file=csv_file) 
