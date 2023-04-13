@@ -73,6 +73,10 @@ class Crypto(commands.Cog):
         while not self.bot.is_closed():
             try:
                 price, price_change_percent = await self.get_crypto_price_data('MATICUSDT')
+                if price is None or price_change_percent is None:
+                    await asyncio.sleep(60)
+                    continue
+
                 color = disnake.Color.green() if price_change_percent >= 0 else disnake.Color.red()
                 arrow_emoji = "🟢" if price_change_percent > 0 else "🔴"
                 status_text = f"MATIC: ${price:.2f} {arrow_emoji}({price_change_percent:.2f}%)"
@@ -88,7 +92,7 @@ class Crypto(commands.Cog):
             except Exception as e:
                 print(f"Error updating presence: {e}")
 
-            await asyncio.sleep(60)
+            await asyncio.sleep(30)
 
     async def limited_get(self, url):
         async with self.semaphore:  # Limit the number of concurrent requests
