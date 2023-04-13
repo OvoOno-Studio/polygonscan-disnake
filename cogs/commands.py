@@ -24,50 +24,6 @@ class Commands(commands.Cog):
     """
     Define generate_csv() - generate csv file for donators.
     """
-    async def generate_csv(self, ctx, data, contract_type, address):
-        print(f'Generating CSV file... for {contract_type}')
-        csvfile = io.StringIO()
-        fieldnames = ['Transaction #', 'Transaction Hash', 'From', 'To', 'When', 'Value']
-
-        if contract_type == 'ERC721':
-            fieldnames = ['Transaction #', 'Transaction Hash', 'Token Name', 'Token ID', 'From', 'To', 'When']
-        elif contract_type == 'ERC1155':
-            fieldnames = ['Transaction #', 'Transaction Hash', 'Token Name', 'Token ID', 'From', 'To', 'When']
-
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=',')  # Specify the delimiter
-        writer.writeheader()
-
-        counter = 0
-        for each in data['result']:
-            print(f"Looping through CSV {counter}...")
-            counter += 1
-            ts = int(each['timeStamp'])
-            dt = datetime.fromtimestamp(ts)
-            row = {
-                'Transaction #': counter,
-                'Transaction Hash': each['hash'],
-                'From': each['from'],
-                'To': each['to'],
-                'When': dt
-            }
-            if contract_type == 'ERC20':
-                value = int(each['value']) / 10 ** 18
-                row['Value'] = value
-            elif contract_type == 'ERC721':
-                row['Token Name'] = each['tokenName']
-                row['Token ID'] = each['tokenID']
-            elif contract_type == 'ERC1155':
-                row['Token Name'] = each['tokenName']
-                row['Token ID'] = each['tokenID']
-            writer.writerow(row)
-
-        csvfile.seek(0)
-        print("CSV generated.")
-        return disnake.File(csvfile, f'{contract_type}_transactions_{address}.csv')
-    
-    """
-    Define handle_erc_transactions - check CSV file for transaction.
-    """
     async def generate_csv(self, ctx, data, contract_type):
         print(f'Generating CSV file... for {contract_type}')
         csvfile = io.StringIO()
@@ -108,6 +64,89 @@ class Commands(commands.Cog):
         csvfile.seek(0)
         print("CSV generated.")
         return disnake.File(csvfile, f'{contract_type}_transactions.csv')
+    
+    """
+    Define handle_erc_transactions - check CSV file for transaction.
+    """
+    async def handle_erc_transactions(self, ctx, address, contract, offset, contract_type, counter=0):
+        print(f"Inside handle_erc_transactions - Contract: {contract_type}")  # Add this print statement
+        if contract_type == 'ERC20':
+            if contract == 'SAND':
+                contract = '0xbbba073c31bf03b8acf7c28ef0738decf3695683'
+            endpoint = f'https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={str(contract)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(self.key)}'
+        elif contract_type == 'ERC721':
+            if contract == 'LAND':
+                contract = '0x9d305a42A3975Ee4c1C57555BeD5919889D9aB1F'
+            endpoint = f'https://api.polygonscan.com/api?module=account&action=tokennfttx&contractaddress={str(contract)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(self.key)}'
+        elif contract_type == 'ERC1155':
+            if contract == 'ITEMS':
+                contract = '0x10162c83AfcE2cA121eCA75A6Ae32A28D1d0145C'
+            endpoint = f'https://api.polygonscan.com/api?module=account&action=token1155tx&contractaddress={str(contract)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(self.key)}'
+
+        r = requests.get(endpoint)
+        data = json.loads(r.text) 
+
+        if data['status'] != '1':
+            return await ctx.send(f":x: Error fetching {contract_type} transactions for {address}")
+
+        # Build the message with Markdown formatting
+        message_lines = [
+            f"**__{contract_type} Transactions for {address}__** :sparkles:",
+            "",  # Empty line for spacing
+        ]
+
+        for each in data['result']:
+            counter += 1
+            ts = int(each['timeStamp'])
+            dt = datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+            value = ''
+            if contract_type == 'ERC20':
+                value = f"💰 Value: **{int(each['value']) / 10 ** 18:.8f}**"
+            elif contract_type == 'ERC721' or contract_type == 'ERC1155':
+                value = f"💸 Token Name: **{each['tokenName']}** | 🆔 Token ID: **{each['tokenID']}**"
+
+            line = f"**{counter}.** `{each['hash']}`\n 🧑 From: `{each['from']}` \n 👉 To: `{each['to']}` \n ⏲️ When: **{dt}** | {value}"
+            message_lines.append(line)
+
+        # Split the message into chunks of 2000 characters or fewer
+        def split_message(lines, max_length=2000):
+            chunks = []
+            current_chunk = []
+            current_length = 0
+
+            for line in lines:
+                line_length = len(line) + 1  # Add 1 for the newline character
+                if current_length + line_length <= max_length:
+                    current_chunk.append(line)
+                    current_length += line_length
+                else:
+                    chunks.append("\n".join(current_chunk))
+                    current_chunk = [line]
+                    current_length = line_length
+
+            if current_chunk:
+                chunks.append("\n".join(current_chunk))
+
+            return chunks
+
+        message_chunks = split_message(message_lines)
+
+        if is_donator():
+            print("Calling generate_csv...")
+            # Call the generate_csv() method to create the CSV file
+            csv_file = await self.generate_csv(ctx, data, contract_type, address) 
+            await ctx.author.send(content="User donator ..sending CSV file as DM!") 
+            # Send the CSV file as an attachment
+            await ctx.author.send(file=csv_file) 
+
+            return
+
+        # Send each chunk as a separate message
+        for chunk in message_chunks:
+            try:
+                await ctx.author.send(content=chunk)
+            except Exception as e:
+                print(f"Error while sending formatted message chunk: {e}")
 
     """
     Define checkTrx() - check status of transaction by hash.
