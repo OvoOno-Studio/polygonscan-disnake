@@ -1,6 +1,7 @@
 import json
 import requests
 import disnake
+from discord import Embed
 from disnake.ext import commands
 from disnake.ext.commands import has_permissions
 from datetime import datetime
@@ -66,6 +67,7 @@ class Commands(commands.Cog):
     Define handle_erc_transactions - check CSV file for transaction.
     """
     async def handle_erc_transactions(self, ctx, address, contract, offset, contract_type, counter=0):
+        print(f"Inside handle_erc_transactions - Contract: {contract_type}")  # Add this print statement
         if contract_type == 'ERC20':
             if contract == 'SAND':
                 contract = '0xbbba073c31bf03b8acf7c28ef0738decf3695683'
@@ -85,24 +87,30 @@ class Commands(commands.Cog):
         if data['status'] != '1':
             return await ctx.send(f":x: Error fetching {contract_type} transactions for {address}")
 
-        message = f":sparkles: Here are the latest **{contract_type}** transactions for {address}:\n"
+        # Create an embed object
+        embed = Embed(title=f"Latest {contract_type} transactions for {address}", color=0x00FF00)
+
+        # Add fields to the embed
         for each in data['result'][:30]:
             counter += 1
             ts = int(each['timeStamp'])
             dt = datetime.fromtimestamp(ts)
             value = ''
             if contract_type == 'ERC20':
-                value = f" | Value: {int(each['value']) / 10 ** 18:.8f}"
+                value = f"Value: {int(each['value']) / 10 ** 18:.8f}"
             elif contract_type == 'ERC721' or contract_type == 'ERC1155':
-                value = f" | Token Name: {each['tokenName']} | Token ID: {each['tokenID']}"
-            message += f"\n`{counter}.` [{each['hash'][:6]}...{each['hash'][-4:]}](https://polygonscan.com/tx/{each['hash']}) | From: `{each['from'][:6]}...{each['from'][-4:]}` | To: `{each['to'][:6]}...{each['to'][-4:]}` | When: {dt}{value}"
+                value = f"Token Name: {each['tokenName']} | Token ID: {each['tokenID']}"
+
+            field_name = f"{counter}. {each['hash'][:6]}...{each['hash'][-4:]}"
+            field_value = f"From: `{each['from'][:6]}...{each['from'][-4:]}` | To: `{each['to'][:6]}...{each['to'][-4:]}` | When: {dt} | {value}"
+            embed.add_field(name=field_name, value=field_value, inline=False)
 
         if is_donator(ctx.author.id):
             csvfile = await self.generate_csv(ctx, data, contract_type)
             await ctx.author.send(f"Here is a CSV file with the last {offset} {contract_type} transactions for {address}:", file=csvfile)
-            message += "\n\n:file_folder: A CSV file with the last 100 transactions has been sent to your DMs."
+            embed.set_footer(text="A CSV file with the last 100 transactions has been sent to your DMs.")
 
-        await ctx.author.send(message)
+        await ctx.author.send(embed=embed)
 
     """
     Define checkTrx() - check status of transaction by hash.
