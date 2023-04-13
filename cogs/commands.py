@@ -88,8 +88,8 @@ class Commands(commands.Cog):
             return await ctx.send(f":x: Error fetching {contract_type} transactions for {address}")
 
         # Create an embed object
-        embed = Embed(title=f"Latest {contract_type} transactions for {address}", color=0x00FF00)
-
+        embed = Embed(title=f":sparkles: Here are the latest **{contract_type}** transactions for {address}:", color=0x00FF00) 
+        
         # Add fields to the embed
         for each in data['result'][:30]:
             counter += 1
