@@ -64,12 +64,31 @@ class Commands(commands.Cog):
             line = f"**{counter}.** `{each['hash'][:6]}...{each['hash'][-4:]}`\nFrom: `{each['from'][:6]}...{each['from'][-4:]}` | To: `{each['to'][:6]}...{each['to'][-4:]}` | When: **{dt}** | {value}"
             message_lines.append(line)
 
-        message = "\n".join(message_lines)
+        # Split the message into chunks of 4000 characters or fewer
+        def split_message(lines, max_length=4000):
+            chunks = []
+            current_chunk = []
 
-        try:
-            await ctx.author.send(content=message)
-        except Exception as e:
-            print(f"Error while sending formatted message: {e}")
+            for line in lines:
+                if len("\n".join(current_chunk + [line])) <= max_length:
+                    current_chunk.append(line)
+                else:
+                    chunks.append("\n".join(current_chunk))
+                    current_chunk = [line]
+
+            if current_chunk:
+                chunks.append("\n".join(current_chunk))
+
+            return chunks
+
+        message_chunks = split_message(message_lines)
+
+        # Send each chunk as a separate message
+        for chunk in message_chunks:
+            try:
+                await ctx.author.send(content=chunk)
+            except Exception as e:
+                print(f"Error while sending formatted message chunk: {e}")
 
     """
     Define checkTrx() - check status of transaction by hash.
