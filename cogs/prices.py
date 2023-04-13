@@ -57,15 +57,14 @@ class Crypto(commands.Cog):
             return
 
         price_change = (current_price - self.previous_matic_price) / self.previous_matic_price * 100
-
         if abs(price_change) >= self.threshold * 100:
             channel = self.bot.get_channel(self.price_alert_channel_id)
-
             if channel:
                 direction = "up" if price_change > 0 else "down"
                 arrow_emoji = "🟢" if price_change > 0 else "🔴"
                 await channel.send(f"📢 @everyone 📢\n**MATIC price has changed by more than 2%!**\n\nIt's now **{direction.upper()}** to **${current_price:.2f}** {arrow_emoji}\n")
-
+            self.previous_matic_price = current_price
+        else:
             self.previous_matic_price = current_price
 
     async def update_crypto_presence(self):
@@ -74,14 +73,9 @@ class Crypto(commands.Cog):
         while not self.bot.is_closed():
             try:
                 price, price_change_percent = await self.get_crypto_price_data('MATICUSDT')
-
                 color = disnake.Color.green() if price_change_percent >= 0 else disnake.Color.red()
-
                 arrow_emoji = "🟢" if price_change_percent > 0 else "🔴"
                 status_text = f"MATIC: ${price:.2f} {arrow_emoji}({price_change_percent:.2f}%)"
-
-                await self.check_and_send_alert(price)
-
                 await self.bot.change_presence(
                     status=disnake.Status.online,
                     activity=disnake.Activity(
@@ -89,8 +83,7 @@ class Crypto(commands.Cog):
                         name=status_text,
                     ),
                 )
-
-                self.previous_matic_price = price
+                await self.check_and_send_alert(price)
 
             except Exception as e:
                 print(f"Error updating presence: {e}")
