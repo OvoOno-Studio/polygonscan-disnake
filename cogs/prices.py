@@ -45,7 +45,10 @@ class Crypto(commands.Cog):
         await ctx.send(f"Wallet address has been set to `{address}`")
 
     async def get_crypto_price_data(self):
-        async with self.session.get(self.api_url) as response:
+        url = f"https://api.coingecko.com/api/v3/simple/price?ids=polygon&vs_currencies=usd&include_24hr_change=true"
+        async with self.session.get(url) as response:
+            if response.status != 200:
+                raise Exception(f"Error in get_crypto_price_data (status code: {response.status}): {await response.text()}")
             json_data = await response.json()
             price = json_data['polygon']['usd']
             price_change_percent = json_data['polygon']['usd_24h_change']
