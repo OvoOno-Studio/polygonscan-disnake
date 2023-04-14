@@ -58,6 +58,10 @@ class Commands(commands.Cog):
                 if each['from'] == '0x0000000000000000000000000000000000000000':
                     transaction_type = 'mint'
 
+            # Debugging print statements
+            print(f"Transaction from: {each['from']} to: {each['to']} address: {address}")
+            print(f"Transaction type: {transaction_type}")
+
             # Skip transactions that do not involve the user's address
             if each['from'] != address and each['to'] != address:
                 continue
