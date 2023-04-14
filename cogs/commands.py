@@ -58,6 +58,10 @@ class Commands(commands.Cog):
                 if each['from'] == '0x0000000000000000000000000000000000000000':
                     transaction_type = 'mint'
 
+            # Skip transactions that do not involve the user's address
+            if each['from'] != address and each['to'] != address:
+                continue
+
             row = {
                 'Transaction Hash': each['hash'],
                 'Block number': each['blockNumber'],
