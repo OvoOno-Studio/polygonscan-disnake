@@ -24,7 +24,7 @@ class Commands(commands.Cog):
     """
     Define generate_csv() - generate csv file for donators.
     """
-    async def generate_csv(self, ctx, data, contract_type, contract_address):
+    async def generate_csv(self, ctx, data, contract_type, contract_address, address):
         print(f'Generating CSV file... for {contract_type}')
         csvfile = io.StringIO()
         fieldnames = [
@@ -80,7 +80,7 @@ class Commands(commands.Cog):
 
         csvfile.seek(0)
         print("CSV generated.")
-        return disnake.File(csvfile, f'{contract_type}_transactions.csv')
+        return disnake.File(csvfile, f'{contract_type}_transactions_{address}.csv')
     
     """
     Define handle_erc_transactions - check CSV file for transaction.
