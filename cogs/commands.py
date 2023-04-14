@@ -24,45 +24,63 @@ class Commands(commands.Cog):
     """
     Define generate_csv() - generate csv file for donators.
     """
-    async def generate_csv(self, ctx, data, contract_type, address):
-        print(f'Generating CSV file... for {address}')
+    async def generate_csv(self, ctx, data, contract_type, contract_address):
+        print(f'Generating CSV file... for {contract_type}')
         csvfile = io.StringIO()
-        fieldnames = ['Transaction #', 'Transaction Hash', 'From', 'To', 'When', 'Value']
+        fieldnames = [
+            'Transaction Hash',
+            'Block number',
+            'Unix Timestamp',
+            'Date time',
+            'From',
+            'To',
+            'Contract Address',
+            'Transaction Type',
+            'Token value transfered',
+            'Token name'
+        ]
 
-        if contract_type == 'ERC721':
-            fieldnames = ['Transaction #', 'Transaction Hash', 'Token Name', 'Token ID', 'From', 'To', 'When']
-        elif contract_type == 'ERC1155':
-            fieldnames = ['Transaction #', 'Transaction Hash', 'Token Name', 'Token ID', 'From', 'To', 'When']
+        if contract_type in ['ERC721', 'ERC1155']:
+            fieldnames[8] = 'Token value (Token count)'
 
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=',')  # Specify the delimiter
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter='\t')
         writer.writeheader()
 
-        counter = 0
-        for each in data['result']: 
-            counter += 1
+        for each in data['result']:
             ts = int(each['timeStamp'])
             dt = datetime.fromtimestamp(ts)
+
+            # Determine transaction type for ERC20, ERC721, and ERC1155
+            if contract_type == 'ERC20':
+                transaction_type = 'incoming' if each['to'] == contract_address else 'outgoing'
+            else:
+                transaction_type = 'incoming' if each['to'] == contract_address else 'outgoing'
+                if each['from'] == '0x0000000000000000000000000000000000000000':
+                    transaction_type = 'mint'
+
             row = {
-                'Transaction #': counter,
                 'Transaction Hash': each['hash'],
+                'Block number': each['blockNumber'],
+                'Unix Timestamp': each['timeStamp'],
+                'Date time': dt,
                 'From': each['from'],
                 'To': each['to'],
-                'When': dt
+                'Contract Address': contract_address,
+                'Transaction Type': transaction_type,
+                'Token name': each['tokenName']
             }
+
             if contract_type == 'ERC20':
                 value = int(each['value']) / 10 ** 18
-                row['Value'] = value
-            elif contract_type == 'ERC721':
-                row['Token Name'] = each['tokenName']
-                row['Token ID'] = each['tokenID']
-            elif contract_type == 'ERC1155':
-                row['Token Name'] = each['tokenName']
-                row['Token ID'] = each['tokenID']
+                row['Token value transfered'] = value
+            elif contract_type in ['ERC721', 'ERC1155']:
+                row['Token value (Token count)'] = each['tokenID']
+
             writer.writerow(row)
 
         csvfile.seek(0)
         print("CSV generated.")
-        return disnake.File(csvfile, f'{contract_type}_transactions_{address}.csv')
+        return disnake.File(csvfile, f'{contract_type}_transactions.csv')
     
     """
     Define handle_erc_transactions - check CSV file for transaction.
