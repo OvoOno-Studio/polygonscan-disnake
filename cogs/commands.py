@@ -25,6 +25,7 @@ class Commands(commands.Cog):
     Define generate_csv() - generate csv file for donators.
     """
     async def generate_csv(self, data, contract_type, contract_address, address):
+        address_lower = address.lower()
         print(f'Generating CSV file... for {contract_type}')
         csvfile = io.StringIO()
         fieldnames = [
@@ -52,18 +53,14 @@ class Commands(commands.Cog):
 
             # Determine transaction type for ERC20, ERC721, and ERC1155
             if contract_type == 'ERC20':
-                transaction_type = 'incoming' if each['to'] == address else 'outgoing'
+                transaction_type = 'incoming' if each['to'] == address_lower else 'outgoing'
             else:
-                transaction_type = 'incoming' if each['to'] == address else 'outgoing'
+                transaction_type = 'incoming' if each['to'] == address_lower else 'outgoing'
                 if each['from'] == '0x0000000000000000000000000000000000000000':
-                    transaction_type = 'mint'
-
-            # Debugging print statements
-            print(f"Transaction from: {each['from']} to: {each['to']} address: {address}")
-            print(f"Transaction type: {transaction_type}")
+                    transaction_type = 'mint' 
 
             # Skip transactions that do not involve the user's address
-            if each['from'] != address and each['to'] != address:
+            if each['from'] != address_lower and each['to'] != address_lower:
                 continue
 
             row = {
@@ -88,7 +85,7 @@ class Commands(commands.Cog):
 
         csvfile.seek(0)
         print("CSV generated.")
-        return disnake.File(csvfile, f'{contract_type}_transactions_{address}.csv')
+        return disnake.File(csvfile, f'{contract_type}_transactions_{address_lower}.csv')
     
     """
     Define handle_erc_transactions - check CSV file for transaction.
