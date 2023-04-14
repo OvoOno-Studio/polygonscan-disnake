@@ -52,9 +52,9 @@ class Commands(commands.Cog):
 
             # Determine transaction type for ERC20, ERC721, and ERC1155
             if contract_type == 'ERC20':
-                transaction_type = 'incoming' if each['to'] == contract_address else 'outgoing'
+                transaction_type = 'incoming' if each['to'] == address else 'outgoing'
             else:
-                transaction_type = 'incoming' if each['to'] == contract_address else 'outgoing'
+                transaction_type = 'incoming' if each['to'] == address else 'outgoing'
                 if each['from'] == '0x0000000000000000000000000000000000000000':
                     transaction_type = 'mint'
 
