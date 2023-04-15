@@ -107,9 +107,9 @@ class Commands(commands.Cog):
                 contract = '0x8463B73ea174D04db5ffF567c77be968666722B4'
             if contract == 'RAB':
                 contract == '0xa090E057a7B3B397eFc0F3430659A05b6a41fA40'
-            if contract == 'CB':
+            if contract == 'CAB':
                 contract == '0x6709660a6237723f278188bcae9e21b21eff8aab'
-            if contract == 'HK':
+            if contract == 'HELL':
                 contract == '0xc3F3EF3929392FDc697c5800d6Cd18AF73377A8f'
             if contract == 'PPP':
                 contract == '0x3476190768dDd5bd2Dc0Fd82B1027281b0F8891f'
