@@ -103,15 +103,15 @@ class Commands(commands.Cog):
                 contract = '0x9d305a42A3975Ee4c1C57555BeD5919889DCE63F'
             if contract == 'FOTNS':
                 contract = '0x5521B00E7952948BABc84F052B5d017792784429'
-            if contract == "MAD":
+            if contract == 'MAD':
                 contract = '0x8463B73ea174D04db5ffF567c77be968666722B4'
-            if contract == "RAB":
+            if contract == 'RAB':
                 contract == '0xa090E057a7B3B397eFc0F3430659A05b6a41fA40'
-            if contract == "CB":
-                contract == '0x6709660a6237723f278188bCAE9E21b21eff8AAb'
-            if contract == "HK":
+            if contract == 'CB':
+                contract == '0x6709660a6237723f278188bcae9e21b21eff8aab'
+            if contract == 'HK':
                 contract == '0xc3F3EF3929392FDc697c5800d6Cd18AF73377A8f'
-            if contract == "PPP":
+            if contract == 'PPP':
                 contract == '0x3476190768dDd5bd2Dc0Fd82B1027281b0F8891f'
             endpoint = f'https://api.polygonscan.com/api?module=account&action=tokennfttx&contractaddress={str(contract)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(self.key)}'
         elif contract_type == 'ERC1155':
