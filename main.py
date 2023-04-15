@@ -21,6 +21,11 @@ bot = commands.Bot(command_prefix=commands.when_mentioned_or("ps-"), intents=int
 async def ping(ctx):
     await ctx.send (f"📶 {round(bot.latency * 1000)}ms") 
 
+# Return Donatebot checkout page
+@bot.command()
+async def ping(ctx):
+    await ctx.send (f"To use full features of PolygonScan Scrapper, you can donate on next link: https://donatebot.io/checkout/944377384872853555 ") 
+
 # Print the message in Python console once bot is ready for usage
 @bot.event
 async def on_ready():
