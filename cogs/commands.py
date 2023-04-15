@@ -123,7 +123,7 @@ class Commands(commands.Cog):
         data = json.loads(r.text) 
 
         print(data)
-        print(r)
+        print(contract_type)
 
         if data['status'] != '1':
             return await ctx.send(f":x: Error fetching {contract_type} transactions for {address}") 
