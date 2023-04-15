@@ -44,7 +44,7 @@ class Commands(commands.Cog):
         if contract_type in ['ERC721', 'ERC1155']:
             fieldnames[8] = 'Token value (Token count)'
 
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter='\t')
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=',')
         writer.writeheader()
 
         for each in data['result']:
@@ -97,6 +97,14 @@ class Commands(commands.Cog):
                 contract = '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619'
             if contract == 'SAND':
                 contract = '0xbbba073c31bf03b8acf7c28ef0738decf3695683'
+            if contract == 'MANA':
+                contract = '0xA1c57f48F0Deb89f569dFbE6E2B7f46D33606fD4'
+            if contract == 'USDT':
+                contract = '0xc2132D05D31c914a87C6611C10748AEb04B58e8F'
+            if contract == 'USDC':
+                contract = '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174'
+            if contract == 'DAI':
+                contract = '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063'
             endpoint = f'https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={str(contract)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(self.key)}'
         elif contract_type == 'ERC721':
             if contract == 'LAND':
