@@ -122,10 +122,9 @@ class Commands(commands.Cog):
         r = requests.get(endpoint)
         data = json.loads(r.text) 
 
-        print(data)
-        print(contract)
-
         if data['status'] != '1':
+            if data['status'] == '0':
+                return await ctx.send(f":x: Not found any {contract_type} transactions for {address}") 
             return await ctx.send(f":x: Error fetching {contract_type} transactions for {address}") 
 
         # Build the message with Markdown formatting
