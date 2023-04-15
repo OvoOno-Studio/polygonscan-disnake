@@ -125,7 +125,7 @@ class Commands(commands.Cog):
         if data['status'] != '1':
             return await ctx.send(f":x: Error fetching {contract_type} transactions for {address}") 
         
-        print(data['status'])
+        print(data)
 
         # Build the message with Markdown formatting
         message_lines = [
