@@ -93,12 +93,26 @@ class Commands(commands.Cog):
     async def handle_erc_transactions(self, ctx, address, contract, offset, contract_type, counter=0):
         print(f"Inside handle_erc_transactions - Contract: {contract_type}")  # Add this print statement
         if contract_type == 'ERC20':
+            if contract == 'WETH':
+                contract = '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619'
             if contract == 'SAND':
                 contract = '0xbbba073c31bf03b8acf7c28ef0738decf3695683'
             endpoint = f'https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={str(contract)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(self.key)}'
         elif contract_type == 'ERC721':
             if contract == 'LAND':
-                contract = '0x9d305a42A3975Ee4c1C57555BeD5919889D9aB1F'
+                contract = '0x9d305a42A3975Ee4c1C57555BeD5919889DCE63F'
+            if contract == 'FOTNS':
+                contract = '0x5521B00E7952948BABc84F052B5d017792784429'
+            if contract == "MAD":
+                contract = '0x8463B73ea174D04db5ffF567c77be968666722B4'
+            if contract == "RAB":
+                contract == '0xa090E057a7B3B397eFc0F3430659A05b6a41fA40'
+            if contract == "CB":
+                contract == '0x6709660a6237723f278188bCAE9E21b21eff8AAb'
+            if contract == "HK":
+                contract == '0xc3F3EF3929392FDc697c5800d6Cd18AF73377A8f'
+            if contract == "PPP":
+                contract == '0x3476190768dDd5bd2Dc0Fd82B1027281b0F8891f'
             endpoint = f'https://api.polygonscan.com/api?module=account&action=tokennfttx&contractaddress={str(contract)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(self.key)}'
         elif contract_type == 'ERC1155':
             if contract == 'ITEMS':
