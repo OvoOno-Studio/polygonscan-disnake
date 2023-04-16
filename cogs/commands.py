@@ -37,9 +37,12 @@ class Commands(commands.Cog):
             'To',
             'Contract Address',
             'Transaction Type',
-            'Transfered token value',
-            'Token ID'
         ]
+
+        if contract_type == 'ERC20':
+            fieldnames.extend(['Transfered token value', 'Token name'])
+        else:
+            fieldnames.append('Token ID')
 
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=',')
         writer.writeheader()
@@ -74,9 +77,8 @@ class Commands(commands.Cog):
             if contract_type == 'ERC20':
                 value = int(each['value']) / 10 ** 18
                 row['Transfered token value'] = value
-                row['Token Name'] = each['tokenName']
-            elif contract_type in ['ERC721', 'ERC1155']:
-                row['Transfered token value'] = each['tokenID']
+                row['Token name'] = each['tokenName']
+            else:
                 row['Token ID'] = each['tokenID']
 
             writer.writerow(row)
@@ -131,7 +133,7 @@ class Commands(commands.Cog):
 
         if data['status'] != '1':
             if data['status'] == '0':
-                return await ctx.send(f"😞 Not found any {contract_type} transactions for {address}") 
+                return await ctx.send(f"😑 Not found any {contract_type} transactions for {address}") 
             return await ctx.send(f":x: Error fetching {contract_type} transactions for {address}") 
 
         # Build the message with Markdown formatting
