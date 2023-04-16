@@ -37,8 +37,7 @@ class Commands(commands.Cog):
             'To',
             'Contract Address',
             'Transaction Type',
-            'Transfered token value',
-            'Token ID'
+            'Transfered token value' 
         ]
 
         if contract_type in ['ERC721', 'ERC1155']:
