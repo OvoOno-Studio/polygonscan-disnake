@@ -72,7 +72,7 @@ class Commands(commands.Cog):
                 'To': each['to'],
                 'Contract Address': contract_address,
                 'Transaction Type': transaction_type,
-                'Token name': each['tokenName']
+                'Token ID': each['tokenID'] if contract_type in ['ERC721', 'ERC1155'] else each['tokenName']
             }
 
             if contract_type == 'ERC20':
