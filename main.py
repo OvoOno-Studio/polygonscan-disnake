@@ -23,7 +23,7 @@ async def ping(ctx):
 
 # Return Donatebot checkout page
 @bot.command()
-async def ping(ctx):
+async def donate(ctx):
     await ctx.send (f"To use full features of PolygonScan Scrapper, you can donate on next link: https://donatebot.io/checkout/944377384872853555 ") 
 
 # Print the message in Python console once bot is ready for usage

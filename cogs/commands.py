@@ -77,9 +77,9 @@ class Commands(commands.Cog):
 
             if contract_type == 'ERC20':
                 value = int(each['value']) / 10 ** 18
-                row['Token value transfered'] = value
+                row['Transfered token value'] = value
             elif contract_type in ['ERC721', 'ERC1155']:
-                row['Token value (Token count)'] = each['tokenID']
+                row['Token ID'] = each['tokenID']
 
             writer.writerow(row)
 
