@@ -41,9 +41,6 @@ class Commands(commands.Cog):
             'Token ID'
         ]
 
-        if contract_type in ['ERC721', 'ERC1155']:
-            fieldnames[8] = 'Token ID'
-
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=',')
         writer.writeheader()
 
@@ -57,7 +54,7 @@ class Commands(commands.Cog):
             else:
                 transaction_type = 'incoming' if each['to'] == address_lower else 'outgoing'
                 if each['from'] == '0x0000000000000000000000000000000000000000':
-                    transaction_type = 'mint' 
+                    transaction_type = 'mint'
 
             # Skip transactions that do not involve the user's address
             if each['from'] != address_lower and each['to'] != address_lower:
@@ -72,13 +69,14 @@ class Commands(commands.Cog):
                 'To': each['to'],
                 'Contract Address': contract_address,
                 'Transaction Type': transaction_type,
-                'Token ID': each['tokenID'] if contract_type in ['ERC721', 'ERC1155'] else each['tokenName']
             }
 
             if contract_type == 'ERC20':
                 value = int(each['value']) / 10 ** 18
                 row['Transfered token value'] = value
+                row['Token ID'] = each['tokenName']
             elif contract_type in ['ERC721', 'ERC1155']:
+                row['Transfered token value'] = each['tokenID']
                 row['Token ID'] = each['tokenID']
 
             writer.writerow(row)
@@ -86,6 +84,7 @@ class Commands(commands.Cog):
         csvfile.seek(0)
         print("CSV generated.")
         return disnake.File(csvfile, f'{contract_type}_transactions_{address_lower}.csv')
+
     
     """
     Define handle_erc_transactions - check CSV file for transaction.
