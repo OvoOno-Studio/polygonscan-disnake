@@ -41,9 +41,6 @@ class Commands(commands.Cog):
             'Token ID'
         ]
 
-        if contract_type in ['ERC721', 'ERC1155']:
-            fieldnames[8] = 'Token Symbol'
-
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=',')
         writer.writeheader()
 
@@ -79,7 +76,7 @@ class Commands(commands.Cog):
                 row['Transfered token value'] = value
                 row['Token Name'] = each['tokenName']
             elif contract_type in ['ERC721', 'ERC1155']:
-                row['Token Symbol'] = each['tokenSymbol']
+                row['Transfered token value'] = each['tokenID']
                 row['Token ID'] = each['tokenID']
 
             writer.writerow(row)
