@@ -42,7 +42,7 @@ class Commands(commands.Cog):
         ]
 
         if contract_type in ['ERC721', 'ERC1155']:
-            fieldnames[8] = 'Token value (Token count)'
+            fieldnames[8] = 'Token ID'
 
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=',')
         writer.writeheader()
