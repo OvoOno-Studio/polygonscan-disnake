@@ -124,6 +124,7 @@ class Crypto(commands.Cog):
     async def send_transaction_message(self, transaction):
         try:
             channel = await self.bot.fetch_channel(self.transaction_channel_id)
+            print(f'Channel ID: {channel}')
         except disnake.NotFound:
             print(f"Channel with ID {self.transaction_channel_id} not found.")
             return
@@ -135,6 +136,7 @@ class Crypto(commands.Cog):
             return
 
         if channel:
+            print(f"Sending message to channel {channel.id}")  # Debugging print statement
             message = (
                 f"🚨 New incoming SAND token transaction to `{self.wallet_address}` 🚨\n"
                 f"💰 Value: {float(transaction['value']) / (10 ** 18):.2f} SAND\n"
@@ -145,7 +147,8 @@ class Crypto(commands.Cog):
                 f"🔢 Transaction Index: `{transaction['transactionIndex']}`"
             )
             try:
-                await channel.send(message)
+                sent_message = await channel.send(message)
+                print(f"Message sent: {sent_message.content}")  # Debugging print statement
             except disnake.HTTPException as e:
                 print(f"Error sending message to channel with ID {self.transaction_channel_id}: {e}")
 
