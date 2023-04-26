@@ -146,8 +146,8 @@ class Crypto(commands.Cog):
                 f"🔢 Transaction Index: `{transaction['transactionIndex']}`"
             )
             try:
-                sent_message = await channel.send(message)
-                print(f"Message sent: {sent_message.content}")  # Debugging print statement
+                await channel.send(message)
+                print(f"Message sent to: {channel}")  # Debugging print statement
             except disnake.HTTPException as e:
                 print(f"Error sending message to channel with ID {self.transaction_channel_id}: {e}")
 
