@@ -124,7 +124,6 @@ class Crypto(commands.Cog):
     async def send_transaction_message(self, transaction):
         try:
             channel = await self.bot.fetch_channel(self.transaction_channel_id)
-            print(f'Channel ID: {channel}')
         except disnake.NotFound:
             print(f"Channel with ID {self.transaction_channel_id} not found.")
             return
