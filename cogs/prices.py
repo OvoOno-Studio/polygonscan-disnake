@@ -147,7 +147,7 @@ class Crypto(commands.Cog):
             )
             try:
                 await channel.send(message)
-                print(f"Message sent to: {channel}")  # Debugging print statement
+                print(f"Message sent to: {channel}") # Debugging print statement
             except disnake.HTTPException as e:
                 print(f"Error sending message to channel with ID {self.transaction_channel_id}: {e}")
 
