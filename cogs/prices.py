@@ -122,9 +122,20 @@ class Crypto(commands.Cog):
             return None
 
     async def send_transaction_message(self, transaction):
-        channel = self.bot.get_channel(self.transaction_channel_id) 
+        try:
+            channel = await self.bot.fetch_channel(self.transaction_channel_id)
+        except disnake.NotFound:
+            print(f"Channel with ID {self.transaction_channel_id} not found.")
+            return
+        except disnake.Forbidden:
+            print(f"Bot does not have permission to access channel with ID {self.transaction_channel_id}.")
+            return
+        except disnake.HTTPException as e:
+            print(f"Error fetching channel with ID {self.transaction_channel_id}: {e}")
+            return
+
         if channel:
-            message = ( 
+            message = (
                 f"🚨 New incoming SAND token transaction to `{self.wallet_address}` 🚨\n"
                 f"💰 Value: {float(transaction['value']) / (10 ** 18):.2f} SAND\n"
                 f"🧑 From: `{transaction['from']}`\n"
@@ -133,7 +144,10 @@ class Crypto(commands.Cog):
                 f"🧱 Block Number: `{transaction['blockNumber']}`\n"
                 f"🔢 Transaction Index: `{transaction['transactionIndex']}`"
             )
-            await channel.send(message)
+            try:
+                await channel.send(message)
+            except disnake.HTTPException as e:
+                print(f"Error sending message to channel with ID {self.transaction_channel_id}: {e}")
 
     async def monitor_wallet_transactions(self):
         await self.bot.wait_until_ready()
