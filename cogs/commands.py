@@ -24,41 +24,23 @@ class Commands(commands.Cog):
 
     @staticmethod
     def get_token_holders(token_address, num_transactions=1000):
-        url = f'https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={token_address}&page=1&offset={num_transactions}&sort=desc&apikey={key}'
-        response = requests.get(url)
-        data = json.loads(response.text)
+        holders = set()
+        page_size = 1000
+        num_pages = num_transactions // page_size
 
-        if data['status'] == '1':
-            transactions = data['result']
-            holders = {tx['from'] for tx in transactions}.union({tx['to'] for tx in transactions})
-            return holders
-        else:
-            return None
+        for page in range(1, num_pages + 1):
+            url = f'https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={token_address}&page={page}&offset={page_size}&sort=desc&apikey={POLYGONSCAN_API_KEY}'
+            response = requests.get(url)
+            data = json.loads(response.text)
 
-    @staticmethod
-    def get_token_holders(token_address, num_transactions=1000):
-        url = f'https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={token_address}&page=1&offset={num_transactions}&sort=desc&apikey={APIKey}'
-        response = requests.get(url)
-        data = json.loads(response.text)
+            if data['status'] == '1':
+                transactions = data['result']
+                page_holders = {tx['from'] for tx in transactions}.union({tx['to'] for tx in transactions})
+                holders.update(page_holders)
+            else:
+                break
 
-        if data['status'] == '1':
-            transactions = data['result']
-            holders = {tx['from'] for tx in transactions}.union({tx['to'] for tx in transactions})
-            return holders
-        else:
-            return None
-
-    async def send_csv(self, ctx, holders):
-        csv_buffer = StringIO()
-        csv_writer = csv.writer(csv_buffer)
-        csv_writer.writerow(['Address'])
-
-        for address in holders:
-            csv_writer.writerow([address])
-
-        csv_buffer.seek(0)
-        file = disnake.File(csv_buffer, "token_holders.csv")
-        await ctx.author.send("Here is the list of token holders:", file=file)
+        return holders if holders else None 
 
     @commands.command(name='getTokenHolder')
     async def get_token_holder(self, ctx, token_address: str = None):
