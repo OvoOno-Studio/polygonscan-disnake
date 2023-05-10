@@ -27,7 +27,7 @@ class Commands(commands.Cog):
     def get_token_holders(token_address, num_transactions=1000):
         holders = set()
         page_size = 100
-        num_pages = 35
+        num_pages = 40
 
         for page in range(1, num_pages + 1):
             url = f'https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={token_address}&page={page}&offset={page_size}&sort=desc&apikey={key}'
@@ -73,7 +73,7 @@ class Commands(commands.Cog):
         if holders is None:
             await ctx.send("Failed to fetch token holders. Please check the token address and try again.")
         else:
-            print("Sending CSV file...")
+            print("Sending CSV file...") 
             await self.send_csv(ctx, holders)
             await ctx.send("Token holders list sent as a CSV file in a direct message.")
 
