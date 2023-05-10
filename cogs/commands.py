@@ -7,6 +7,7 @@ from disnake.ext.commands import has_permissions
 from datetime import datetime
 import csv
 import io
+from io import StringIO
 from config import APIKey
 from checks import is_donator
 
@@ -20,6 +21,57 @@ class Commands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.key = str(APIKey)
+
+    @staticmethod
+    def get_token_holders(token_address, num_transactions=1000):
+        url = f'https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={token_address}&page=1&offset={num_transactions}&sort=desc&apikey={key}'
+        response = requests.get(url)
+        data = json.loads(response.text)
+
+        if data['status'] == '1':
+            transactions = data['result']
+            holders = {tx['from'] for tx in transactions}.union({tx['to'] for tx in transactions})
+            return holders
+        else:
+            return None
+
+    @staticmethod
+    def get_token_holders(token_address, num_transactions=1000):
+        url = f'https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={token_address}&page=1&offset={num_transactions}&sort=desc&apikey={APIKey}'
+        response = requests.get(url)
+        data = json.loads(response.text)
+
+        if data['status'] == '1':
+            transactions = data['result']
+            holders = {tx['from'] for tx in transactions}.union({tx['to'] for tx in transactions})
+            return holders
+        else:
+            return None
+
+    async def send_csv(self, ctx, holders):
+        csv_buffer = StringIO()
+        csv_writer = csv.writer(csv_buffer)
+        csv_writer.writerow(['Address'])
+
+        for address in holders:
+            csv_writer.writerow([address])
+
+        csv_buffer.seek(0)
+        file = disnake.File(csv_buffer, "token_holders.csv")
+        await ctx.author.send("Here is the list of token holders:", file=file)
+
+    @commands.command(name='getTokenHolder')
+    async def get_token_holder(self, ctx, token_address: str = None):
+        if token_address is None:
+            await ctx.send("Please provide a valid token address.")
+            return
+
+        holders = self.get_token_holders(token_address)
+        if holders is None:
+            await ctx.send("Failed to fetch token holders. Please check the token address and try again.")
+        else:
+            await self.send_csv(ctx, holders)
+            await ctx.send("Token holders list sent as a CSV file in a direct message.")
 
     """
     Define generate_csv() - generate csv file for donators.
