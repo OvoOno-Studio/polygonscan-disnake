@@ -27,7 +27,7 @@ class Commands(commands.Cog):
     def get_token_holders(token_address, num_transactions=1000):
         holders = set()
         page_size = 100
-        num_pages = 30
+        num_pages = 44
 
         for page in range(1, num_pages + 1):
             url = f'https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={token_address}&page={page}&offset={page_size}&sort=desc&apikey={key}'
