@@ -27,7 +27,7 @@ class Commands(commands.Cog):
     def get_token_holders(token_address, num_transactions=1000):
         holders = set()
         page_size = 100
-        num_pages = 20
+        num_pages = 30
 
         for page in range(1, num_pages + 1):
             url = f'https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={token_address}&page={page}&offset={page_size}&sort=desc&apikey={key}'
@@ -43,7 +43,7 @@ class Commands(commands.Cog):
             else:
                 break
 
-            time.sleep(1)  # Add a delay between requests
+            time.sleep(1.5)  # Add a delay between requests
 
         print(f"Total token holders fetched: {len(holders)}")
         return holders if holders else None
