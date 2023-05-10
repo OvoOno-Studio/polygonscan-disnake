@@ -33,6 +33,8 @@ class Commands(commands.Cog):
             response = requests.get(url)
             data = json.loads(response.text)
 
+            print(f"Fetching page {page}: {url}")
+
             if data['status'] == '1':
                 transactions = data['result']
                 page_holders = {tx['from'] for tx in transactions}.union({tx['to'] for tx in transactions})
@@ -40,7 +42,8 @@ class Commands(commands.Cog):
             else:
                 break
 
-        return holders if holders else None 
+        print(f"Total token holders fetched: {len(holders)}")
+        return holders if holders else None
     
     async def send_csv(self, ctx, holders):
         csv_buffer = StringIO()
@@ -64,6 +67,7 @@ class Commands(commands.Cog):
         if holders is None:
             await ctx.send("Failed to fetch token holders. Please check the token address and try again.")
         else:
+            print("Sending CSV file...")
             await self.send_csv(ctx, holders)
             await ctx.send("Token holders list sent as a CSV file in a direct message.")
 
