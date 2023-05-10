@@ -27,10 +27,10 @@ class Commands(commands.Cog):
     def get_token_holders(token_address, num_transactions=1000):
         holders = set()
         page_size = 100
-        num_pages = num_transactions // page_size
+        num_pages = 20
 
         for page in range(1, num_pages + 1):
-            url = f'https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={token_address}&page={page}&offset={page_size}&sort=desc&apikey={key}'
+            url = f'https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={token_address}&page={page}&offset={page_size}&sort=desc&apikey={POLYGONSCAN_API_KEY}'
             response = requests.get(url)
             data = json.loads(response.text)
 
@@ -60,6 +60,9 @@ class Commands(commands.Cog):
         file = disnake.File(csv_buffer, "token_holders.csv")
         await ctx.author.send("Here is the list of token holders:", file=file)
 
+    """
+    Define get_token_holder - send CSV file as DM of token holders wallets .
+    """
     @commands.command(name='getTokenHolder')
     async def get_token_holder(self, ctx, token_address: str = None):
         if token_address is None:
