@@ -41,6 +41,18 @@ class Commands(commands.Cog):
                 break
 
         return holders if holders else None 
+    
+    async def send_csv(self, ctx, holders):
+        csv_buffer = StringIO()
+        csv_writer = csv.writer(csv_buffer)
+        csv_writer.writerow(['Address'])
+
+        for address in holders:
+            csv_writer.writerow([address])
+
+        csv_buffer.seek(0)
+        file = disnake.File(csv_buffer, "token_holders.csv")
+        await ctx.author.send("Here is the list of token holders:", file=file)
 
     @commands.command(name='getTokenHolder')
     async def get_token_holder(self, ctx, token_address: str = None):
