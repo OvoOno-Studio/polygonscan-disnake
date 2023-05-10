@@ -1,6 +1,7 @@
 import json
 import requests
 import disnake
+import time
 # from disnake import Embed
 from disnake.ext import commands
 from disnake.ext.commands import has_permissions
@@ -25,7 +26,7 @@ class Commands(commands.Cog):
     @staticmethod
     def get_token_holders(token_address, num_transactions=1000):
         holders = set()
-        page_size = 1000
+        page_size = 100
         num_pages = num_transactions // page_size
 
         for page in range(1, num_pages + 1):
@@ -41,6 +42,8 @@ class Commands(commands.Cog):
                 holders.update(page_holders)
             else:
                 break
+
+            time.sleep(1)  # Add a delay between requests
 
         print(f"Total token holders fetched: {len(holders)}")
         return holders if holders else None
