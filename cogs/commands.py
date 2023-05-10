@@ -30,7 +30,7 @@ class Commands(commands.Cog):
         num_pages = num_transactions // page_size
 
         for page in range(1, num_pages + 1):
-            url = f'https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={token_address}&page={page}&offset={page_size}&sort=desc&apikey={POLYGONSCAN_API_KEY}'
+            url = f'https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={token_address}&page={page}&offset={page_size}&sort=desc&apikey={key}'
             response = requests.get(url)
             data = json.loads(response.text)
 
