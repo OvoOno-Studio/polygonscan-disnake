@@ -26,6 +26,9 @@ class Crypto(commands.Cog):
         self.bot.loop.create_task(self.update_crypto_presence())
         self.bot.loop.create_task(self.monitor_wallet_transactions()) 
 
+    """
+    Define set_transaction_channel - set channel to get alerts for new transactions.
+    """
     @commands.command(name="set_transaction_channel")
     @has_permissions(administrator=True)
     async def set_transaction_channel(self, ctx, channel: disnake.TextChannel):
@@ -33,6 +36,9 @@ class Crypto(commands.Cog):
         self.transaction_channel_id = channel.id
         await ctx.send(f"Transaction channel has been set to {channel.mention}")
 
+    """
+    Define set_price_alert_channel - set channel to get alerts for new price changes.
+    """
     @commands.command(name="set_price_alert_channel")
     @has_permissions(administrator=True)
     async def set_price_alert_channel(self, ctx, channel: disnake.TextChannel):
@@ -40,6 +46,9 @@ class Crypto(commands.Cog):
         self.price_alert_channel_id = channel.id
         await ctx.send(f"Price alert channel has been set to {channel.mention}")
 
+    """
+    Define set_wallet_address - set set crypto wallet to monitor for new changes.
+    """
     @commands.command(name="set_wallet_address")
     @has_permissions(administrator=True)
     async def set_wallet_address(self, ctx, address: str):

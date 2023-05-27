@@ -23,6 +23,9 @@ class Commands(commands.Cog):
         self.bot = bot
         self.key = str(APIKey)
 
+    """
+    Define get_token_holder - return holders of specific token as CSV file.
+    """
     @staticmethod
     def get_token_holders(token_address, num_transactions=1000):
         holders = set()
@@ -142,7 +145,6 @@ class Commands(commands.Cog):
         csvfile.seek(0)
         print("CSV generated.")
         return disnake.File(csvfile, f'{contract_type}_transactions_{address_lower}.csv')
-
     
     """
     Define handle_erc_transactions - check CSV file for transaction.

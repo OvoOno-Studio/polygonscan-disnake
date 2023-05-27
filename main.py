@@ -24,7 +24,7 @@ async def ping(ctx):
 # Return Donatebot checkout page
 @bot.command()
 async def donate(ctx):
-    await ctx.send (f"To use full features of PolygonScan Scrapper, you can donate on next link: https://donatebot.io/checkout/944377384872853555 ") 
+    await ctx.send (f"To access all features from PolygonScan Scrapper Bot and OvoOno Studio in globally, you can donate with one-time PayPal payment on next link: https://upgrade.chat/ovoono-studio/p/ovodonator ") 
 
 # Print the message in Python console once bot is ready for usage
 @bot.event
