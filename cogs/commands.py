@@ -64,7 +64,7 @@ class Commands(commands.Cog):
     """
     Define get_token_holder - send CSV file as DM of token holders wallets .
     """
-    @is_donator
+    @is_donator()
     @commands.command(name='getTokenHolder')
     async def get_token_holder(self, ctx, token_address: str = None):
         if token_address is None:
