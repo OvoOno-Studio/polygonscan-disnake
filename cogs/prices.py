@@ -23,6 +23,7 @@ class Crypto(commands.Cog):
         self.previous_matic_price = None
         self.last_known_transaction = None
         self.semaphore = asyncio.Semaphore(4)  # Create a Semaphore with a maximum of 4 concurrent tasks
+        self.bot.loop.create_task(self.price_check_and_alert())
         self.bot.loop.create_task(self.update_crypto_presence())
         self.bot.loop.create_task(self.monitor_wallet_transactions()) 
 
@@ -73,17 +74,30 @@ class Crypto(commands.Cog):
 
         price_change = (current_price - self.previous_matic_price) / self.previous_matic_price * 100 
 
-        if price_change <= -5:  # Check if the price is down by 5% or more
-            print("Sending price alert")  # Add print statement for debugging
-            channel = self.bot.get_channel(self.price_alert_channel_id)
-            if channel:
-                direction = "down"
-                arrow_emoji = "🔴"
-                await channel.send(f"📢 @everyone 📢\n**MATIC price has dropped by 5% or more!**\n\nIt's now **{direction.upper()}** to **${current_price:.2f}** {arrow_emoji}\n")
-            self.previous_matic_price = current_price
-        else:
-            self.previous_matic_price = current_price
+        channel = self.bot.get_channel(self.price_alert_channel_id)
+        if not channel:
+            print("Price alert channel not found.")
+            return
 
+        if abs(price_change) >= self.threshold:  # Check if the price change (up or down) is greater than or equal to the threshold
+            direction = "up" if price_change >= 0 else "down"
+            arrow_emoji = "🟢" if price_change >= 0 else "🔴"
+            await channel.send(f"📢 @everyone 📢\n**MATIC price has changed by {abs(price_change):.2f}%!**\n\nIt's now **{direction.upper()}** to **${current_price:.2f}** {arrow_emoji}\n")
+        self.previous_matic_price = current_price
+
+    async def price_check_and_alert(self):
+            await self.bot.wait_until_ready()
+
+            while not self.bot.is_closed():
+                try:
+                    price, _ = await self.get_crypto_price_data()
+                    if price is None:
+                        await self.check_and_send_alert(price)
+                except Exception as e:
+                    print(f"Error in price_check_and_alert: {e}")
+                
+                await asyncio.sleep(3 * 60 * 60) # Sleep for 3 hours 
+    
     async def update_crypto_presence(self):
         await self.bot.wait_until_ready()
 
@@ -103,8 +117,7 @@ class Crypto(commands.Cog):
                         type=disnake.ActivityType.watching,
                         name=status_text,
                     ),
-                )
-                await self.check_and_send_alert(price)
+                ) 
 
             except Exception as e:
                 print(f"Error updating presence: {e}")

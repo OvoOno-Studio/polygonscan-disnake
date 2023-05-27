@@ -23,9 +23,7 @@ class Commands(commands.Cog):
         self.bot = bot
         self.key = str(APIKey)
 
-    """
-    Define get_token_holder - return holders of specific token as CSV file.
-    """
+
     @staticmethod
     def get_token_holders(token_address, num_transactions=1000):
         holders = set()
@@ -66,6 +64,7 @@ class Commands(commands.Cog):
     """
     Define get_token_holder - send CSV file as DM of token holders wallets .
     """
+    @is_donator
     @commands.command(name='getTokenHolder')
     async def get_token_holder(self, ctx, token_address: str = None):
         if token_address is None:

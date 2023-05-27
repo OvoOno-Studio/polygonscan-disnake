@@ -19,9 +19,9 @@ Website: [Top.GG Profile](https://top.gg/bot/1041454438595965049)
 
 Bot has additional features such as monitoring crypto wallets for incoming transaction and price changes alert. To properly setup run next commands:
 
-``` set_wallet_address ``` Set set crypto wallet to monitor for new changes
-``` ps-set_transaction_channel <your_transaction_channel_id``` Set channel to get incoming transaction as message.
-``` ps-set_price_alert_channel <your_price_alert_channel_id``` Set channel to get alerts for new price changes.
+- ``` ps-set_wallet_address <wallet>``` Set set crypto wallet to monitor for new changes
+- ``` ps-set_transaction_channel <your_transaction_channel_id``` Set channel to get incoming transaction as message.
+- ``` ps-set_price_alert_channel <your_price_alert_channel_id``` Set channel to get alerts for new price changes.
 
 Full features can be unlocked by one-time donation payment through PayPal. Donations is giving OvoSupportes much upgradable functionalities, such as return 
 CSV files, scrapping up to the 1000 transaction and much more. To checkout more information run:
