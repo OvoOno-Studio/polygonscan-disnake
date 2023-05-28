@@ -59,13 +59,17 @@ class Crypto(commands.Cog):
     
     async def get_crypto_price_data(self):
         url = f"https://api.coingecko.com/api/v3/simple/price?ids=matic-network&vs_currencies=usd&include_24hr_change=true"
-        async with self.session.get(url) as response:
-            if response.status != 200:
-                raise Exception(f"Error in get_crypto_price_data (status code: {response.status}): {await response.text()}")
-            json_data = await response.json()
-            price = json_data['matic-network']['usd']
-            price_change_percent = json_data['matic-network']['usd_24h_change']
-            return price, price_change_percent
+        try:
+            async with self.session.get(url) as response:
+                if response.status != 200:
+                    raise Exception(f"Error in get_crypto_price_data (status code: {response.status}): {await response.text()}")
+                json_data = await response.json()
+                price = json_data['matic-network']['usd']
+                price_change_percent = json_data['matic-network']['usd_24h_change']
+                return price, price_change_percent
+        except Exception as e:
+            print(f"Error in get_crypto_price_data: {e}")
+            return None, None
 
     async def check_and_send_alert(self, current_price):
         if self.previous_matic_price is None:
