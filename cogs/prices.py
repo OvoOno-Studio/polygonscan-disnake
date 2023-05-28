@@ -91,7 +91,7 @@ class Crypto(commands.Cog):
             while not self.bot.is_closed():
                 try:
                     price, _ = await self.get_crypto_price_data()
-                    if price is None:
+                    if price is not None:
                         await self.check_and_send_alert(price)
                 except Exception as e:
                     print(f"Error in price_check_and_alert: {e}")
