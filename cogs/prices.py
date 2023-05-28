@@ -72,26 +72,27 @@ class Crypto(commands.Cog):
             return None, None
 
     async def check_and_send_alert(self, current_price):
+        print('Checking MATIC price...')
         if self.previous_matic_price is None:
             self.previous_matic_price = current_price
             return
 
         price_change = (current_price - self.previous_matic_price) / self.previous_matic_price * 100 
-
+        print(f'New price: {price_change}')
         channel = self.bot.get_channel(self.price_alert_channel_id)
         if not channel:
             print("Price alert channel not found.")
             return
 
-        if abs(price_change) >= self.threshold:  # Check if the price change (up or down) is greater than or equal to the threshold
-            direction = "up" if price_change >= 0 else "down"
-            arrow_emoji = "🟢" if price_change >= 0 else "🔴"
-            await channel.send(f"📢 @everyone 📢\n**MATIC price has changed by {abs(price_change):.2f}%!**\n\nIt's now **{direction.upper()}** to **${current_price:.2f}** {arrow_emoji}\n")
+        # if abs(price_change) >= self.threshold:  # Check if the price change (up or down) is greater than or equal to the threshold
+        direction = "up" if price_change >= 0 else "down"
+        arrow_emoji = "🟢" if price_change >= 0 else "🔴"
+        await channel.send(f"📢 @everyone 📢\n**MATIC price has changed by {abs(price_change):.2f}%!**\n\nIt's now **{direction.upper()}** to **${current_price:.2f}** {arrow_emoji}\n")
         self.previous_matic_price = current_price
 
     async def price_check_and_alert(self):
             await self.bot.wait_until_ready()
-
+        
             while not self.bot.is_closed():
                 try:
                     price, _ = await self.get_crypto_price_data()
