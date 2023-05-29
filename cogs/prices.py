@@ -91,17 +91,18 @@ class Crypto(commands.Cog):
         self.previous_matic_price = current_price
 
     async def price_check_and_alert(self):
-            await self.bot.wait_until_ready()
+        await self.bot.wait_until_ready()
         
-            while not self.bot.is_closed():
-                try:
-                    price, _ = await self.get_crypto_price_data()
-                    if price is not None:
-                        await self.check_and_send_alert(price)
-                except Exception as e:
-                    print(f"Error in price_check_and_alert: {e}")
-                
-                await asyncio.sleep(3 * 60 * 60) # Sleep for 3 hours 
+        print('Checking price...')
+        while not self.bot.is_closed():
+            try:
+                price, _ = await self.get_crypto_price_data()
+                if price is not None:
+                    await self.check_and_send_alert(price)
+            except Exception as e:
+                print(f"Error in price_check_and_alert: {e}")
+            
+            await asyncio.sleep(10 * 60) # Sleep for 3 hours 
     
     async def update_crypto_presence(self):
         await self.bot.wait_until_ready()
@@ -116,6 +117,7 @@ class Crypto(commands.Cog):
                 color = disnake.Color.green() if price_change_percent >= 0 else disnake.Color.red()
                 arrow_emoji = "🟢" if price_change_percent > 0 else "🔴"
                 status_text = f"MATIC: ${price:.2f} {arrow_emoji}({price_change_percent:.2f}%)"
+                print(f'Updating crypto presencace: {price}')
                 await self.bot.change_presence(
                     status=disnake.Status.online,
                     activity=disnake.Activity(
@@ -189,7 +191,6 @@ class Crypto(commands.Cog):
                     print(f"Error in transactions response: {transactions}")
                     continue
 
-                print(f"Checking IN transactions for wallet {self.wallet_address}")
                 print(f"Transaction hash: {transactions[0]['hash']}")
 
                 last_transaction = None
