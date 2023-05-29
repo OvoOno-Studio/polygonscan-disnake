@@ -74,7 +74,10 @@ class Crypto(commands.Cog):
             arrow_emoji = "🟢" if price_change >= 0 else "🔴"
             channel = self.bot.get_channel(self.price_alert_channel_id)
             if channel is not None:
+                print(f'Sendning price alert to: {channel}')
                 await channel.send(f"📢 @everyone 📢\n**MATIC price has changed by {abs(price_change):.2f}%!**\n\nIt's now **{direction.upper()}** to **${current_price:.2f}** {arrow_emoji}\n")
+            else:
+                print('No channel optimized')
             self.previous_matic_price = current_price
         except Exception as e:
             print(f"Error in check_and_send_alert: {e}")
