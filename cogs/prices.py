@@ -11,7 +11,7 @@ class Crypto(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.session = aiohttp.ClientSession()
-        self.api_url = "https://api.coingecko.com/api/v3/simple/price?ids=polygon&vs_currencies=usd&include_24hr_change=true"
+        self.api_url = "https://api.coingecko.com/api/v3/simple/price?ids=matic-network&vs_currencies=usd&include_24hr_change=true"
         self.polygon_scan_api_url = f"https://api.polygonscan.com/api?module=account&action=tokentx&apikey={APIKey}"
         self.wallet_address = wallet_address
         self.sand_contract_address = "0xBbba073C31bF03b8ACf7c28EF0738DeCF3695683" 
@@ -56,7 +56,7 @@ class Crypto(commands.Cog):
                     print(f"Failed to fetch crypto price data, status code: {response.status}, message: {await response.text()}")
                     return None, None
                 json_data = await response.json()
-                return json_data['polygon']['usd'], json_data['polygon']['usd_24h_change']
+                return json_data['matic-network']['usd'], json_data['matic-network']['usd_24h_change']
         except Exception as e:
             print(f"Error in get_crypto_price_data: {e}")
             return None, None
