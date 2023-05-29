@@ -1,35 +1,33 @@
+import aiohttp
+import asyncio
 import disnake
 from disnake.ext import commands
 from disnake.ext.commands import has_permissions
 from config import set_transaction_channel, set_price_alert_channel, set_wallet_address
-import io
-import csv
-import datetime
-import aiohttp 
-import asyncio
 from config import APIKey, transaction_channel_id, price_alert_channel_id, wallet_address
+
 
 class Crypto(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot 
+        self.bot = bot
         self.session = aiohttp.ClientSession()
         self.api_url = "https://api.coingecko.com/api/v3/simple/price?ids=polygon&vs_currencies=usd&include_24hr_change=true"
         self.polygon_scan_api_url = f"https://api.polygonscan.com/api?module=account&action=tokentx&apikey={APIKey}"
-        self.wallet_address = wallet_address # Replace this with the wallet address you want to monitor # Set up this with command
-        self.sand_contract_address = "0xBbba073C31bF03b8ACf7c28EF0738DeCF3695683" # SAND token contract address on Polygon
-        self.transaction_channel_id = transaction_channel_id # Set up this with command
-        self.price_alert_channel_id = price_alert_channel_id # Set up this with command
-        self.threshold = 0.02 # 2% threshhold
+        self.wallet_address = wallet_address
+        self.sand_contract_address = "0xBbba073C31bF03b8ACf7c28EF0738DeCF3695683" 
+        self.transaction_channel_id = transaction_channel_id 
+        self.price_alert_channel_id = price_alert_channel_id
+        self.threshold = 0.02
         self.previous_matic_price = None
         self.last_known_transaction = None
-        self.semaphore = asyncio.Semaphore(4)  # Create a Semaphore with a maximum of 4 concurrent tasks
+        self.semaphore = asyncio.Semaphore(4)  
         self.bot.loop.create_task(self.price_check_and_alert())
+        print('Scheduled price_check_and_alert every 10 minutes')
         self.bot.loop.create_task(self.update_crypto_presence())
-        self.bot.loop.create_task(self.monitor_wallet_transactions()) 
+        print('Scheduled update_crypto_presence every 30 seconds')
+        self.bot.loop.create_task(self.monitor_wallet_transactions())
+        print('Scheduled monitor_wallet_transactions every 60 seconds')
 
-    """
-    Define set_transaction_channel - set channel to get alerts for new transactions.
-    """
     @commands.command(name="set_transaction_channel")
     @has_permissions(administrator=True)
     async def set_transaction_channel(self, ctx, channel: disnake.TextChannel):
@@ -37,9 +35,6 @@ class Crypto(commands.Cog):
         self.transaction_channel_id = channel.id
         await ctx.send(f"Transaction channel has been set to {channel.mention}")
 
-    """
-    Define set_price_alert_channel - set channel to get alerts for new price changes.
-    """
     @commands.command(name="set_price_alert_channel")
     @has_permissions(administrator=True)
     async def set_price_alert_channel(self, ctx, channel: disnake.TextChannel):
@@ -47,62 +42,54 @@ class Crypto(commands.Cog):
         self.price_alert_channel_id = channel.id
         await ctx.send(f"Price alert channel has been set to {channel.mention}")
 
-    """
-    Define set_wallet_address - set set crypto wallet to monitor for new changes.
-    """
     @commands.command(name="set_wallet_address")
     @has_permissions(administrator=True)
     async def set_wallet_address(self, ctx, address: str):
         set_wallet_address(address)
         self.wallet_address = address
         await ctx.send(f"Wallet address has been set to `{address}`") 
-    
+
     async def get_crypto_price_data(self):
-        url = f"https://api.coingecko.com/api/v3/simple/price?ids=matic-network&vs_currencies=usd&include_24hr_change=true"
         try:
-            async with self.session.get(url) as response:
+            async with self.session.get(self.api_url) as response:
                 if response.status != 200:
-                    raise Exception(f"Error in get_crypto_price_data (status code: {response.status}): {await response.text()}")
+                    print(f"Failed to fetch crypto price data, status code: {response.status}, message: {await response.text()}")
+                    return None, None
                 json_data = await response.json()
-                price = json_data['matic-network']['usd']
-                price_change_percent = json_data['matic-network']['usd_24h_change']
-                return price, price_change_percent
+                return json_data['polygon']['usd'], json_data['polygon']['usd_24h_change']
         except Exception as e:
             print(f"Error in get_crypto_price_data: {e}")
             return None, None
 
     async def check_and_send_alert(self, current_price):
-        print('Checking MATIC price...')
-        if self.previous_matic_price is None:
-            self.previous_matic_price = current_price
-            return
+        try:
+            print('Checking MATIC price...')
+            if self.previous_matic_price is None:
+                self.previous_matic_price = current_price
+                return
 
-        price_change = (current_price - self.previous_matic_price) / self.previous_matic_price * 100 
-        print(f'New price: {price_change}')
-        channel = self.bot.get_channel(self.price_alert_channel_id)
-        if not channel:
-            print("Price alert channel not found.")
-            return
-
-        # if abs(price_change) >= self.threshold:  # Check if the price change (up or down) is greater than or equal to the threshold
-        direction = "up" if price_change >= 0 else "down"
-        arrow_emoji = "🟢" if price_change >= 0 else "🔴"
-        await channel.send(f"📢 @everyone 📢\n**MATIC price has changed by {abs(price_change):.2f}%!**\n\nIt's now **{direction.upper()}** to **${current_price:.2f}** {arrow_emoji}\n")
-        self.previous_matic_price = current_price
+            price_change = (current_price - self.previous_matic_price) / self.previous_matic_price * 100 
+            print(f'New price: {price_change}')
+            if abs(price_change) >= self.threshold:
+                channel = self.bot.get_channel(self.price_alert_channel_id)
+                if channel is not None:
+                    await channel.send(f'📉 MATIC price dropped by more than {self.threshold}% 📉')
+                self.previous_matic_price = current_price
+        except Exception as e:
+            print(f"Error in check_and_send_alert: {e}")
 
     async def price_check_and_alert(self):
-        await self.bot.wait_until_ready()
-        
-        print('Checking price...')
         while not self.bot.is_closed():
             try:
-                price, _ = await self.get_crypto_price_data()
-                if price is not None:
-                    await self.check_and_send_alert(price)
+                current_price, price_change_24h = await self.get_crypto_price_data()
+                if current_price is not None:
+                    await self.check_and_send_alert(current_price)
+                else:
+                    print("No price data to check.")
+                await asyncio.sleep(600)  # 10 minutes
             except Exception as e:
                 print(f"Error in price_check_and_alert: {e}")
-            
-            await asyncio.sleep(10 * 60) # Sleep for 3 hours 
+                await asyncio.sleep(600)  # In case of an error, wait 10 minutes before retrying
     
     async def update_crypto_presence(self):
         await self.bot.wait_until_ready()
