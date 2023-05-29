@@ -17,7 +17,7 @@ class Crypto(commands.Cog):
         self.sand_contract_address = "0xBbba073C31bF03b8ACf7c28EF0738DeCF3695683" 
         self.transaction_channel_id = transaction_channel_id 
         self.price_alert_channel_id = price_alert_channel_id
-        self.threshold = 0.02
+        #self.threshold = 0.02
         self.previous_matic_price = None
         self.last_known_transaction = None
         self.semaphore = asyncio.Semaphore(4)  
@@ -69,12 +69,13 @@ class Crypto(commands.Cog):
                 return
 
             price_change = (current_price - self.previous_matic_price) / self.previous_matic_price * 100 
-            print(f'New price: {price_change}')
-            if abs(price_change) >= self.threshold:
-                channel = self.bot.get_channel(self.price_alert_channel_id)
-                if channel is not None:
-                    await channel.send(f'📉 MATIC price dropped by more than {self.threshold}% 📉')
-                self.previous_matic_price = current_price
+            print(f'New price: {price_change}') 
+            direction = "up" if price_change >= 0 else "down"
+            arrow_emoji = "🟢" if price_change >= 0 else "🔴"
+            channel = self.bot.get_channel(self.price_alert_channel_id)
+            if channel is not None:
+                await channel.send(f"📢 @everyone 📢\n**MATIC price has changed by {abs(price_change):.2f}%!**\n\nIt's now **{direction.upper()}** to **${current_price:.2f}** {arrow_emoji}\n")
+            self.previous_matic_price = current_price
         except Exception as e:
             print(f"Error in check_and_send_alert: {e}")
 
@@ -86,10 +87,10 @@ class Crypto(commands.Cog):
                     await self.check_and_send_alert(current_price)
                 else:
                     print("No price data to check.")
-                await asyncio.sleep(600)  # 10 minutes
+                await asyncio.sleep(60)  # 10 minutes
             except Exception as e:
                 print(f"Error in price_check_and_alert: {e}")
-                await asyncio.sleep(600)  # In case of an error, wait 10 minutes before retrying
+                await asyncio.sleep(60)  # In case of an error, wait 10 minutes before retrying
     
     async def update_crypto_presence(self):
         await self.bot.wait_until_ready()
