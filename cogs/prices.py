@@ -105,7 +105,7 @@ class Crypto(commands.Cog):
                 arrow_emoji = "🟢" if price_change_percent > 0 else "🔴"
                 status_text = f"MATIC: ${price:.2f} {arrow_emoji}({price_change_percent:.2f}%)"
                 print(f'Updating crypto presencace: {price}')
-                await self.check_and_send_alert()
+                await self.check_and_send_alert(price)
                 print('Checking price...')
                 await self.bot.change_presence(
                     status=disnake.Status.online,
