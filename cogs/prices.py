@@ -19,9 +19,7 @@ class Crypto(commands.Cog):
         #self.threshold = 0.02
         self.previous_matic_price = None
         self.last_known_transaction = None
-        self.semaphore = asyncio.Semaphore(4)  
-        self.bot.loop.create_task(self.price_check_and_alert())
-        print('Scheduled price_check_and_alert every 3 hours')
+        self.semaphore = asyncio.Semaphore(4)    
         self.bot.loop.create_task(self.update_crypto_presence())
         print('Scheduled update_crypto_presence every 30 seconds')
         self.bot.loop.create_task(self.monitor_wallet_transactions())
@@ -89,7 +87,7 @@ class Crypto(commands.Cog):
                     await self.check_and_send_alert(current_price)
                 else:
                     print("No price data to check.")
-                await asyncio.sleep(3 * 60 * 60)  # 10 minutes
+                await asyncio.sleep(600)  # 10 minutes
             except Exception as e:
                 print(f"Error in price_check_and_alert: {e}")
                 await asyncio.sleep(60)  # In case of an error, wait 10 minutes before retrying
@@ -103,11 +101,12 @@ class Crypto(commands.Cog):
                 if price is None or price_change_percent is None:
                     await asyncio.sleep(60)
                     continue
-
-                color = disnake.Color.green() if price_change_percent >= 0 else disnake.Color.red()
+ 
                 arrow_emoji = "🟢" if price_change_percent > 0 else "🔴"
                 status_text = f"MATIC: ${price:.2f} {arrow_emoji}({price_change_percent:.2f}%)"
                 print(f'Updating crypto presencace: {price}')
+                await self.check_and_send_alert()
+                print('Checking price...')
                 await self.bot.change_presence(
                     status=disnake.Status.online,
                     activity=disnake.Activity(
@@ -207,7 +206,7 @@ class Crypto(commands.Cog):
             except Exception as e:
                 print(f"Error monitoring wallet transactions: {e}")
 
-            await asyncio.sleep(5 * 60)
+            await asyncio.sleep(60)
 
     async def send_no_transactions_message(self):
         channel = self.bot.get_channel(self.transaction_channel_id)
