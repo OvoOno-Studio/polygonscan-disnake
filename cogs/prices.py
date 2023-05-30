@@ -87,7 +87,7 @@ class Crypto(commands.Cog):
                     await self.check_and_send_alert(current_price)
                 else:
                     print("No price data to check.")
-                await asyncio.sleep(600)  # 10 minutes
+                # await asyncio.sleep(600)  # 10 minutes
             except Exception as e:
                 print(f"Error in price_check_and_alert: {e}")
                 await asyncio.sleep(60)  # In case of an error, wait 10 minutes before retrying
@@ -118,7 +118,7 @@ class Crypto(commands.Cog):
             except Exception as e:
                 print(f"Error updating presence: {e}")
 
-            await asyncio.sleep(30)
+            await asyncio.sleep(600)
 
     async def limited_get(self, url):
         async with self.semaphore:  # Limit the number of concurrent requests
