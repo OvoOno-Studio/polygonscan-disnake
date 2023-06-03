@@ -37,6 +37,7 @@ GuildId = os.getenv('GUILD_ID')
 DiscordToken = os.getenv('DISCORD_TOKEN')
 PublicKey = os.getenv('PUBLIC_KEY')
 APIKey = os.getenv('API_KEY')
+API2Key = os.getenv('API2_KEY')
 transaction_channel_id = config["transaction_channel_id"]
 price_alert_channel_id = config["price_alert_channel_id"]
 wallet_address = config["wallet_address"]

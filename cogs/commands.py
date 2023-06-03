@@ -9,7 +9,7 @@ from datetime import datetime
 import csv
 import io
 from io import StringIO
-from config import APIKey
+from config import APIKey, API2Key
 from checks import is_donator
 
 intents = disnake.Intents.default()
@@ -391,12 +391,16 @@ class Scrape(commands.Cog):
     @commands.command()
     async def get_gas_oracle(self, ctx): 
         key = APIKey
-        url_poly = f"https://api.polygonscan.com/api?module=gastracker&action=gasoracle&apikey={key}"
-        response = requests.get(url_poly)  
+        key2 = API2Key
+        
+        url_eth = f"https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey={key2}"
+        response = requests.get(url_eth)  
         data = json.loads(response.text)
 
         # construct a message with the desired formatting and emojis
-        message = (
+        message = ( 
+            f"\n"
+            f"**Etherum Gas oracle** \n"
             f"🔹 **Last Block:** {data['result']['LastBlock']}\n"
             f"⛽ **Safe Gas Price:** {data['result']['SafeGasPrice']} Gwei\n"
             f"📌 **Propose Gas Price:** {data['result']['ProposeGasPrice']} Gwei\n"
@@ -405,6 +409,26 @@ class Scrape(commands.Cog):
             f"📊 **Gas Used Ratio:** {data['result']['gasUsedRatio']}\n"
             f"💵 **USD Price:** ${data['result']['UsdPrice']}"
         )
+
+        await ctx.send(message)
+
+        url_poly = f"https://api.polygonscan.com/api?module=gastracker&action=gasoracle&apikey={key}"
+        response = requests.get(url_poly)  
+        data = json.loads(response.text)
+
+        # construct a message with the desired formatting and emojis
+        message = ( 
+            f"\n"
+            f"**Polygon Gas oracle** \n"
+            f"🔹 **Last Block:** {data['result']['LastBlock']}\n"
+            f"⛽ **Safe Gas Price:** {data['result']['SafeGasPrice']} Gwei\n"
+            f"📌 **Propose Gas Price:** {data['result']['ProposeGasPrice']} Gwei\n"
+            f"⚡ **Fast Gas Price:** {data['result']['FastGasPrice']} Gwei\n"
+            f"💰 **Suggested Base Fee:** {data['result']['suggestBaseFee']}\n"
+            f"📊 **Gas Used Ratio:** {data['result']['gasUsedRatio']}\n"
+            f"💵 **USD Price:** ${data['result']['UsdPrice']}"
+        )
+
         await ctx.send(message)
 
     """
