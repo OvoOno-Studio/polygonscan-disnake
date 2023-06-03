@@ -15,7 +15,9 @@ class Moni(commands.Cog):
         self.sand_contract_address = "0xBbba073C31bF03b8ACf7c28EF0738DeCF3695683"  
         self.previous_matic_price = None
         self.last_known_transaction = None
-        self.semaphore = asyncio.Semaphore(4)    
+        self.semaphore = asyncio.Semaphore(4) 
+        self.wallet_address = get_wallet_address  
+        print(self.wallet_address)
         self.bot.loop.create_task(self.price_check_and_alert())
         self.bot.loop.create_task(self.update_crypto_presence())
         self.bot.loop.create_task(self.monitor_wallet_transactions())

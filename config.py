@@ -2,8 +2,7 @@
 from dotenv import load_dotenv
 from replit import db
 from checks import ensure_server_config
-import os
-import json
+import os 
 
 # This creates a connection to your Replit database
 def create_connection():

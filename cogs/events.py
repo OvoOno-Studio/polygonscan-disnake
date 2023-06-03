@@ -6,8 +6,7 @@ class Events(commands.Cog):
         self.bot = bot
     
     @commands.Cog.listener()
-    async def on_ready(self): 
-        print('testing...')
+    async def on_ready(self):  
         # Loop through each guild the bot is in
         for guild in self.bot.guilds:
             # Initialize the server's configuration in the database
