@@ -145,6 +145,12 @@ class Moni(commands.Cog):
         for guild in self.bot.guilds:
             self.wallet_address = get_wallet_address(guild.id)
             self.transaction_channel_id = get_transaction_channel(guild.id)
+
+            # Check if transaction_channel_id is not a valid Discord snowflake
+            if not self.transaction_channel_id.isnumeric():
+                print(f"Invalid channel ID: {self.transaction_channel_id}")
+                continue
+
             try:
                 channel = await self.bot.fetch_channel(self.transaction_channel_id)
                 if channel:
@@ -170,7 +176,11 @@ class Moni(commands.Cog):
             except disnake.Forbidden:
                 print(f"Bot does not have permission to access channel with ID {self.transaction_channel_id}.")
             except disnake.HTTPException as e:
-                print(f"Error fetching channel with ID {self.transaction_channel_id}: {e}")
+                if e.status == 429:  # Handle rate limit error
+                    print("Rate limit reached, sleeping for a bit...")
+                    await asyncio.sleep(10)  # sleep for 10 seconds before trying again
+                else:
+                    print(f"Error fetching channel with ID {self.transaction_channel_id}: {e}")
 
     async def monitor_wallet_transactions(self):
         await self.bot.wait_until_ready()
