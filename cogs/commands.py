@@ -385,7 +385,7 @@ class Scrape(commands.Cog):
         await ctx.author.send(embed=embed) 
     
     """
-    Define get_gas_oracle() - return list of ERC-20 transactions, can be filtered by specific smart contract address. 
+    Define get_gas_oracle() - Returns the current Safe, Proposed and Fast gas prices.. 
     """
     @is_donator()
     @commands.command()
@@ -407,7 +407,6 @@ class Scrape(commands.Cog):
             f"⚡ **Fast Gas Price:** {data['result']['FastGasPrice']} Gwei\n"
             f"💰 **Suggested Base Fee:** {data['result']['suggestBaseFee']}\n"
             f"📊 **Gas Used Ratio:** {data['result']['gasUsedRatio']}\n"
-            f"💵 **USD Price:** ${data['result']['UsdPrice']}"
         )
 
         await ctx.send(message)
