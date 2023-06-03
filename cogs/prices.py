@@ -210,7 +210,7 @@ class Moni(commands.Cog):
                     else:
                         print(f"No new incoming transactions found for wallet {self.wallet_address}")
                 
-                await asyncio.sleep(59)
+                await asyncio.sleep(30)
 
             except Exception as e:
                 print(f"Error monitoring wallet transactions: {e}")

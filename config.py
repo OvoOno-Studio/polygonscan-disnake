@@ -10,19 +10,25 @@ def _load_config():
   with open(CONFIG_FILE, "r") as f:
     return json.load(f)
 
-def _save_config(config):
-  with open(CONFIG_FILE, "w") as f:
-    json.dump(config, f, indent=4)
+# def _save_config(config):
+#   with open(CONFIG_FILE, "w") as f:
+#     json.dump(config, f, indent=4)
 
 def set_transaction_channel(channel_id):
-  config = _load_config()
-  config["transaction_channel_id"] = channel_id
-  _save_config(config)
+  # Ensure 'GuildConfig' exists in db and is a dictionary
+  if "GuildConfig" not in db or not isinstance(db["GuildConfig"], dict):
+    print('No database!')
+
+  # Update the channel for price allerts
+  db["GuildConfig"]["transaction_channel_id"] = transaction_channel_id
 
 def set_price_alert_channel(channel_id):
-  config = _load_config()
-  config["price_alert_channel_id"] = channel_id
-  _save_config(config)
+  # Ensure 'GuildConfig' exists in db and is a dictionary
+  if "GuildConfig" not in db or not isinstance(db["GuildConfig"], dict):
+    print('No database!')
+
+  # Update the channel for price allerts
+  db["GuildConfig"]["price_alert_channel_id"] = price_alert_channel_id 
 
 def set_wallet_address(wallet_address):
   # Ensure 'GuildConfig' exists in db and is a dictionary
