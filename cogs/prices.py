@@ -3,8 +3,8 @@ import asyncio
 import disnake
 from disnake.ext import commands
 from disnake.ext.commands import has_permissions
-from config import set_transaction_channel, set_price_alert_channel, set_wallet_address
-from config import APIKey, transaction_channel_id, price_alert_channel_id, wallet_address
+from config import set_transaction_channel, set_price_alert_channel, set_wallet_address, APIKey
+from config import get_transaction_channel, get_price_alert_channel, get_wallet_address
 
 class Moni(commands.Cog):
     def __init__(self, bot):
@@ -12,19 +12,16 @@ class Moni(commands.Cog):
         self.session = aiohttp.ClientSession()
         self.api_url = "https://api.coingecko.com/api/v3/simple/price?ids=matic-network&vs_currencies=usd&include_24hr_change=true"
         self.polygon_scan_api_url = f"https://api.polygonscan.com/api?module=account&action=tokentx&apikey={APIKey}"
-        self.wallet_address = wallet_address
+        self.wallet_address = get_wallet_address
         self.sand_contract_address = "0xBbba073C31bF03b8ACf7c28EF0738DeCF3695683" 
-        self.transaction_channel_id = transaction_channel_id 
-        self.price_alert_channel_id = price_alert_channel_id
+        self.transaction_channel_id = get_transaction_channel
+        self.price_alert_channel_id = get_price_alert_channel
         self.previous_matic_price = None
         self.last_known_transaction = None
         self.semaphore = asyncio.Semaphore(4)    
         self.bot.loop.create_task(self.price_check_and_alert())
-        print('Scheduled price_check_and_alert every 3 hours')
         self.bot.loop.create_task(self.update_crypto_presence())
-        print('Scheduled update_crypto_presence every 30 seconds')
         self.bot.loop.create_task(self.monitor_wallet_transactions())
-        print('Scheduled monitor_wallet_transactions every 60 seconds')
 
     @commands.command(name="set_transaction_channel")
     @has_permissions(administrator=True)
@@ -36,14 +33,14 @@ class Moni(commands.Cog):
     @commands.command(name="set_price_alert_channel")
     @has_permissions(administrator=True)
     async def set_price_alert_channel(self, ctx, channel: disnake.TextChannel):
-        set_price_alert_channel(channel.id)
+        set_price_alert_channel(ctx.guild.id, channel.id)
         self.price_alert_channel_id = channel.id
         await ctx.send(f"Price alert channel has been set to {channel.mention}") 
 
     @commands.command(name="set_wallet_address")
     @has_permissions(administrator=True)
     async def set_wallet_address(self, ctx, address: str):
-        set_wallet_address(address)
+        set_wallet_address(ctx.guild.id, address)
         self.wallet_address = address
         await ctx.send(f"Wallet address has been set to `{address}`") 
 

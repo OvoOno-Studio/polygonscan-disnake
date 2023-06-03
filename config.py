@@ -1,44 +1,38 @@
 # config.py
 from dotenv import load_dotenv
 from replit import db
+from checks import ensure_server_config
 import os
 import json
 
-CONFIG_FILE = "config.json"
+# This creates a connection to your Replit database
+def create_connection():
+    connection = db.connect()  
+    return connection
 
-def _load_config():
-  with open(CONFIG_FILE, "r") as f:
-    return json.load(f)
+def set_transaction_channel(server_id, channel_id):
+  server_config = ensure_server_config(server_id)
+  server_config["transaction_channel_id"] = channel_id
 
-# def _save_config(config):
-#   with open(CONFIG_FILE, "w") as f:
-#     json.dump(config, f, indent=4)
+def get_transaction_channel(server_id):
+  server_config = ensure_server_config(server_id)
+  return server_config.get('price_alert_channel_id')
 
-def set_transaction_channel(channel_id):
-  # Ensure 'GuildConfig' exists in db and is a dictionary
-  if "GuildConfig" not in db or not isinstance(db["GuildConfig"], dict):
-    print('No database!')
+def set_price_alert_channel(server_id, channel_id):
+  server_config = ensure_server_config(server_id)
+  server_config["price_alert_channel_id"] = channel_id
 
-  # Update the channel for price allerts
-  db["GuildConfig"]["transaction_channel_id"] = channel_id
+def get_price_alert_channel(server_id):
+  server_config = ensure_server_config(server_id)
+  return server_config.get('price_alert_channel_id')
 
-def set_price_alert_channel(channel_id):
-  # Ensure 'GuildConfig' exists in db and is a dictionary
-  if "GuildConfig" not in db or not isinstance(db["GuildConfig"], dict):
-    print('No database!')
+def set_wallet_address(server_id, wallet_address): 
+  server_config = ensure_server_config(server_id)
+  server_config["wallet_address"] = wallet_address 
 
-  # Update the channel for price allerts
-  db["GuildConfig"]["price_alert_channel_id"] = channel_id
-
-def set_wallet_address(wallet_address):
-  # Ensure 'GuildConfig' exists in db and is a dictionary
-  if "GuildConfig" not in db or not isinstance(db["GuildConfig"], dict):
-    print('No database!')
-
-  # Update the wallet address
-  db["GuildConfig"]["wallet_address"] = wallet_address 
-
-config = _load_config()
+def get_wallet_address(server_id):
+  server_config = ensure_server_config(server_id)
+  return server_config.get("wallet_address")
 
 load_dotenv()
 
@@ -48,6 +42,6 @@ DiscordToken = os.getenv('DISCORD_TOKEN')
 PublicKey = os.getenv('PUBLIC_KEY')
 APIKey = os.getenv('API_KEY')
 API2Key = os.getenv('API2_KEY')
-transaction_channel_id = db['GuildConfig']['transaction_channel_id']
-price_alert_channel_id = db['GuildConfig']["price_alert_channel_id"]
-wallet_address = db['GuildConfig']["wallet_address"]  
+# transaction_channel_id = db['GuildConfig']['transaction_channel_id']
+# price_alert_channel_id = db['GuildConfig']["price_alert_channel_id"]
+# wallet_address = db['GuildConfig']["wallet_address"]  

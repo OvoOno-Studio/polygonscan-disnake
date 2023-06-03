@@ -1,5 +1,6 @@
 import disnake
 from disnake.ext import commands
+from replit import db
 
 # Define is donator to separate free and paied version
 def is_donator():
@@ -11,3 +12,10 @@ def is_donator():
             await ctx.send("You need to be a Donator to use this bot's commands.")
             return False
     return commands.check(predicate)
+
+# Ensure if there is guild confiuration in database
+def ensure_server_config(server_id):
+    if server_id not in db or not isinstance(db[server_id], dict):
+        db[server_id] ={}
+
+    return db[server_id]
