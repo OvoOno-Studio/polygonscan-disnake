@@ -147,7 +147,7 @@ class Moni(commands.Cog):
             self.transaction_channel_id = get_transaction_channel(guild.id)
 
             # Check if transaction_channel_id is not a valid Discord snowflake
-            if not self.transaction_channel_id.isnumeric():
+            if not str(self.transaction_channel_id).isnumeric():
                 print(f"Invalid channel ID: {self.transaction_channel_id}")
                 continue
 
