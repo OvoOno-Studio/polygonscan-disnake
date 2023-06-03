@@ -20,7 +20,7 @@ def set_transaction_channel(channel_id):
     print('No database!')
 
   # Update the channel for price allerts
-  db["GuildConfig"]["transaction_channel_id"] = transaction_channel_id
+  db["GuildConfig"]["transaction_channel_id"] = channel_id
 
 def set_price_alert_channel(channel_id):
   # Ensure 'GuildConfig' exists in db and is a dictionary
@@ -28,7 +28,7 @@ def set_price_alert_channel(channel_id):
     print('No database!')
 
   # Update the channel for price allerts
-  db["GuildConfig"]["price_alert_channel_id"] = price_alert_channel_id 
+  db["GuildConfig"]["price_alert_channel_id"] = channel_id
 
 def set_wallet_address(wallet_address):
   # Ensure 'GuildConfig' exists in db and is a dictionary
