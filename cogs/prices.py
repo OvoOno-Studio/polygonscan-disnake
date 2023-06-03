@@ -15,9 +15,7 @@ class Moni(commands.Cog):
         self.sand_contract_address = "0xBbba073C31bF03b8ACf7c28EF0738DeCF3695683"  
         self.previous_matic_price = None
         self.last_known_transaction = None
-        self.semaphore = asyncio.Semaphore(4) 
-        self.wallet_address = get_wallet_address  
-        print(self.wallet_address)
+        self.semaphore = asyncio.Semaphore(4)  
         self.bot.loop.create_task(self.price_check_and_alert())
         self.bot.loop.create_task(self.update_crypto_presence())
         self.bot.loop.create_task(self.monitor_wallet_transactions())
@@ -124,92 +122,99 @@ class Moni(commands.Cog):
                 return await response.json()
 
     async def fetch_wallet_transactions(self):
-        url = f"{self.polygon_scan_api_url}&address={self.wallet_address}&contractaddress={self.sand_contract_address}&sort=desc"
-        try:
-            json_data = await self.limited_get(url)
-            # print(f"fetch_wallet_transactions response: {json_data}")  # Log the response for debugging
-            if json_data and "result" in json_data:
-                return json_data["result"]
-            else:
-                print(f"Error in fetch_wallet_transactions: {json_data}")
+        for guild in self.bot.guilds:
+            self.wallet_address = get_wallet_address(guild.id)
+            url = f"{self.polygon_scan_api_url}&address={self.wallet_address}&contractaddress={self.sand_contract_address}&sort=desc"
+            try:
+                json_data = await self.limited_get(url)
+                # print(f"fetch_wallet_transactions response: {json_data}")  # Log the response for debugging
+                if json_data and "result" in json_data:
+                    return json_data["result"]
+                else:
+                    print(f"Error in fetch_wallet_transactions: {json_data}")
+                    return None
+            except Exception as e:
+                print(f"Error in fetch_wallet_transactions: {e}")
                 return None
-        except Exception as e:
-            print(f"Error in fetch_wallet_transactions: {e}")
-            return None
 
     async def send_transaction_message(self, transaction):
-        try:
-            channel = await self.bot.fetch_channel(self.transaction_channel_id)
-        except disnake.NotFound:
-            print(f"Channel with ID {self.transaction_channel_id} not found.")
-            return
-        except disnake.Forbidden:
-            print(f"Bot does not have permission to access channel with ID {self.transaction_channel_id}.")
-            return
-        except disnake.HTTPException as e:
-            print(f"Error fetching channel with ID {self.transaction_channel_id}: {e}")
-            return
-
-        if channel:
-            print(f"Sending message to channel {channel.id}")  # Debugging print statement
-            message = (
-                f"🚨 New incoming SAND token transaction to `{self.wallet_address}` 🚨\n"
-                f"💰 Value: {float(transaction['value']) / (10 ** 18):.2f} SAND\n"
-                f"🧑 From: `{transaction['from']}`\n"
-                f"👉 To: `{transaction['to']}`\n"
-                f"🔗 Transaction Hash: [`{transaction['hash']}`](https://polygonscan.com/tx/{transaction['hash']})\n"
-                f"🧱 Block Number: `{transaction['blockNumber']}`\n"
-                f"🔢 Transaction Index: `{transaction['transactionIndex']}`"
-            )
+        for guild in self.bot.guilds:
+            self.wallet_address = get_wallet_address(guild.id)
             try:
-                await channel.send(message)
-                print(f"Message sent to: {channel}") # Debugging print statement
+                channel = await self.bot.fetch_channel(self.transaction_channel_id)
+            except disnake.NotFound:
+                print(f"Channel with ID {self.transaction_channel_id} not found.")
+                return
+            except disnake.Forbidden:
+                print(f"Bot does not have permission to access channel with ID {self.transaction_channel_id}.")
+                return
             except disnake.HTTPException as e:
-                print(f"Error sending message to channel with ID {self.transaction_channel_id}: {e}")
+                print(f"Error fetching channel with ID {self.transaction_channel_id}: {e}")
+                return
+
+            if channel:
+                print(f"Sending message to channel {channel.id}")  # Debugging print statement
+                message = (
+                    f"🚨 New incoming SAND token transaction to `{self.wallet_address}` 🚨\n"
+                    f"💰 Value: {float(transaction['value']) / (10 ** 18):.2f} SAND\n"
+                    f"🧑 From: `{transaction['from']}`\n"
+                    f"👉 To: `{transaction['to']}`\n"
+                    f"🔗 Transaction Hash: [`{transaction['hash']}`](https://polygonscan.com/tx/{transaction['hash']})\n"
+                    f"🧱 Block Number: `{transaction['blockNumber']}`\n"
+                    f"🔢 Transaction Index: `{transaction['transactionIndex']}`"
+                )
+                try:
+                    await channel.send(message)
+                    print(f"Message sent to: {channel}") # Debugging print statement
+                except disnake.HTTPException as e:
+                    print(f"Error sending message to channel with ID {self.transaction_channel_id}: {e}")
 
     async def monitor_wallet_transactions(self):
         await self.bot.wait_until_ready()
 
-        while not self.bot.is_closed():
-            try:
-                transactions = await self.fetch_wallet_transactions()
+        for guild in self.bot.guilds:
+            self.wallet_address = get_wallet_address(guild.id)
 
-                if not transactions or isinstance(transactions, str):
-                    print(f"Error in transactions response: {transactions}")
-                    await asyncio.sleep(1)  # Add delay here
-                    continue
+            while not self.bot.is_closed():
+                try:
+                    transactions = await self.fetch_wallet_transactions()
 
-                print(f"Transaction hash: {transactions[0]['hash']}")
-
-                last_transaction = None
-                for transaction in transactions:
-                    if transaction["to"].lower() == self.wallet_address.lower():
-                        last_transaction = transaction
+                    if not transactions or isinstance(transactions, str):
+                        print(f"Error in transactions response: {transactions}")
                         await asyncio.sleep(1)  # Add delay here
-                        break
+                        continue
 
-                if last_transaction is None:
-                    print(f"No incoming transactions found for wallet {self.wallet_address}")
-                    continue
+                    print(f"Transaction hash: {transactions[0]['hash']}")
 
-                if self.last_known_transaction is None:
-                    self.last_known_transaction = last_transaction
-                else:
-                    if self.last_known_transaction["hash"] != last_transaction["hash"]:
-                        print(f"New incoming transaction found: {last_transaction}")
-                        print(f"Sending transaction message for {last_transaction['hash']}")
-                        await self.send_transaction_message(last_transaction)
+                    last_transaction = None
+                    for transaction in transactions:
+                        if transaction["to"].lower() == self.wallet_address.lower():
+                            last_transaction = transaction
+                            await asyncio.sleep(1)  # Add delay here
+                            break
+
+                    if last_transaction is None:
+                        print(f"No incoming transactions found for wallet {self.wallet_address}")
+                        continue
+
+                    if self.last_known_transaction is None:
                         self.last_known_transaction = last_transaction
                     else:
-                        print(f"No new incoming transactions found for wallet {self.wallet_address}")
-                
-                await asyncio.sleep(30)
+                        if self.last_known_transaction["hash"] != last_transaction["hash"]:
+                            print(f"New incoming transaction found: {last_transaction}")
+                            print(f"Sending transaction message for {last_transaction['hash']}")
+                            await self.send_transaction_message(last_transaction)
+                            self.last_known_transaction = last_transaction
+                        else:
+                            print(f"No new incoming transactions found for wallet {self.wallet_address}")
+                    
+                    await asyncio.sleep(30)
 
-            except Exception as e:
-                print(f"Error monitoring wallet transactions: {e}")
-                await asyncio.sleep(1)
+                except Exception as e:
+                    print(f"Error monitoring wallet transactions: {e}")
+                    await asyncio.sleep(1)
 
-            await asyncio.sleep(60)
+                await asyncio.sleep(60)
 
 def setup(bot):
     bot.add_cog(Moni(bot))
