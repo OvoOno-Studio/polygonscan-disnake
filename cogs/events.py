@@ -2,7 +2,7 @@ from disnake.ext import commands
 from config import set_price_alert_channel, set_transaction_channel, set_wallet_address
 
 class Events(commands.Cog):
-    def __ini__(self, bot):
+    def __init__(self, bot):
         self.bot = bot
     
     @commands.Cog.listener()
