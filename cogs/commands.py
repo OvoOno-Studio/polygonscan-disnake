@@ -18,7 +18,7 @@ intents.message_content = True
 key = str(APIKey)   
 bot = commands.Bot(command_prefix=commands.when_mentioned_or("ps-"), intents=intents)
 
-class Commands(commands.Cog):
+class Scrape(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.key = str(APIKey)
@@ -383,6 +383,18 @@ class Commands(commands.Cog):
         ) 
 
         await ctx.author.send(embed=embed) 
+    
+    """
+    Define get_gas_oracle() - return list of ERC-20 transactions, can be filtered by specific smart contract address. 
+    """
+    @is_donator()
+    @commands.command()
+    async def get_gas_oracle(self, ctx): 
+        key = APIKey
+        url_poly = f"https://api.polygonscan.com/api?module=gastracker&action=gasoracle&apikey={key}"
+        response = requests.get(url_poly)  
+        data = json.loads(response.text) 
+        await ctx.send(data)
 
     """
     Define getErc20() - return list of ERC-20 transactions, can be filtered by specific smart contract address. 
@@ -409,4 +421,4 @@ class Commands(commands.Cog):
         await self.handle_erc_transactions(ctx, address, contract, offset, 'ERC1155')
     
 def setup(bot):
-    bot.add_cog(Commands(bot))
+    bot.add_cog(Scrape(bot))

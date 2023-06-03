@@ -8,5 +8,5 @@
 - [x] Limit the max offset ( Free Version )
 - [x] Optimize getErc20, getErc721, getErc1155 to send DM's to author and set max offset
 - [x] Add function to check status by transaction hash
-- [ ] Update content of messages with emojies, font styling etc
-- [ ] Add message if there is no result
+- [x] Update content of messages with emojies, font styling etc
+- [x] Add message if there is no result

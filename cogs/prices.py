@@ -6,7 +6,7 @@ from disnake.ext.commands import has_permissions
 from config import set_transaction_channel, set_price_alert_channel, set_wallet_address
 from config import APIKey, transaction_channel_id, price_alert_channel_id, wallet_address
 
-class Crypto(commands.Cog):
+class Moni(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.session = aiohttp.ClientSession()
@@ -16,10 +16,11 @@ class Crypto(commands.Cog):
         self.sand_contract_address = "0xBbba073C31bF03b8ACf7c28EF0738DeCF3695683" 
         self.transaction_channel_id = transaction_channel_id 
         self.price_alert_channel_id = price_alert_channel_id
-        #self.threshold = 0.02
         self.previous_matic_price = None
         self.last_known_transaction = None
         self.semaphore = asyncio.Semaphore(4)    
+        self.bot.loop.create_task(self.check_and_send_alert())
+        print('Scheduled update_crypto_presence every 3 hours')
         self.bot.loop.create_task(self.update_crypto_presence())
         print('Scheduled update_crypto_presence every 30 seconds')
         self.bot.loop.create_task(self.monitor_wallet_transactions())
@@ -37,7 +38,7 @@ class Crypto(commands.Cog):
     async def set_price_alert_channel(self, ctx, channel: disnake.TextChannel):
         set_price_alert_channel(channel.id)
         self.price_alert_channel_id = channel.id
-        await ctx.send(f"Price alert channel has been set to {channel.mention}")
+        await ctx.send(f"Price alert channel has been set to {channel.mention}") 
 
     @commands.command(name="set_wallet_address")
     @has_permissions(administrator=True)
@@ -87,10 +88,10 @@ class Crypto(commands.Cog):
                     await self.check_and_send_alert(current_price)
                 else:
                     print("No price data to check.")
-                # await asyncio.sleep(600)  # 10 minutes
+                await asyncio.sleep(10800)  # 3 hours
             except Exception as e:
                 print(f"Error in price_check_and_alert: {e}")
-                await asyncio.sleep(60)  # In case of an error, wait 10 minutes before retrying
+                await asyncio.sleep(3600)  # In case of an error, wait 10 minutes before retrying
     
     async def update_crypto_presence(self):
         await self.bot.wait_until_ready()
@@ -105,8 +106,6 @@ class Crypto(commands.Cog):
                 arrow_emoji = "🟢" if price_change_percent > 0 else "🔴"
                 status_text = f"MATIC: ${price:.2f} {arrow_emoji}({price_change_percent:.2f}%)"
                 print(f'Updating crypto presencace: {price}')
-                await self.check_and_send_alert(price)
-                print('Checking price...')
                 await self.bot.change_presence(
                     status=disnake.Status.online,
                     activity=disnake.Activity(
@@ -118,7 +117,7 @@ class Crypto(commands.Cog):
             except Exception as e:
                 print(f"Error updating presence: {e}")
 
-            await asyncio.sleep(600)
+            await asyncio.sleep(60)
 
     async def limited_get(self, url):
         async with self.semaphore:  # Limit the number of concurrent requests
@@ -208,12 +207,5 @@ class Crypto(commands.Cog):
 
             await asyncio.sleep(60)
 
-    async def send_no_transactions_message(self):
-        channel = self.bot.get_channel(self.transaction_channel_id)
-
-        if channel:
-            message = f"No transactions found for wallet {self.wallet_address}."
-            await channel.send(message)
-
 def setup(bot):
-    bot.add_cog(Crypto(bot))
+    bot.add_cog(Moni(bot))
