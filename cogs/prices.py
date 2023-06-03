@@ -22,7 +22,7 @@ class Moni(commands.Cog):
         self.bot.loop.create_task(self.price_check_and_alert())
         print('Scheduled price_check_and_alert every 3 hours')
         self.bot.loop.create_task(self.update_crypto_presence())
-        print('Scheduled update_crypto_presence every 120 seconds')
+        print('Scheduled update_crypto_presence every 30 seconds')
         self.bot.loop.create_task(self.monitor_wallet_transactions())
         print('Scheduled monitor_wallet_transactions every 60 seconds')
 
@@ -79,6 +79,7 @@ class Moni(commands.Cog):
             self.previous_matic_price = current_price
         except Exception as e:
             print(f"Error in check_and_send_alert: {e}")
+            await asyncio.sleep(1)  # Add delay here
 
     async def price_check_and_alert(self):
         await self.bot.wait_until_ready()
@@ -91,7 +92,7 @@ class Moni(commands.Cog):
                 else:
                     print("No price data to check.")
                     
-                await asyncio.sleep(3 * 60 * 60)  # 3 hours
+                await asyncio.sleep(10800)  # 3 hours
                 
             except Exception as e:
                 print(f"Error in price_check_and_alert: {e}")
@@ -120,8 +121,9 @@ class Moni(commands.Cog):
 
             except Exception as e:
                 print(f"Error updating presence: {e}")
+                await asyncio.sleep(1)  # Add delay here
 
-            await asyncio.sleep(120)
+            await asyncio.sleep(30)
 
     async def limited_get(self, url):
         async with self.semaphore:  # Limit the number of concurrent requests
@@ -181,6 +183,7 @@ class Moni(commands.Cog):
 
                 if not transactions or isinstance(transactions, str):
                     print(f"Error in transactions response: {transactions}")
+                    await asyncio.sleep(1)  # Add delay here
                     continue
 
                 print(f"Transaction hash: {transactions[0]['hash']}")
@@ -189,6 +192,7 @@ class Moni(commands.Cog):
                 for transaction in transactions:
                     if transaction["to"].lower() == self.wallet_address.lower():
                         last_transaction = transaction
+                        await asyncio.sleep(1)  # Add delay here
                         break
 
                 if last_transaction is None:
@@ -205,9 +209,12 @@ class Moni(commands.Cog):
                         self.last_known_transaction = last_transaction
                     else:
                         print(f"No new incoming transactions found for wallet {self.wallet_address}")
+                
+                await asyncio.sleep(59)
 
             except Exception as e:
                 print(f"Error monitoring wallet transactions: {e}")
+                await asyncio.sleep(1)
 
             await asyncio.sleep(60)
 
