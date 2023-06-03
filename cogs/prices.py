@@ -20,9 +20,9 @@ class Moni(commands.Cog):
         self.last_known_transaction = None
         self.semaphore = asyncio.Semaphore(4)    
         self.bot.loop.create_task(self.price_check_and_alert())
-        print('Scheduled update_crypto_presence every 3 hours')
+        print('Scheduled price_check_and_alert every 3 hours')
         self.bot.loop.create_task(self.update_crypto_presence())
-        print('Scheduled update_crypto_presence every 30 seconds')
+        print('Scheduled update_crypto_presence every 120 seconds')
         self.bot.loop.create_task(self.monitor_wallet_transactions())
         print('Scheduled monitor_wallet_transactions every 60 seconds')
 
@@ -95,7 +95,7 @@ class Moni(commands.Cog):
                 
             except Exception as e:
                 print(f"Error in price_check_and_alert: {e}")
-                await asyncio.sleep(60)  # In case of an error, wait 1 minute before retrying
+                await asyncio.sleep(3600)  # In case of an error, wait 1 minute before retrying
     
     async def update_crypto_presence(self):
         await self.bot.wait_until_ready()
@@ -121,7 +121,7 @@ class Moni(commands.Cog):
             except Exception as e:
                 print(f"Error updating presence: {e}")
 
-            await asyncio.sleep(60)
+            await asyncio.sleep(120)
 
     async def limited_get(self, url):
         async with self.semaphore:  # Limit the number of concurrent requests
