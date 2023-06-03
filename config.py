@@ -10,28 +10,31 @@ def create_connection():
     return connection
 
 def set_transaction_channel(server_id, channel_id):
-  server_config = ensure_server_config(server_id)
-  server_config["transaction_channel_id"] = channel_id
+    server_config = ensure_server_config(server_id)
+    server_config["transaction_channel_id"] = channel_id
+    db[str(server_id)] = server_config
 
 def get_transaction_channel(server_id):
-  server_config = ensure_server_config(server_id)
-  return server_config.get('price_alert_channel_id')
+    server_config = ensure_server_config(server_id)
+    return server_config.get('transaction_channel_id')
 
 def set_price_alert_channel(server_id, channel_id):
-  server_config = ensure_server_config(server_id)
-  server_config["price_alert_channel_id"] = channel_id
+    server_config = ensure_server_config(server_id)
+    server_config["price_alert_channel_id"] = channel_id
+    db[str(server_id)] = server_config
 
 def get_price_alert_channel(server_id):
-  server_config = ensure_server_config(server_id)
-  return server_config.get('price_alert_channel_id')
+    server_config = ensure_server_config(server_id)
+    return server_config.get('price_alert_channel_id')
 
 def set_wallet_address(server_id, wallet_address): 
-  server_config = ensure_server_config(server_id)
-  server_config["wallet_address"] = wallet_address 
+    server_config = ensure_server_config(server_id)
+    server_config["wallet_address"] = wallet_address 
+    db[str(server_id)] = server_config
 
 def get_wallet_address(server_id):
-  server_config = ensure_server_config(server_id)
-  return str(server_config.get("wallet_address"))
+    server_config = ensure_server_config(server_id)
+    return server_config.get("wallet_address")
 
 load_dotenv()
 
