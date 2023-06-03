@@ -15,6 +15,7 @@ def is_donator():
 
 # Ensure if there is guild confiuration in database
 def ensure_server_config(server_id):
+    server_id = str(server_id)  # Convert server_id to a string
     if server_id not in db or not isinstance(db[server_id], dict):
         db[server_id] ={}
 
