@@ -53,21 +53,23 @@ class Moni(commands.Cog):
 
     async def check_and_send_alert(self, current_price):
         try:
-            print('Checking MATIC price...')
             if self.previous_matic_price is None:
                 self.previous_matic_price = current_price
                 return
 
             price_change = (current_price - self.previous_matic_price) / self.previous_matic_price * 100 
-            print(f'New price: {price_change}') 
             direction = "up" if price_change >= 0 else "down"
             arrow_emoji = "🟢" if price_change >= 0 else "🔴"
-            channel = self.bot.get_channel(self.price_alert_channel_id)
-            if channel is not None:
-                print(f'Sending price alert to: {channel}')
-                await channel.send(f"📢 PRICE CHANGE ALERT 📢\n**MATIC** price has changed by {abs(price_change):.2f}%!\n\nIt's now **{direction.upper()}** to **${current_price:.2f}** {arrow_emoji}\n")
-            else:
-                print('No channel optimized')
+            
+            for guild in self.bot.guilds:
+                price_alert_channel_id = get_price_alert_channel(guild.id)
+                channel = self.bot.get_channel(price_alert_channel_id)
+                if channel is not None:
+                    print(f'Sending price alert to: {channel}')
+                    await channel.send(f"📢 PRICE CHANGE ALERT 📢\n**MATIC** price has changed by {abs(price_change):.2f}%!\n\nIt's now **{direction.upper()}** to **${current_price:.2f}** {arrow_emoji}\n")
+                else:
+                    print('No channel optimized')
+
             self.previous_matic_price = current_price
         except Exception as e:
             print(f"Error in check_and_send_alert: {e}")
@@ -88,7 +90,7 @@ class Moni(commands.Cog):
                 
             except Exception as e:
                 print(f"Error in price_check_and_alert: {e}")
-                await asyncio.sleep(3600)  # In case of an error, wait 1 minute before retrying
+                await asyncio.sleep(360)  # In case of an error, wait 1 minute before retrying
     
     async def update_crypto_presence(self):
         await self.bot.wait_until_ready()
@@ -102,7 +104,6 @@ class Moni(commands.Cog):
  
                 arrow_emoji = "🟢" if price_change_percent > 0 else "🔴"
                 status_text = f"MATIC: ${price:.2f} {arrow_emoji}({price_change_percent:.2f}%)"
-                print(f'Updating crypto presencace: {price}')
                 await self.bot.change_presence(
                     status=disnake.Status.online,
                     activity=disnake.Activity(
@@ -126,7 +127,7 @@ class Moni(commands.Cog):
         for guild in self.bot.guilds:
             self.wallet_address = get_wallet_address(guild.id)
             if self.wallet_address is None or len(self.wallet_address) != 42 or not self.wallet_address.startswith('0x'):
-                print(f"Skipping guild {guild.name} due to invalid wallet address: {self.wallet_address}")
+                # print(f"Skipping guild {guild.name} due to invalid wallet address: {self.wallet_address}")
                 continue
             url = f"{self.polygon_scan_api_url}&address={self.wallet_address}&contractaddress={self.sand_contract_address}&sort=desc"
             try:
@@ -143,42 +144,41 @@ class Moni(commands.Cog):
     async def send_transaction_message(self, transaction):
         for guild in self.bot.guilds:
             self.wallet_address = get_wallet_address(guild.id)
+            self.transaction_channel_id = get_transaction_channel(guild.id)
             try:
                 channel = await self.bot.fetch_channel(self.transaction_channel_id)
+                if channel:
+                    print(f"Sending message to channel {channel.id}")  # Debugging print statement
+                    message = (
+                        f"🚨 New incoming SAND token transaction to `{self.wallet_address}` 🚨\n"
+                        f"💰 Value: {float(transaction['value']) / (10 ** 18):.2f} SAND\n"
+                        f"🧑 From: `{transaction['from']}`\n"
+                        f"👉 To: `{transaction['to']}`\n"
+                        f"🔗 Transaction Hash: [`{transaction['hash']}`](https://polygonscan.com/tx/{transaction['hash']})\n"
+                        f"🧱 Block Number: `{transaction['blockNumber']}`\n"
+                        f"🔢 Transaction Index: `{transaction['transactionIndex']}`"
+                    )
+                    try:
+                        await channel.send(message)
+                        print(f"Message sent to: {channel}") # Debugging print statement
+                    except disnake.HTTPException as e:
+                        print(f"Error sending message to channel with ID {self.transaction_channel_id}: {e}")
+                    else:
+                        print('No channel optimized!')
             except disnake.NotFound:
                 print(f"Channel with ID {self.transaction_channel_id} not found.")
-                return
             except disnake.Forbidden:
                 print(f"Bot does not have permission to access channel with ID {self.transaction_channel_id}.")
-                return
             except disnake.HTTPException as e:
                 print(f"Error fetching channel with ID {self.transaction_channel_id}: {e}")
-                return
-
-            if channel:
-                print(f"Sending message to channel {channel.id}")  # Debugging print statement
-                message = (
-                    f"🚨 New incoming SAND token transaction to `{self.wallet_address}` 🚨\n"
-                    f"💰 Value: {float(transaction['value']) / (10 ** 18):.2f} SAND\n"
-                    f"🧑 From: `{transaction['from']}`\n"
-                    f"👉 To: `{transaction['to']}`\n"
-                    f"🔗 Transaction Hash: [`{transaction['hash']}`](https://polygonscan.com/tx/{transaction['hash']})\n"
-                    f"🧱 Block Number: `{transaction['blockNumber']}`\n"
-                    f"🔢 Transaction Index: `{transaction['transactionIndex']}`"
-                )
-                try:
-                    await channel.send(message)
-                    print(f"Message sent to: {channel}") # Debugging print statement
-                except disnake.HTTPException as e:
-                    print(f"Error sending message to channel with ID {self.transaction_channel_id}: {e}")
 
     async def monitor_wallet_transactions(self):
         await self.bot.wait_until_ready()
 
-        for guild in self.bot.guilds:
-            self.wallet_address = get_wallet_address(guild.id)
-            print(self.wallet_address)
-            while not self.bot.is_closed():
+        while not self.bot.is_closed():
+            for guild in self.bot.guilds:
+                self.wallet_address = get_wallet_address(guild.id)
+                self.transaction_channel_id = get_transaction_channel(guild.id)
                 try:
                     transactions = await self.fetch_wallet_transactions()
 
