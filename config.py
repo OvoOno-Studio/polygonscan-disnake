@@ -25,9 +25,12 @@ def set_price_alert_channel(channel_id):
   _save_config(config)
 
 def set_wallet_address(wallet_address):
-  config = _load_config()
-  config["wallet_address"] = wallet_address
-  _save_config(config)
+  # Ensure 'GuildConfig' exists in db and is a dictionary
+  if "GuildConfig" not in db or not isinstance(db["GuildConfig"], dict):
+    print('No database!')
+
+  # Update the wallet address
+  db["GuildConfig"]["wallet_address"] = wallet_address 
 
 config = _load_config()
 
