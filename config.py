@@ -31,7 +31,7 @@ def set_wallet_address(server_id, wallet_address):
 
 def get_wallet_address(server_id):
   server_config = ensure_server_config(server_id)
-  return server_config.get("wallet_address")
+  return str(server_config.get("wallet_address"))
 
 load_dotenv()
 
