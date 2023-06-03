@@ -125,10 +125,12 @@ class Moni(commands.Cog):
     async def fetch_wallet_transactions(self):
         for guild in self.bot.guilds:
             self.wallet_address = get_wallet_address(guild.id)
+            if self.wallet_address is None or len(self.wallet_address) != 42 or not self.wallet_address.startswith('0x'):
+                print(f"Skipping guild {guild.name} due to invalid wallet address: {self.wallet_address}")
+                continue
             url = f"{self.polygon_scan_api_url}&address={self.wallet_address}&contractaddress={self.sand_contract_address}&sort=desc"
             try:
                 json_data = await self.limited_get(url)
-                # print(f"fetch_wallet_transactions response: {json_data}")  # Log the response for debugging
                 if json_data and "result" in json_data:
                     return json_data["result"]
                 else:
