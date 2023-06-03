@@ -72,7 +72,7 @@ class Moni(commands.Cog):
             arrow_emoji = "🟢" if price_change >= 0 else "🔴"
             channel = self.bot.get_channel(self.price_alert_channel_id)
             if channel is not None:
-                print(f'Sendning price alert to: {channel}')
+                print(f'Sending price alert to: {channel}')
                 await channel.send(f"📢 PRICE CHANGE ALERT 📢\n**MATIC** price has changed by {abs(price_change):.2f}%!\n\nIt's now **{direction.upper()}** to **${current_price:.2f}** {arrow_emoji}\n")
             else:
                 print('No channel optimized')
@@ -81,6 +81,8 @@ class Moni(commands.Cog):
             print(f"Error in check_and_send_alert: {e}")
 
     async def price_check_and_alert(self):
+        await self.bot.wait_until_ready()
+        
         while not self.bot.is_closed():
             try:
                 current_price, price_change_24h = await self.get_crypto_price_data()
@@ -88,10 +90,12 @@ class Moni(commands.Cog):
                     await self.check_and_send_alert(current_price)
                 else:
                     print("No price data to check.")
-                await asyncio.sleep(10800)  # 3 hours
+                    
+                await asyncio.sleep(3 * 60 * 60)  # 3 hours
+                
             except Exception as e:
                 print(f"Error in price_check_and_alert: {e}")
-                await asyncio.sleep(3600)  # In case of an error, wait 10 minutes before retrying
+                await asyncio.sleep(60)  # In case of an error, wait 1 minute before retrying
     
     async def update_crypto_presence(self):
         await self.bot.wait_until_ready()
