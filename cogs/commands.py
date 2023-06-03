@@ -393,8 +393,19 @@ class Scrape(commands.Cog):
         key = APIKey
         url_poly = f"https://api.polygonscan.com/api?module=gastracker&action=gasoracle&apikey={key}"
         response = requests.get(url_poly)  
-        data = json.loads(response.text) 
-        await ctx.send(data)
+        data = json.loads(response.text)
+
+        # construct a message with the desired formatting and emojis
+        message = (
+            f"🔹 **Last Block:** {data['result']['LastBlock']}\n"
+            f"⛽ **Safe Gas Price:** {data['result']['SafeGasPrice']} Gwei\n"
+            f"📌 **Propose Gas Price:** {data['result']['ProposeGasPrice']} Gwei\n"
+            f"⚡ **Fast Gas Price:** {data['result']['FastGasPrice']} Gwei\n"
+            f"💰 **Suggested Base Fee:** {data['result']['suggestBaseFee']}\n"
+            f"📊 **Gas Used Ratio:** {data['result']['gasUsedRatio']}\n"
+            f"💵 **USD Price:** ${data['result']['UsdPrice']}"
+        )
+        await ctx.send(message)
 
     """
     Define getErc20() - return list of ERC-20 transactions, can be filtered by specific smart contract address. 
