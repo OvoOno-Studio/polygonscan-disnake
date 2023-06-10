@@ -3,14 +3,13 @@ from disnake.ext import commands
 from replit import db
 
 # Define is donator to separate free and paied version
-def is_donator():
+def is_donator(self):
     async def predicate(ctx):
         donator_role = disnake.utils.get(ctx.guild.roles, name="OvoDonator")
         if donator_role in ctx.author.roles:
             return True
         else:
-            await ctx.send("You need to be a Donator to use this bot's commands.")
-            return False
+            raise commands.CheckFailure("You need to be a Donator to use this bot's commands.")
     return commands.check(predicate)
 
 # Ensure if there is guild confiuration in database
