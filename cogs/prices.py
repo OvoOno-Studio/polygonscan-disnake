@@ -101,7 +101,7 @@ class Moni(commands.Cog):
         
         while not self.bot.is_closed():
             try:
-                current_price, price_change_24h = await self.get_crypto_price_data()
+                current_price, price_change_24h, volume_24h, price_high_24h, price_low_24h, market_cap, total_volume = await self.get_crypto_price_data()
                 if current_price is not None:
                     await self.check_and_send_alert(current_price)
                 else:
@@ -118,7 +118,7 @@ class Moni(commands.Cog):
 
         while not self.bot.is_closed():
             try:
-                price, price_change_percent, coin_data = await self.get_crypto_price_data()
+                price, price_change_percent, coin_data, *_ = await self.get_crypto_price_data()
                 if price is None or price_change_percent is None or coin_data is None:
                     await asyncio.sleep(60)
                     continue
