@@ -10,13 +10,9 @@ from disnake.ext import commands
 from config import DiscordToken
 import os, traceback
 
-from cogs.base import BaseCog
-
 class Bot(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix=commands.when_mentioned_or("ps-"), intents=disnake.Intents.all())
-
-        self.add_cog(BaseCog(self))
 
         for file in os.listdir('./cogs'):
             if file.endswith('.py') and file != '__init__.py':
