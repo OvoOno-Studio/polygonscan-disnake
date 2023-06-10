@@ -1,8 +1,7 @@
 import json
 import requests
 import disnake
-import time
-# from disnake import Embed
+import time 
 from disnake.ext import commands
 from disnake.ext.commands import has_permissions
 from datetime import datetime
@@ -11,13 +10,7 @@ import io
 import os
 from io import StringIO
 from config import APIKey, API2Key
-from checks import is_donator
-
-intents = disnake.Intents.default()
-intents.members = True
-intents.message_content = True
-key = str(APIKey)   
-bot = commands.Bot(command_prefix=commands.when_mentioned_or("ps-"), intents=intents)
+from checks import is_donator 
 
 class Scrape(commands.Cog):
     def __init__(self, bot):
