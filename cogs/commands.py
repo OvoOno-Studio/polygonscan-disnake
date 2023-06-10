@@ -415,7 +415,7 @@ class Scrape(commands.Cog):
                 f"🔹 **Contract Address**: {contractAddress}\n"
                 f"👤 **Contract Creator**: {contractCreator}\n"
                 f"🔗 **TxHash**: {txHash}\n"
-                f"--------\n"
+                f"------------------------------------------\n"
             )
 
         # Send DM to the author

@@ -37,21 +37,30 @@ class Moni(commands.Cog):
     @has_permissions(administrator=True)
     async def set_wallet_address(self, ctx, address: str):
         set_wallet_address(ctx.guild.id, address)
-        await ctx.send(f"Wallet address has been set to `{address}`") 
+        await ctx.send(f"Wallet address has been set to `{address}`")
+
+    async def get_coin_data(self):
+        try:
+            async with self.session.get("https://api.coingecko.com/api/v3/coins/matic-network") as response:
+                if response.status != 200:
+                    print(f"Failed to fetch coin data, status code: {response.status}, message: {await response.text()}")
+                    return None
+                json_data = await response.json()
+                return json_data
+        except Exception as e:
+            print(f"Error in get_coin_data: {e}")
+            return None
 
     async def get_crypto_price_data(self):
-        try:
-            async with self.session.get(self.api_url) as response:
-                if response.status != 200:
-                    print(f"Failed to fetch crypto price data, status code: {response.status}, message: {await response.text()}")
-                    return None, None
-                json_data = await response.json()
-                return json_data['matic-network']['usd'], json_data['matic-network']['usd_24h_change']
-        except Exception as e:
-            print(f"Error in get_crypto_price_data: {e}")
-            return None, None
+        coin_data = await self.get_coin_data()
+        if coin_data is not None:
+            usd_price = coin_data['market_data']['current_price']['usd']
+            price_change_24h = coin_data['market_data']['price_change_percentage_24h']
+            return usd_price, price_change_24h, coin_data
+        else:
+            return None, None, None
 
-    async def check_and_send_alert(self, current_price):
+    async def check_and_send_alert(self, current_price, coin_data):
         try:
             if self.previous_matic_price is None:
                 self.previous_matic_price = current_price
@@ -61,12 +70,24 @@ class Moni(commands.Cog):
             direction = "up" if price_change >= 0 else "down"
             arrow_emoji = "🟢" if price_change >= 0 else "🔴"
             
+            price_high_24h = coin_data['market_data']['high_24h']['usd']
+            price_low_24h = coin_data['market_data']['low_24h']['usd']
+            volume_24h = coin_data['market_data']['total_volume']['usd']
+            market_cap = coin_data['market_data']['market_cap']['usd']
+
             for guild in self.bot.guilds:
                 price_alert_channel_id = get_price_alert_channel(guild.id)
                 channel = self.bot.get_channel(price_alert_channel_id)
                 if channel is not None:
                     print(f'Sending price alert to: {channel}')
-                    await channel.send(f"📢 PRICE CHANGE ALERT 📢\n**MATIC** price has changed by {abs(price_change):.2f}%!\n\nIt's now **{direction.upper()}** to **${current_price:.2f}** {arrow_emoji}\n")
+                    await channel.send(
+                        f"🚨 **PRICE CHANGE ALERT** 🚨\n\n"
+                        f"💲 **MATIC Price:** ${current_price:.2f} {arrow_emoji} ({abs(price_change):.2f}% change)\n"
+                        f"📈 **24h High:** ${price_high_24h:.2f}\n"
+                        f"📉 **24h Low:** ${price_low_24h:.2f}\n"
+                        f"💼 **24h Volume:** ${volume_24h:.2f}\n"
+                        f"💰 **Market Cap:** ${market_cap:.2f}\n"
+                    )
                 else:
                     print('No channel optimized')
 
@@ -97,8 +118,8 @@ class Moni(commands.Cog):
 
         while not self.bot.is_closed():
             try:
-                price, price_change_percent = await self.get_crypto_price_data()
-                if price is None or price_change_percent is None:
+                price, price_change_percent, coin_data = await self.get_crypto_price_data()
+                if price is None or price_change_percent is None or coin_data is None:
                     await asyncio.sleep(60)
                     continue
  
