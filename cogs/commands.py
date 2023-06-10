@@ -385,11 +385,35 @@ class Scrape(commands.Cog):
         await ctx.author.send(embed=embed) 
     
     """
-    Define get_gas_oracle() - Returns the current Safe, Proposed and Fast gas prices.. 
+    Define abi() - Returns the current Safe, Proposed and Fast gas prices.. 
+    """
+    @commands.command()
+    async def abi(self, ctx: commands.Context, address: str):
+        key = APIKey
+        url = f"https://api.polygonscan.com/api?module=contract&action=getabi&address={str(address)}&apikey={str(key)}"
+        response = requests.get(url)
+        data = json.loads(response.text)
+
+         # Parse the 'result' string into a Python object
+        abi = json.loads(data['result'])
+        pretty_abi = json.dumps(abi, indent=4)
+        formatted_message = f"```json\n{pretty_abi}\n```"
+
+        # construct a message with the desired formatting and emojis
+        message = (
+            f"\n"
+            f"**Contract ABI 📜 for Verified Smart Contract: {address}**\n"
+            f"{formatted_message}"
+        )
+
+        await ctx.send(message)
+    
+    """
+    Define gas() - Returns the current Safe, Proposed and Fast gas prices.. 
     """
     @is_donator()
     @commands.command()
-    async def get_gas_oracle(self, ctx): 
+    async def gas(self, ctx): 
         key = APIKey
         key2 = API2Key
         
