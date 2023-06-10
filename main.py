@@ -9,7 +9,8 @@ import disnake
 from disnake.ext import commands 
 from config import DiscordToken
 import os, traceback
-from cogs import BaseCog
+
+from cogs.base import BaseCog
 
 class Bot(commands.Bot):
     def __init__(self):
