@@ -10,28 +10,16 @@ from disnake.ext import commands
 from config import DiscordToken
 import os, traceback
 
-class Bot(commands.Bot):
-    def __init__(self):
-        super().__init__(command_prefix=commands.when_mentioned_or("ps-"), intents=disnake.Intents.all())
+class BaseCog(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
 
-        for file in os.listdir('./cogs'):
-            if file.endswith('.py') and file != '__init__.py':
-                try:
-                    self.load_extension(f"cogs.{file[:-3]}")
-                    print(f"{file[:-3]} Loaded successfully.")
-                except:
-                    print(f"Unable to load {file[:-3]}.")
-                    print(traceback.format_exc())
-                    
-        self.add_listener(self.on_ready)
-        self.add_listener(self.on_command_error)
-        self.add_command(self.ping)
-        self.add_command(self.donate)
-
+    @commands.Cog.listener()
     async def on_ready(self):
         print("Welcome to the PolygonScan Tracker Bot!")
-        print(f"Logged in as {self.user} (ID: {self.user.id})\n--------------------------------------------------------------------")
+        print(f"Logged in as {self.bot.user} (ID: {self.bot.user.id})\n--------------------------------------------------------------------")
 
+    @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.CommandNotFound):
             await ctx.send("**Invalid command. Try using** `help` **to figure out commands!**")
@@ -42,11 +30,26 @@ class Bot(commands.Bot):
 
     @commands.command()
     async def ping(self, ctx):
-        await ctx.send (f"📶 {round(self.latency * 1000)}ms")
+        await ctx.send (f"📶 {round(self.bot.latency * 1000)}ms")
 
     @commands.command()
     async def donate(self, ctx):
         await ctx.send (f"To access all features from PolygonScan Scrapper Bot and OvoOno Studio in globally, you can donate with one-time PayPal payment on next link: https://upgrade.chat/ovoono-studio/p/ovodonator ")
+
+class Bot(commands.Bot):
+    def __init__(self):
+        super().__init__(command_prefix=commands.when_mentioned_or("ps-"), intents=disnake.Intents.all())
+
+        self.add_cog(BaseCog(self))
+
+        for file in os.listdir('./cogs'):
+            if file.endswith('.py') and file != '__init__.py':
+                try:
+                    self.load_extension(f"cogs.{file[:-3]}")
+                    print(f"{file[:-3]} Loaded successfully.")
+                except:
+                    print(f"Unable to load {file[:-3]}.")
+                    print(traceback.format_exc())
 
 def main():
     bot = Bot()
