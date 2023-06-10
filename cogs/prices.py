@@ -86,8 +86,9 @@ class Moni(commands.Cog):
                 if channel is not None:
                     print(f'Sending price alert to: {channel}')
                     await channel.send(
+                        f"\n"
                         f"🚨 **PRICE CHANGE ALERT** 🚨\n\n"
-                        f"💲 **MATIC Price:** ${current_price:.2f} {arrow_emoji} ({abs(price_change):.2f}% change)\n"
+                        f"💵 **MATIC Price:** ${current_price:.2f} {arrow_emoji} ({abs(price_change):.2f}% change)\n"
                         f"📈 **24h High:** ${price_high_24h:.2f}\n"
                         f"📉 **24h Low:** ${price_low_24h:.2f}\n"
                         f"💼 **24h Volume:** ${volume_24h:.2f}\n"
