@@ -106,16 +106,9 @@ class Moni(commands.Cog):
         
         while not self.bot.is_closed():
             try:
-                coin_data = self.get_crypto_price_data()
-                if coin_data is not None:
-                    current_price = coin_data['usd_price']
-                    price_change_24h = coin_data['price_change_24h']
-                    volume_24h = coin_data['volume_24h']
-                    price_high_24h = coin_data['price_high_24h']
-                    price_low_24h = coin_data['price_low_24h']
-                    market_cap = coin_data['market_cap']
-                    total_volume = coin_data['total_volume']
-                    await self.check_and_send_alert(current_price, coin_data)  
+                current_price, price_change_24h, coin_data = await self.get_crypto_price_data()
+                if current_price is not None:
+                    await self.check_and_send_alert(current_price, coin_data)
                 else:
                     print("No price data to check.")
                     
