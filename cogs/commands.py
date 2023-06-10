@@ -288,6 +288,7 @@ class Scrape(commands.Cog):
         )
          
         await ctx.author.send(embed=embed) 
+
     """
     Define getTrxHash() - return a link to for specific transaction hash.
     """
@@ -383,7 +384,44 @@ class Scrape(commands.Cog):
         ) 
 
         await ctx.author.send(embed=embed) 
+
     
+    """
+    Define creator() - Returns a contract's deployer address and transaction hash it was created, up to 5 at a time. 
+    """    
+    @commands.command()
+    async def creator(self, ctx: commands.Context, *addresses: str):
+        author = ctx.author.mention
+
+        # Concatenate all addresses into a comma-separated string
+        addresses_str = ','.join(addresses)
+
+        # Fetch the contract creation data from the API
+        url = f"https://api.polygonscan.com/api?module=contract&action=getcontractcreation&contractaddresses={addresses_str}&apikey={str(APIKey)}"
+        response = requests.get(url)
+        data = json.loads(response.text)
+        results = data['result']
+
+        message = f"**Contract Creator and Creation Tx Hash**\n"
+
+        # Loop through results to format the message
+        for result in results:
+            contractAddress = result['contractAddress']
+            contractCreator = result['contractCreator']
+            txHash = result['txHash']
+
+            message += (
+                f"\n"
+                f"🔹 **Contract Address**: {contractAddress}\n"
+                f"👤 **Contract Creator**: {contractCreator}\n"
+                f"🔗 **TxHash**: {txHash}\n"
+                f"--------\n"
+            )
+
+        # Send DM to the author
+        await ctx.send(f"Sending Contract Creator and Creation Tx Hash for **{addresses_str}** - sent DM to {ctx.author}") 
+        await ctx.author.send(message)
+
     """
     Define abi() - Returns the current Safe, Proposed and Fast gas prices.. 
     """
@@ -408,6 +446,7 @@ class Scrape(commands.Cog):
         # Send the file in a direct message to the user
         try:
             with open(temp_file, 'rb') as f:
+                await ctx.send(f"Sending ABI JSON  for **{address}** - sent DM to {ctx.author}") 
                 await ctx.author.send(file=disnake.File(f))
         except Exception as e:
             print(f"An error occurred when trying to send a message: {e}")
