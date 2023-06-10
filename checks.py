@@ -3,7 +3,7 @@ from disnake.ext import commands
 from replit import db
 
 # Define is donator to separate free and paied version
-def is_donator(self):
+def is_donator():
     async def predicate(ctx):
         donator_role = disnake.utils.get(ctx.guild.roles, name="OvoDonator")
         if donator_role in ctx.author.roles:
