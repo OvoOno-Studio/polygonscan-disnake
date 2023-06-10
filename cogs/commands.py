@@ -358,14 +358,13 @@ class Scrape(commands.Cog):
     Define getBalance() - get amount in WEI for single address. 
     """
     @commands.command()
-    async def getBalance(self, ctx: commands.Context, address: str): 
+    async def balance(self, ctx: commands.Context, address: str): 
         api_key = self.key
         author = ctx.author.mention
         endpoint = f'https://api.polygonscan.com/api?module=account&action=balance&address={str(address)}&apikey={str(api_key)}'
         response = requests.get(endpoint)  
         data = json.loads(response.text) 
-        amount = float(data['result']) / ( 10 ** 18 ) # Convert WEI to MATIC 
-        print(f"User - {author} trigger command getBalance for {address} wallet address.")
+        amount = float(data['result']) / ( 10 ** 18 ) # Convert WEI to MATIC  
         await ctx.send(f"Sending MATIC balance for **{address}** - sent DM to {author}") 
         embed = disnake.Embed(
             title=f"Get balance for {str(address)}",
@@ -390,11 +389,12 @@ class Scrape(commands.Cog):
     @commands.command()
     async def abi(self, ctx: commands.Context, address: str):
         key = APIKey
+        author = ctx.author.mention
         url = f"https://api.polygonscan.com/api?module=contract&action=getabi&address={str(address)}&apikey={str(key)}"
         response = requests.get(url)
         data = json.loads(response.text)
-
-         # Parse the 'result' string into a Python object
+        print(data)
+        # Parse the 'result' string into a Python object
         abi = json.loads(data['result'])
         pretty_abi = json.dumps(abi, indent=4)
         formatted_message = f"```json\n{pretty_abi}\n```"
@@ -406,7 +406,7 @@ class Scrape(commands.Cog):
             f"{formatted_message}"
         )
 
-        await ctx.send(message)
+        await ctx.author.send(message)
     
     """
     Define gas() - Returns the current Safe, Proposed and Fast gas prices.. 
