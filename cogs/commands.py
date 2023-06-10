@@ -8,6 +8,7 @@ from disnake.ext.commands import has_permissions
 from datetime import datetime
 import csv
 import io
+import os
 from io import StringIO
 from config import APIKey, API2Key
 from checks import is_donator
@@ -355,7 +356,7 @@ class Scrape(commands.Cog):
         await ctx.author.send(embed=embed)    
     
     """
-    Define getBalance() - get amount in WEI for single address. 
+    Define balance() - get amount in WEI for single address. 
     """
     @commands.command()
     async def balance(self, ctx: commands.Context, address: str): 
@@ -389,24 +390,30 @@ class Scrape(commands.Cog):
     @commands.command()
     async def abi(self, ctx: commands.Context, address: str):
         key = APIKey
-        author = ctx.author.mention
         url = f"https://api.polygonscan.com/api?module=contract&action=getabi&address={str(address)}&apikey={str(key)}"
         response = requests.get(url)
         data = json.loads(response.text)
-        print(data)
+
         # Parse the 'result' string into a Python object
         abi = json.loads(data['result'])
         pretty_abi = json.dumps(abi, indent=4)
-        formatted_message = f"```json\n{pretty_abi}\n```"
+        
+        # Create a temporary file
+        temp_file = f'abi_{address}.json'
 
-        # construct a message with the desired formatting and emojis
-        message = (
-            f"\n"
-            f"**Contract ABI 📜 for Verified Smart Contract: {address}**\n"
-            f"{formatted_message}"
-        )
+        # Write the ABI to the file
+        with open(temp_file, 'w') as f:
+            f.write(pretty_abi)
 
-        await ctx.author.send(message)
+        # Send the file in a direct message to the user
+        try:
+            with open(temp_file, 'rb') as f:
+                await ctx.author.send(file=disnake.File(f))
+        except Exception as e:
+            print(f"An error occurred when trying to send a message: {e}")
+
+        # Cleanup: Remove the temporary file after it's used
+        os.remove(temp_file)
     
     """
     Define gas() - Returns the current Safe, Proposed and Fast gas prices.. 
