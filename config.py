@@ -10,7 +10,11 @@ GuildId = os.getenv('GUILD_ID')
 DiscordToken = os.getenv('DISCORD_TOKEN')
 PublicKey = os.getenv('PUBLIC_KEY')
 APIKey = os.getenv('API_KEY')
-API2Key = os.getenv('API2_KEY') 
+API2Key = os.getenv('API2_KEY')
+# Upgrate.Chat API 
+BearerToken = os.getenv('TOKEN')
+ClientID = os.getenv('CLIENT')
+Secret = os.getenv('SECRET')
 
 # This creates a connection to your Replit database
 def create_connection():

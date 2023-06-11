@@ -2,15 +2,16 @@ import disnake
 import aiohttp
 import json
 from disnake.ext import commands
+from config import BearerToken, ClientID, Secret
 from replit import db
 
 # Define is donator to separate free and paied version
 async def fetch_donators():
     headers = {
         'accept': 'application/json',
-        'Authorization': 'Bearer your_token_here',
-        'client_id': 'your_client_id',
-        'client_secret': 'your_client_secret',
+        'Authorization': str(BearerToken),
+        'client_id': str(ClientID),
+        'client_secret': str(Secret),
     }
 
     async with aiohttp.ClientSession() as session:
