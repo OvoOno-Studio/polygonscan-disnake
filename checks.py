@@ -9,9 +9,9 @@ from replit import db
 async def fetch_donators():
     headers = {
         'accept': 'application/json',
-        'Authorization': str(config.BearerToken),
-        'client_id': str(config.ClientID),
-        'client_secret': str(config.Secret),
+        'Authorization': 'Bearer' + config.BearerToken,
+        'client_id': config.ClientID,
+        'client_secret': config.Secret,
     }
 
     # Print headers for debugging (remove or comment this out in production!)
