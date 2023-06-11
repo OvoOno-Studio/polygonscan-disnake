@@ -9,7 +9,7 @@ from replit import db
 async def fetch_donators():
     headers = {
         'accept': 'application/json',
-        'Authorization': 'Bearer' + config.BearerToken,
+        'Authorization': 'Bearer ' + config.BearerToken,
         'client_id': config.ClientID,
         'client_secret': config.Secret,
     }
