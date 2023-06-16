@@ -1,6 +1,7 @@
 import disnake
 import aiohttp
 import json
+import asyncio
 from disnake.ext import commands
 import config
 from replit import db
@@ -14,9 +15,6 @@ async def fetch_donators():
         'client_secret': config.Secret,
     }
 
-    # Print headers for debugging (remove or comment this out in production!)
-    print(f"Headers: {headers}")
-
     async with aiohttp.ClientSession() as session:
         async with session.get('https://api.upgrade.chat/v1/users', headers=headers) as resp:
             # Check the status of the response
@@ -27,12 +25,22 @@ async def fetch_donators():
 
             data = await resp.text()
 
-    return json.loads(data)
+    # Load the data into a dictionary
+    donators_data = json.loads(data)
+
+    # Write the data into a JSON file
+    with open('donators.json', 'w') as json_file:
+        json.dump(donators_data, json_file)
+
+    return donators_data
+
 
 def is_donator():
     async def predicate(ctx):
-        donators = await fetch_donators()
-        
+        # Load the donators data from the JSON file
+        with open('donators.json', 'r') as json_file:
+            donators = json.load(json_file)
+
         # Add error handling for when fetch_donators fails
         if not donators:
             raise commands.CheckFailure("Failed to verify donator status due to an internal error.")
@@ -50,3 +58,12 @@ def ensure_server_config(server_id):
     if str(server_id) not in db.keys():
         db[str(server_id)] = {}
     return db[str(server_id)] 
+
+# Run the fetch_donators function every 30 minutes
+async def update_donators_periodically():
+    while True:
+        await fetch_donators()
+        await asyncio.sleep(30*60)  # wait 30 minutes
+
+# Start the periodic update
+asyncio.create_task(update_donators_periodically())
