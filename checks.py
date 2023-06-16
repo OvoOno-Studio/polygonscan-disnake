@@ -64,6 +64,3 @@ async def update_donators_periodically():
     while True:
         await fetch_donators()
         await asyncio.sleep(30*60)  # wait 30 minutes
-
-# Start the periodic update
-asyncio.create_task(update_donators_periodically())
