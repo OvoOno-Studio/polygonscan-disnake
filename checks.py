@@ -1,9 +1,5 @@
-import disnake
-import aiohttp
-import json
-import asyncio
-from disnake.ext import commands
-import config
+import disnake 
+from disnake.ext import commands 
 from replit import db
 
 # Define is donator to separate free and paied version
@@ -55,9 +51,8 @@ from replit import db
 
 def is_donator():
     async def predicate(ctx):
-        donator_role = disnake.utils.get(ctx.guild.roles, name="OvoDonator")
-        support_role = disnake.utlis.get(ctx.guild.roles, name="OvoSupporter")
-        if donator_role and support_role in ctx.author.roles:
+        donator_role = disnake.utils.get(ctx.guild.roles, name="OvoDonator") 
+        if donator_role in ctx.author.roles:
             return True
         else:
             raise commands.CheckFailure("You need to be a Donator to use this bot's commands.")

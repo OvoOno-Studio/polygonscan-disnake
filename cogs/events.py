@@ -49,7 +49,7 @@ class Events(commands.Cog):
                     })
 
                     # Write the updated data back to the JSON file
-                    with open('user.json', 'w') as json_file:
+                    with open('donators.json', 'w') as json_file:
                         json.dump(data, json_file)
 
     async def check_and_send_default_settings_alert(self, guild):
