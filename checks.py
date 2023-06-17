@@ -16,13 +16,13 @@ async def fetch_donators():
     }
 
     async with aiohttp.ClientSession() as session:
-        async with session.get('https://api.upgrade.chat/v1/users', headers=headers) as resp:
+        async with session.get('https://developers.buymeacoffee.com/api/v1/subscriptions?status=active', headers=headers) as resp:
             # Check the status of the response
             if resp.status != 200:
                 # Print response text for debugging if status is not 200
                 print(f"Failed to fetch donators. HTTP status code: {resp.status}, response: {await resp.text()}")
                 return None
-
+            print('Donators fetched...')
             data = await resp.text()
 
     # Load the data into a dictionary

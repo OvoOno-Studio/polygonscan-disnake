@@ -20,7 +20,7 @@ class Scrape(commands.Cog):
     @staticmethod
     def get_token_holders(token_address, num_transactions=1000, page_size=100, num_pages=40):
         holders = set() 
-
+        key = str(APIKey)
         for page in range(1, num_pages + 1):
             url = f'https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={token_address}&page={page}&offset={page_size}&sort=desc&apikey={key}'
             response = requests.get(url)

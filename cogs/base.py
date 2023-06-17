@@ -1,5 +1,6 @@
 from disnake.ext import commands 
-from checks import update_donators_periodically
+#from checks import update_donators_periodically
+
 class BaseCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -8,7 +9,7 @@ class BaseCog(commands.Cog):
     async def on_ready(self):
         print("Welcome to the PolygonScan Tracker Bot!")
         print(f"Logged in as {self.bot.user} (ID: {self.bot.user.id})\n--------------------------------------------------------------------")
-        self.bot.loop.create_task(update_donators_periodically())
+        # self.bot.loop.create_task(update_donators_periodically())
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
