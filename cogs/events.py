@@ -1,4 +1,6 @@
 import asyncio
+import json
+from disnake import Member
 from disnake.ext import commands
 from config import set_price_alert_channel, set_transaction_channel, set_wallet_address
 from config import get_price_alert_channel, get_transaction_channel, get_wallet_address
@@ -26,6 +28,29 @@ class Events(commands.Cog):
     async def on_guild_join(self, guild):
         # Initialize the server's configuration in the database
         await self.check_and_send_default_settings_alert(guild)
+
+    @commands.Cog.listener()
+    async def on_member_update(self, before: Member, after: Member):
+        # Check if the roles have changed
+        if before.roles != after.roles:
+            # Check if the new roles include "OvoDonator" or "OvoSupporter"
+            new_roles = [role.name for role in after.roles]
+            if "OvoDonator" in new_roles or "OvoSupporter" in new_roles:
+                # Load the current data from the JSON file
+                with open('donators.json', 'r') as json_file:
+                    data = json.load(json_file)
+                
+                # Check if the user id is not already in the data
+                if not any(user['user_id'] == after.id for user in data):
+                    # Add the new user to the data
+                    data.append({
+                        'user_id': after.id,
+                        'username': after.name
+                    })
+
+                    # Write the updated data back to the JSON file
+                    with open('user.json', 'w') as json_file:
+                        json.dump(data, json_file)
 
     async def check_and_send_default_settings_alert(self, guild):
         default_settings = {
