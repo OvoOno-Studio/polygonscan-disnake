@@ -56,7 +56,7 @@ def is_donator():
             donators = json.load(json_file)
 
         # Check if the author's id is in the list of donator ids
-        if str(ctx.author.id) in [donator['user_id'] for donator in donators]:
+        if ctx.author.id in [donator['user_id'] for donator in donators]:
             return True
         else:
             raise commands.CheckFailure("You need to be a Donator to use this bot's commands.")
