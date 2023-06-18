@@ -38,8 +38,11 @@ class Events(commands.Cog):
             after_roles = set(role.name for role in after.roles)
 
             # Load the current data from the JSON file
-            with open('donators.json', 'r') as json_file:
-                data = json.load(json_file)
+            try:
+                with open('donators.json', 'r') as json_file:
+                    data = json.load(json_file)
+            except json.JSONDecodeError:
+                data = []
 
             # Get the roles that were added and removed
             added_roles = after_roles - before_roles
@@ -61,7 +64,6 @@ class Events(commands.Cog):
             # Write the updated data back to the JSON file
             with open('donators.json', 'w') as json_file:
                 json.dump(data, json_file)
-
 
     async def check_and_send_default_settings_alert(self, guild):
         default_settings = {
