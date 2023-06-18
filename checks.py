@@ -62,7 +62,6 @@ def is_donator():
             raise commands.CheckFailure("You need to be a Donator to use this bot's commands.")
     return commands.check(predicate)
 
-
 # Ensure if there is guild confiuration in database
 def ensure_server_config(server_id):
     if str(server_id) not in db.keys():

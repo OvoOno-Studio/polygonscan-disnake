@@ -32,25 +32,31 @@ class Events(commands.Cog):
     @commands.Cog.listener()
     async def on_member_update(self, before: Member, after: Member):
         # Check if the roles have changed
-        if before.roles != after.roles:
-            # Check if the new roles include "OvoDonator" or "OvoSupporter"
-            new_roles = [role.name for role in after.roles]
-            if "OvoDonator" in new_roles or "OvoSupporter" in new_roles:
-                # Load the current data from the JSON file
-                with open('donators.json', 'r') as json_file:
-                    data = json.load(json_file)
-                
-                # Check if the user id is not already in the data
-                if not any(user['user_id'] == after.id for user in data):
-                    # Add the new user to the data
-                    data.append({
-                        'user_id': after.id,
-                        'username': after.name
-                    })
+        if set(before.roles) != set(after.roles):
+            # Get the set of role names before and after the update
+            before_roles = set(role.name for role in before.roles)
+            after_roles = set(role.name for role in after.roles)
 
-                    # Write the updated data back to the JSON file
-                    with open('donators.json', 'w') as json_file:
-                        json.dump(data, json_file)
+            # Load the current data from the JSON file
+            with open('donators.json', 'r') as json_file:
+                data = json.load(json_file)
+
+            # Check if the user has gained "OvoDonator" or "OvoSupporter" role
+            if ("OvoDonator" in after_roles or "OvoSupporter" in after_roles) and not any(user['user_id'] == after.id for user in data):
+                # Add the new user to the data
+                data.append({
+                    'user_id': after.id,
+                    'username': after.name
+                })
+
+            # Check if the user has lost "OvoDonator" or "OvoSupporter" role
+            elif ("OvoDonator" not in after_roles and "OvoSupporter" not in after_roles) and any(user['user_id'] == after.id for user in data):
+                # Remove the user from the data
+                data = [user for user in data if user['user_id'] != after.id]
+
+            # Write the updated data back to the JSON file
+            with open('donators.json', 'w') as json_file:
+                json.dump(data, json_file)
 
     async def check_and_send_default_settings_alert(self, guild):
         default_settings = {
