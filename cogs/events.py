@@ -45,22 +45,23 @@ class Events(commands.Cog):
             added_roles = after_roles - before_roles
             removed_roles = before_roles - after_roles
 
-            # Check if the user has gained "OvoDonator" or "OvoSupporter" role
-            if ("OvoDonator" in added_roles or "OvoSupporter" in added_roles) and not any(user['user_id'] == after.id for user in data):
+            # Check if the user has gained "OvoDonator" role
+            if "OvoDonator" in added_roles and not any(user['user_id'] == after.id for user in data):
                 # Add the new user to the data
                 data.append({
                     'user_id': after.id,
                     'username': after.name
                 })
 
-            # Check if the user has lost "OvoDonator" or "OvoSupporter" role
-            elif ("OvoDonator" in removed_roles or "OvoSupporter" in removed_roles) and any(user['user_id'] == after.id for user in data):
+            # Check if the user has lost "OvoDonator" role
+            elif "OvoDonator" in removed_roles and any(user['user_id'] == after.id for user in data):
                 # Remove the user from the data
                 data = [user for user in data if user['user_id'] != after.id]
 
             # Write the updated data back to the JSON file
             with open('donators.json', 'w') as json_file:
                 json.dump(data, json_file)
+
 
     async def check_and_send_default_settings_alert(self, guild):
         default_settings = {
