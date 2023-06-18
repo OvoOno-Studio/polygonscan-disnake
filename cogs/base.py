@@ -26,7 +26,7 @@ class BaseCog(commands.Cog):
 
     @commands.command()
     async def donate(self, ctx):
-        await ctx.send (f"To access all features from PolygonScan Scrapper Bot and OvoOno Studio in globally, you can donate with one-time PayPal payment on next link: https://upgrade.chat/ovoono-studio/p/ovodonator ")
+        await ctx.send (f"To access all features from PolygonScan Scrapper Bot and OvoOno Studio in globally, you can donate with one-time PayPal payment on next link: https://www.buymeacoffee.com/bezmir")
 
 def setup(bot):
     bot.add_cog(BaseCog(bot))
