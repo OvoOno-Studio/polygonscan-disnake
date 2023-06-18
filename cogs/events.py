@@ -41,8 +41,12 @@ class Events(commands.Cog):
             with open('donators.json', 'r') as json_file:
                 data = json.load(json_file)
 
+            # Get the roles that were added and removed
+            added_roles = after_roles - before_roles
+            removed_roles = before_roles - after_roles
+
             # Check if the user has gained "OvoDonator" or "OvoSupporter" role
-            if ("OvoDonator" in after_roles or "OvoSupporter" in after_roles) and not any(user['user_id'] == after.id for user in data):
+            if ("OvoDonator" in added_roles or "OvoSupporter" in added_roles) and not any(user['user_id'] == after.id for user in data):
                 # Add the new user to the data
                 data.append({
                     'user_id': after.id,
@@ -50,7 +54,7 @@ class Events(commands.Cog):
                 })
 
             # Check if the user has lost "OvoDonator" or "OvoSupporter" role
-            elif ("OvoDonator" not in after_roles and "OvoSupporter" not in after_roles) and any(user['user_id'] == after.id for user in data):
+            elif ("OvoDonator" in removed_roles or "OvoSupporter" in removed_roles) and any(user['user_id'] == after.id for user in data):
                 # Remove the user from the data
                 data = [user for user in data if user['user_id'] != after.id]
 
