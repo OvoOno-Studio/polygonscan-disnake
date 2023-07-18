@@ -23,6 +23,8 @@ class Signal(commands.Cog):
             print(f"Error in fetch_signal_data: {e}")
             return None
 
+    import json
+
     async def send_signal_message(self, signal_data):
         try:
             with open('donators.json', 'r') as f:
@@ -35,7 +37,7 @@ class Signal(commands.Cog):
             return
 
         user_ids = [donator['user_id'] for donator in donators]
-        signal_mapping = {0: 'HODL', -1: 'SELL', 1: 'BUY'}
+        signal_mapping = {0: ('HODL', '🟡'), -1: ('SELL', '🔴'), 1: ('BUY', '🟢')}
 
         for user_id in user_ids:
             try:
@@ -43,10 +45,11 @@ class Signal(commands.Cog):
                 if user:
                     print(f"Sending signal message to user {user.id}")  # Debugging print statement
                     message = (
-                        f"📡 **New Signal Data** 📡\n"
-                        f"MACD: {signal_mapping[signal_data['macd']]}\n"
-                        f"RSI: {signal_mapping[signal_data['rsi']]}\n"
-                        f"Bollinger Bands: {signal_mapping[signal_data['bollingerBands']]}\n"
+                        f".\n\n"
+                        f"📡 **New CryptoSignal Data for MATIC/USDT** 📡\n\n"
+                        f"**MACD:** {signal_mapping[signal_data['macd']][1]} {signal_mapping[signal_data['macd']][0]}\n"
+                        f"**RSI:** {signal_mapping[signal_data['rsi']][1]} {signal_mapping[signal_data['rsi']][0]}\n"
+                        f"**Bollinger Bands:** {signal_mapping[signal_data['bollingerBands']][1]} {signal_mapping[signal_data['bollingerBands']][0]}\n"
                     )
                     try:
                         await user.send(message)
@@ -73,7 +76,7 @@ class Signal(commands.Cog):
                 else:
                     print("No signal data to send.")
                     
-                await asyncio.sleep(60)  # 4 hours
+                await asyncio.sleep(14400)  # 4 hours
                 
             except Exception as e:
                 print(f"Error in send_signal: {e}")

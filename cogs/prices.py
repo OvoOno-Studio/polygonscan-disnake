@@ -114,7 +114,7 @@ class Moni(commands.Cog):
                 else:
                     print("No price data to check.")
                     
-                await asyncio.sleep(10800)  # 3 hours
+                await asyncio.sleep(14400)  # 3 hours
                 
             except Exception as e:
                 print(f"Error in price_check_and_alert: {e}")
