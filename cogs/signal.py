@@ -1,3 +1,4 @@
+import json
 import aiohttp
 import asyncio
 import disnake
@@ -23,7 +24,19 @@ class Signal(commands.Cog):
             return None
 
     async def send_signal_message(self, signal_data):
-        user_ids = [672884172750061578, 590579819369201664, 709845194719101059]  # Replace with your actual user IDs
+        try:
+            with open('donators.json', 'r') as f:
+                donators = json.load(f)
+        except FileNotFoundError:
+            print("File 'donators.json' not found.")
+            return
+        except json.JSONDecodeError:
+            print("Error decoding JSON from 'donators.json'.")
+            return
+
+        user_ids = [donator['user_id'] for donator in donators]
+        signal_mapping = {0: 'HODL', -1: 'SELL', 1: 'BUY'}
+
         for user_id in user_ids:
             try:
                 user = await self.bot.fetch_user(user_id)
@@ -31,9 +44,9 @@ class Signal(commands.Cog):
                     print(f"Sending signal message to user {user.id}")  # Debugging print statement
                     message = (
                         f"📡 **New Signal Data** 📡\n"
-                        f"MACD: {signal_data['macd']}\n"
-                        f"RSI: {signal_data['rsi']}\n"
-                        f"Bollinger Bands: {signal_data['bollingerBands']}\n"
+                        f"MACD: {signal_mapping[signal_data['macd']]}\n"
+                        f"RSI: {signal_mapping[signal_data['rsi']]}\n"
+                        f"Bollinger Bands: {signal_mapping[signal_data['bollingerBands']]}\n"
                     )
                     try:
                         await user.send(message)
