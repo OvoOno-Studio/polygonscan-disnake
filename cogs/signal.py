@@ -95,17 +95,20 @@ class Signal(commands.Cog):
 
         while not self.bot.is_closed():
             try:
-                signal_data = await self.fetch_signal_data()
-                if signal_data is not None:
-                    await self.send_signal_message(signal_data)
+                data = await self.fetch_signal_data()
+                if data is not None:
+                    signal_data = data['signal']
+                    indicators_data = data['indicators']  # assuming 'indicators' key exists in the data
+                    await self.send_signal_message(signal_data, indicators_data)
                 else:
                     print("No signal data to send.")
                     
-                await asyncio.sleep(14400)  # 4 hours
-                
+                await asyncio.sleep(60)  # 4 hours
+                    
             except Exception as e:
                 print(f"Error in send_signal: {e}")
                 await asyncio.sleep(60)  # In case of an error, wait 1 minute before retrying
+
 
 def setup(bot):
     bot.add_cog(Signal(bot))
