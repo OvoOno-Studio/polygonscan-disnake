@@ -1,8 +1,7 @@
 import aiohttp
 import asyncio
 import disnake
-from disnake.ext import commands
-from config import get_transaction_channel
+from disnake.ext import commands 
 
 class Signal(commands.Cog):
     def __init__(self, bot):
@@ -24,12 +23,12 @@ class Signal(commands.Cog):
             return None
 
     async def send_signal_message(self, signal_data):
-        for guild in self.bot.guilds:
-            self.transaction_channel_id = get_transaction_channel(guild.id)
+        user_ids = [672884172750061578, 590579819369201664, 709845194719101059]  # Replace with your actual user IDs
+        for user_id in user_ids:
             try:
-                channel = await self.bot.fetch_channel(self.transaction_channel_id)
-                if channel:
-                    print(f"Sending signal message to channel {channel.id}")  # Debugging print statement
+                user = await self.bot.fetch_user(user_id)
+                if user:
+                    print(f"Sending signal message to user {user.id}")  # Debugging print statement
                     message = (
                         f"📡 **New Signal Data** 📡\n"
                         f"MACD: {signal_data['macd']}\n"
@@ -37,18 +36,18 @@ class Signal(commands.Cog):
                         f"Bollinger Bands: {signal_data['bollingerBands']}\n"
                     )
                     try:
-                        await channel.send(message)
-                        print(f"Signal message sent to: {channel}") # Debugging print statement
+                        await user.send(message)
+                        print(f"Signal message sent to: {user}")  # Debugging print statement
                     except disnake.HTTPException as e:
-                        print(f"Error sending signal message to channel with ID {self.transaction_channel_id}: {e}")
+                        print(f"Error sending signal message to user with ID {user_id}: {e}")
                 else:
-                    print('No channel optimized!')
+                    print(f"User with ID {user_id} not found.")
             except disnake.NotFound:
-                print(f"Channel with ID {self.transaction_channel_id} not found.")
+                print(f"User with ID {user_id} not found.")
             except disnake.Forbidden:
-                print(f"Bot does not have permission to access channel with ID {self.transaction_channel_id}.")
+                print(f"Bot does not have permission to send messages to user with ID {user_id}.")
             except disnake.HTTPException as e:
-                print(f"Error fetching channel with ID {self.transaction_channel_id}: {e}")
+                print(f"Error fetching user with ID {user_id}: {e}")
 
     async def send_signal(self):
         await self.bot.wait_until_ready()
