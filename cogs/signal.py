@@ -20,23 +20,12 @@ class Signal(commands.Cog):
                     print(f"Failed to fetch signal data, status code: {response.status}, message: {await response.text()}")
                     return None
                 json_data = await response.json()
-                return json_data 
+                return json_data["signal"]
         except Exception as e:
             print(f"Error in fetch_signal_data: {e}")
-            return None
-        
-    def generate_graph(self, data, title, filename):
-        plt.figure(figsize=(14, 7))
-        plt.plot(data, label=title)
-        plt.title(title)
-        plt.xlabel('Time')
-        plt.ylabel('Value')
-        plt.legend()
-        plt.grid(True)
-        plt.savefig(filename)
-        plt.close()
+            return None 
 
-    async def send_signal_message(self, signal_data, indicators_data):
+    async def send_signal_message(self, signal_data):
         try:
             with open('donators.json', 'r') as f:
                 donators = json.load(f)
@@ -50,37 +39,23 @@ class Signal(commands.Cog):
         user_ids = [donator['user_id'] for donator in donators]
         signal_mapping = {0: ('HODL', '🟡'), -1: ('SELL', '🔴'), 1: ('BUY', '🟢')}
 
-        # Generate graphs for each indicator
-        for indicator in ['macd', 'rsi', 'bollingerBands']:
-            plt.figure(figsize=(14, 7))
-            plt.plot(indicators_data[indicator], label=indicator)
-            plt.title(f'{indicator} over time')
-            plt.xlabel('Time')
-            plt.ylabel('Value')
-            plt.legend()
-            plt.grid(True)
-            plt.savefig(f'{indicator}.png')
-            plt.close()
-
         for user_id in user_ids:
             try:
                 user = await self.bot.fetch_user(user_id)
                 if user:
                     print(f"Sending signal message to user {user.id}")  # Debugging print statement
-                    embed = disnake.Embed(
-                        title="📡 New CryptoSignal Data for MATIC/USDT 📡",
-                        description=(
-                            f"**MACD:** {signal_mapping[signal_data['macd']][1]} {signal_mapping[signal_data['macd']][0]}\n"
-                            f"**RSI:** {signal_mapping[signal_data['rsi']][1]} {signal_mapping[signal_data['rsi']][0]}\n"
-                            f"**Bollinger Bands:** {signal_mapping[signal_data['bollingerBands']][1]} {signal_mapping[signal_data['bollingerBands']][0]}\n"
-                        ),
-                        color=disnake.Color.blue()
+                    message = (
+                        f".\n\n"
+                        f"📡 **New CryptoSignal Data for MATIC/USDT** 📡\n\n"
+                        f"**MACD:** {signal_mapping[signal_data['macd']][1]} {signal_mapping[signal_data['macd']][0]}\n"
+                        f"**RSI:** {signal_mapping[signal_data['rsi']][1]} {signal_mapping[signal_data['rsi']][0]}\n"
+                        f"**Bollinger Bands:** {signal_mapping[signal_data['bollingerBands']][1]} {signal_mapping[signal_data['bollingerBands']][0]}\n"
                     )
-                    for indicator in ['macd', 'rsi', 'bollingerBands']:
-                        file = disnake.File(f"{indicator}.png", filename=f"{indicator}.png")
-                        embed.set_image(url=f"attachment://{indicator}.png")
-                        await user.send(embed=embed, file=file)
+                    try:
+                        await user.send(message)
                         print(f"Signal message sent to: {user}")  # Debugging print statement
+                    except disnake.HTTPException as e:
+                        print(f"Error sending signal message to user with ID {user_id}: {e}")
                 else:
                     print(f"User with ID {user_id} not found.")
             except disnake.NotFound:
@@ -95,20 +70,17 @@ class Signal(commands.Cog):
 
         while not self.bot.is_closed():
             try:
-                data = await self.fetch_signal_data()
-                if data is not None:
-                    signal_data = data['signal']
-                    indicators_data = data['indicators']  # assuming 'indicators' key exists in the data
-                    await self.send_signal_message(signal_data, indicators_data)
+                signal_data = await self.fetch_signal_data()
+                if signal_data is not None:
+                    await self.send_signal_message(signal_data)
                 else:
                     print("No signal data to send.")
                     
-                await asyncio.sleep(60)  # 4 hours
-                    
+                await asyncio.sleep(14400)  # 4 hours
+                
             except Exception as e:
                 print(f"Error in send_signal: {e}")
                 await asyncio.sleep(60)  # In case of an error, wait 1 minute before retrying
-
 
 def setup(bot):
     bot.add_cog(Signal(bot))
