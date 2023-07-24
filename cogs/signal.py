@@ -84,7 +84,7 @@ class Signal(commands.Cog):
             try:
                 for guild in self.bot.guilds:
                     self.signal_pair = get_signal_pair(guild.id)
-                    print(self.bot.guilds)
+                    print(guild)
                     signal_data = await self.fetch_signal_data(self.signal_pair)
                     if signal_data is not None:
                         await self.send_signal_message(signal_data)
