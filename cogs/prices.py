@@ -245,9 +245,7 @@ class Moni(commands.Cog):
                             print(f"New incoming transaction found: {last_transaction}")
                             print(f"Sending transaction message for {last_transaction['hash']}")
                             await self.send_transaction_message(last_transaction)
-                            self.last_known_transaction = last_transaction
-                        else:
-                            print(f"No new incoming transactions found for wallet {self.wallet_address}")
+                            self.last_known_transaction = last_transaction 
                     
                     await asyncio.sleep(30)
 
