@@ -61,7 +61,7 @@ class Signal(commands.Cog):
                         f"💵 **Pair:** {self.signal_pair}/usdt\n"
                         f"📊 **MACD:**\n ----------- \n{signal_mapping[signal_data['macd']][1]} {signal_mapping[signal_data['macd']][0]}\n ----------- \n"
                         f"📊 **RSI:**\n ----------- \n {signal_mapping[signal_data['rsi']][1]} {signal_mapping[signal_data['rsi']][0]}\n ----------- \n "
-                        f"📜 **BB:**\n ----------- \n {signal_mapping[signal_data['bollingerBands']][1]} {signal_mapping[signal_data['bollingerBands']][0]}\n  ----------- \n"
+                        f"📜 **BB:**\n ----------- \n {signal_mapping[signal_data['bollingerBands']][1]} {signal_mapping[signal_data['bollingerBands']][0]}\n ----------- \n"
                     )
                     try:
                         await user.send(message)
@@ -83,8 +83,7 @@ class Signal(commands.Cog):
         while not self.bot.is_closed(): 
             for guild in self.bot.guilds:
                 try:
-                    self.signal_pair = get_signal_pair(guild.id)
-                    print(guild)
+                    self.signal_pair = get_signal_pair(guild.id) 
                     signal_data = await self.fetch_signal_data(self.signal_pair)
                     if signal_data is not None:
                         await self.send_signal_message(signal_data)
@@ -95,7 +94,7 @@ class Signal(commands.Cog):
                 except Exception as e:
                     print(f"Error in send_signal: {e}")
                     await asyncio.sleep(60)  # In case of an error, wait 1 minute before retrying
-            await asyncio.sleep(3600)  # 1 hour
+            
 
 def setup(bot):
     bot.add_cog(Signal(bot))
