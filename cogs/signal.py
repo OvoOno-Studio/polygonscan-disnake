@@ -58,9 +58,9 @@ class Signal(commands.Cog):
                     message = (
                         f".\n"
                         f"📡 **New Technical analysis Indicators: ** 📡\n\n"
-                        f"💵 **Pair:**\n {self.signal_pair}/usdt\n"
-                        f"📊 **MACD:**\n ----------- \n{signal_mapping[signal_data['macd']][1]} {signal_mapping[signal_data['macd']][0]}\n  ----------- \n"
-                        f"📊 **RSI:**\n ----------- \n {signal_mapping[signal_data['rsi']][1]} {signal_mapping[signal_data['rsi']][0]}\n  ----------- \n "
+                        f"💵 **Pair:** {self.signal_pair}/usdt\n"
+                        f"📊 **MACD:**\n ----------- \n{signal_mapping[signal_data['macd']][1]} {signal_mapping[signal_data['macd']][0]}\n ----------- \n"
+                        f"📊 **RSI:**\n ----------- \n {signal_mapping[signal_data['rsi']][1]} {signal_mapping[signal_data['rsi']][0]}\n ----------- \n "
                         f"📜 **BB:**\n ----------- \n {signal_mapping[signal_data['bollingerBands']][1]} {signal_mapping[signal_data['bollingerBands']][0]}\n  ----------- \n"
                     )
                     try:
@@ -91,7 +91,7 @@ class Signal(commands.Cog):
                     else:
                         print("No signal data to send.")
                         
-                    await asyncio.sleep(3600)  # 1 hour
+                    await asyncio.sleep(60)  # 1 hour
                 
             except Exception as e:
                 print(f"Error in send_signal: {e}")
