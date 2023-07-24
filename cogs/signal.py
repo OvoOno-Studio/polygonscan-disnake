@@ -24,15 +24,11 @@ class Signal(commands.Cog):
 
     async def fetch_signal_data(self):
         try:
-            for guild in self.bot.guilds:
-                if self.signal_pair is None:
-                    self.signal_pair = 'matic'
-
-                self.signal_pair = get_signal_pair(guild.id)
-                print('Signal pair')
-                print(self.signal_pair)
+            for guild in self.bot.guilds: 
+                signal_pair = get_signal_pair(guild.id)
+                print(signal_pair)
                 
-                url = self.api_url + self.signal_pair
+                url = self.api_url + signal_pair 
                 print(url)   
                 async with self.session.get(url) as response:
                     if response.status != 200:
@@ -60,28 +56,24 @@ class Signal(commands.Cog):
 
         for user_id in user_ids:
             try:
-                for guild in self.bot.guilds: 
-
-                    self.signal_pair = get_signal_pair(guild.id) 
-
-                    user = await self.bot.fetch_user(user_id)
-                    if user:
-                        print(f"Sending signal message to user {user.id}")  # Debugging print statement
-                        message = (
-                            f".\n"
-                            f"📡 **New Technical analysis Indicators: ** 📡\n\n"
-                            f"💵 **Pair:**\n {self.signal_pair}/usdt\n"
-                            f"📊 **MACD:**\n ----------- \n{signal_mapping[signal_data['macd']][1]} {signal_mapping[signal_data['macd']][0]}\n  ----------- \n"
-                            f"📊 **RSI:**\n ----------- \n {signal_mapping[signal_data['rsi']][1]} {signal_mapping[signal_data['rsi']][0]}\n  ----------- \n "
-                            f"📜 **BB:**\n ----------- \n {signal_mapping[signal_data['bollingerBands']][1]} {signal_mapping[signal_data['bollingerBands']][0]}\n  ----------- \n"
-                        )
-                        try:
-                            await user.send(message)
-                            print(f"Signal message sent to: {user}")  # Debugging print statement
-                        except disnake.HTTPException as e:
-                            print(f"Error sending signal message to user with ID {user_id}: {e}")
-                    else:
-                        print(f"User with ID {user_id} not found.")
+                user = await self.bot.fetch_user(user_id)
+                if user:
+                    print(f"Sending signal message to user {user.id}")  # Debugging print statement
+                    message = (
+                        f".\n"
+                        f"📡 **New Technical analysis Indicators: ** 📡\n\n"
+                        f"💵 **Pair:**\n {self.signal_pair}/usdt\n"
+                        f"📊 **MACD:**\n ----------- \n{signal_mapping[signal_data['macd']][1]} {signal_mapping[signal_data['macd']][0]}\n  ----------- \n"
+                        f"📊 **RSI:**\n ----------- \n {signal_mapping[signal_data['rsi']][1]} {signal_mapping[signal_data['rsi']][0]}\n  ----------- \n "
+                        f"📜 **BB:**\n ----------- \n {signal_mapping[signal_data['bollingerBands']][1]} {signal_mapping[signal_data['bollingerBands']][0]}\n  ----------- \n"
+                    )
+                    try:
+                        await user.send(message)
+                        print(f"Signal message sent to: {user}")  # Debugging print statement
+                    except disnake.HTTPException as e:
+                        print(f"Error sending signal message to user with ID {user_id}: {e}")
+                else:
+                    print(f"User with ID {user_id} not found.")
             except disnake.NotFound:
                 print(f"User with ID {user_id} not found.")
             except disnake.Forbidden:
