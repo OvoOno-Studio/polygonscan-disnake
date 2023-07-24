@@ -55,4 +55,4 @@ def set_signal_pair(server_id, signal_pair):
 
 def get_signal_pair(server_id):
     server_config = ensure_server_config(server_id)
-    return server_config.get["signal_pair"]
+    return server_config.get("signal_pair")
