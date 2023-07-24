@@ -13,7 +13,7 @@ class Signal(commands.Cog):
         self.bot = bot
         self.session = aiohttp.ClientSession()
         self.signal_pair = None
-        self.api_url = f"https://ovoonoapi.azurewebsites.net/crypto/`{self.signal_pair}`"
+        self.api_url = "https://ovoonoapi.azurewebsites.net/crypto/"
         self.bot.loop.create_task(self.send_signal())
 
     @commands.command(name="set_signal_pair")
@@ -28,8 +28,10 @@ class Signal(commands.Cog):
                 self.signal_pair = get_signal_pair(guild.id)
                 if self.signal_pair is None:
                     self.signal_pair = 'matic'
-                    
-                async with self.session.get(self.api_url) as response:
+
+                url = self.api_url + self.signal_pair
+                print(url)   
+                async with self.session.get(url) as response:
                     if response.status != 200:
                         print(f"Failed to fetch signal data, status code: {response.status}, message: {await response.text()}")
                         return None
