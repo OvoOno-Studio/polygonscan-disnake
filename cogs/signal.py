@@ -80,21 +80,20 @@ class Signal(commands.Cog):
     async def send_signal(self):
         await self.bot.wait_until_ready()
 
-        while not self.bot.is_closed(): 
-            for guild in self.bot.guilds:
-                try:
-                    self.signal_pair = get_signal_pair(guild.id) 
-                    signal_data = await self.fetch_signal_data(self.signal_pair)
-                    if signal_data is not None:
-                        await self.send_signal_message(signal_data)
-                    else:
-                        print("No signal data to send.")
-                        
+        while not self.bot.is_closed():  
+            try:
+                self.signal_pair = get_signal_pair(944377384872853555)
+                signal_data = await self.fetch_signal_data(self.signal_pair)
+                if signal_data is not None:
+                    await self.send_signal_message(signal_data)
+                    await asyncio.sleep(3600)  # 1 hour
+                else:
+                    print("No signal data to send.")
                     
-                except Exception as e:
-                    print(f"Error in send_signal: {e}")
-                    await asyncio.sleep(60)  # In case of an error, wait 1 minute before retrying
-            
+                
+            except Exception as e:
+                print(f"Error in send_signal: {e}")
+                await asyncio.sleep(60)  # In case of an error, wait 1 minute before retrying
 
 def setup(bot):
     bot.add_cog(Signal(bot))
