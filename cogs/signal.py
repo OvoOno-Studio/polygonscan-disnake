@@ -22,20 +22,16 @@ class Signal(commands.Cog):
         set_signal_pair(ctx.guild.id, signal_pair)
         await ctx.send(f"Signal pair has been set to `{signal_pair}`/usdt")
 
-    async def fetch_signal_data(self):
-        try:
-            for guild in self.bot.guilds: 
-                signal_pair = get_signal_pair(guild.id)
-                print(signal_pair)
-                
-                url = self.api_url + signal_pair 
-                print(url)   
-                async with self.session.get(url) as response:
-                    if response.status != 200:
-                        print(f"Failed to fetch signal data, status code: {response.status}, message: {await response.text()}")
-                        return None
-                    json_data = await response.json()
-                    return json_data["signal"]
+    async def fetch_signal_data(self, pair):
+        try: 
+            url = self.api_url + pair
+            print(url)
+            async with self.session.get(url) as response:
+                if response.status != 200:
+                    print(f"Failed to fetch signal data, status code: {response.status}, message: {await response.text()}")
+                    return None
+                json_data = await response.json()
+                return json_data["signal"]
         except Exception as e:
             print(f"Error in fetch_signal_data: {e}")
             return None 
@@ -86,13 +82,16 @@ class Signal(commands.Cog):
 
         while not self.bot.is_closed():
             try:
-                signal_data = await self.fetch_signal_data()
-                if signal_data is not None:
-                    await self.send_signal_message(signal_data)
-                else:
-                    print("No signal data to send.")
-                    
-                await asyncio.sleep(3600)  # 1 hour
+                for guild in self.bot.guilds:
+                    self.signal_pair = get_signal_pair(guild.id)
+                    print(self.signal_pair)
+                    signal_data = await self.fetch_signal_data(self.signal_pair)
+                    if signal_data is not None:
+                        await self.send_signal_message(signal_data)
+                    else:
+                        print("No signal data to send.")
+                        
+                    await asyncio.sleep(3600)  # 1 hour
                 
             except Exception as e:
                 print(f"Error in send_signal: {e}")
