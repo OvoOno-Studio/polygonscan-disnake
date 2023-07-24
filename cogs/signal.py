@@ -84,14 +84,14 @@ class Signal(commands.Cog):
             try:
                 for guild in self.bot.guilds:
                     self.signal_pair = get_signal_pair(guild.id)
-                    print(self.signal_pair)
+                    print(self.bot.guilds)
                     signal_data = await self.fetch_signal_data(self.signal_pair)
                     if signal_data is not None:
                         await self.send_signal_message(signal_data)
                     else:
                         print("No signal data to send.")
                         
-                    await asyncio.sleep(60)  # 1 hour
+                    await asyncio.sleep(3600)  # 1 hour
                 
             except Exception as e:
                 print(f"Error in send_signal: {e}")
