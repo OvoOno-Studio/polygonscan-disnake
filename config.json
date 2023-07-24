@@ -1,5 +1,6 @@
 { 
     "transaction_channel_id": 1004040635533230121,
     "price_alert_channel_id": 1004040635533230121,
-    "wallet_address": "0x214d52880b1e4e17d020908cd8eaa988ffdd4020"
+    "wallet_address": "0x214d52880b1e4e17d020908cd8eaa988ffdd4020",
+    "signal_pair": "MATIC"
 }

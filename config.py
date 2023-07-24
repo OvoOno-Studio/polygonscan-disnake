@@ -47,3 +47,12 @@ def set_wallet_address(server_id, wallet_address):
 def get_wallet_address(server_id):
     server_config = ensure_server_config(server_id)
     return server_config.get("wallet_address")
+
+def set_signal_pair(server_id, signal_pair):
+    server_config = ensure_server_config(server_id)
+    server_config["signal_pair"] = signal_pair
+    db[str(server_id)] = server_config
+
+def get_signal_pair(server_id):
+    server_config = ensure_server_config(server_id)
+    return server_config.get["signal_pair"]

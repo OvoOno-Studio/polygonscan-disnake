@@ -2,25 +2,36 @@ import json
 import aiohttp
 import asyncio
 import disnake
-from disnake.ext import commands 
-import matplotlib.pyplot as plt
-import os
+from disnake.ext import commands
+from disnake.ext.commands import has_permissions
+from config import get_signal_pair, set_signal_pair
+# import matplotlib.pyplot as plt
+# import os
 
 class Signal(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.session = aiohttp.ClientSession()
-        self.api_url = "https://ovoonoapi.azurewebsites.net/crypto/matic"
+        self.api_url = f"https://ovoonoapi.azurewebsites.net/crypto/{self.signal_pair}"
+        self.signal_pair = None
         self.bot.loop.create_task(self.send_signal())
+
+    @commands.command(name="set_signal_pair")
+    @has_permissions(administrator=True)
+    async def set_signal_pair(self, ctx, signal_pair: str):
+        set_signal_pair(ctx.guild.id, signal_pair)
+        await ctx.send(f"Signal pair has been set to `{signal_pair}`/USDT")
 
     async def fetch_signal_data(self):
         try:
-            async with self.session.get(self.api_url) as response:
-                if response.status != 200:
-                    print(f"Failed to fetch signal data, status code: {response.status}, message: {await response.text()}")
-                    return None
-                json_data = await response.json()
-                return json_data["signal"]
+            for guild in self.bot.guilds:
+                self.signal_pair = get_signal_pair(guild.id)
+                async with self.session.get(self.api_url) as response:
+                    if response.status != 200:
+                        print(f"Failed to fetch signal data, status code: {response.status}, message: {await response.text()}")
+                        return None
+                    json_data = await response.json()
+                    return json_data["signal"]
         except Exception as e:
             print(f"Error in fetch_signal_data: {e}")
             return None 
@@ -37,7 +48,7 @@ class Signal(commands.Cog):
             return
 
         user_ids = [donator['user_id'] for donator in donators]
-        signal_mapping = {0: ('HODL', '🟡'), -1: ('SELL', '🔴'), 1: ('BUY', '🟢')}
+        signal_mapping = {0: ('🟡', 'HODL'), -1: ('🔴', 'SELL'), 1: ('🟢', 'BUY')}
 
         for user_id in user_ids:
             try:
@@ -46,10 +57,11 @@ class Signal(commands.Cog):
                     print(f"Sending signal message to user {user.id}")  # Debugging print statement
                     message = (
                         f".\n\n"
-                        f"📡 **New CryptoSignal Data for MATIC/USDT** 📡\n\n"
+                        f"📡 **New Technical analysis Indicators: ** 📡\n\n"
+                        f"**Pair:** {self.signal_pair}/usdt\n\n"
                         f"**MACD:** {signal_mapping[signal_data['macd']][1]} {signal_mapping[signal_data['macd']][0]}\n"
                         f"**RSI:** {signal_mapping[signal_data['rsi']][1]} {signal_mapping[signal_data['rsi']][0]}\n"
-                        f"**Bollinger Bands:** {signal_mapping[signal_data['bollingerBands']][1]} {signal_mapping[signal_data['bollingerBands']][0]}\n"
+                        f"**BB:** {signal_mapping[signal_data['bollingerBands']][1]} {signal_mapping[signal_data['bollingerBands']][0]}\n"
                     )
                     try:
                         await user.send(message)
@@ -76,7 +88,7 @@ class Signal(commands.Cog):
                 else:
                     print("No signal data to send.")
                     
-                await asyncio.sleep(14400)  # 4 hours
+                await asyncio.sleep(3600)  # 1 hour
                 
             except Exception as e:
                 print(f"Error in send_signal: {e}")
