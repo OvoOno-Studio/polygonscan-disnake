@@ -20,7 +20,7 @@ class Signal(commands.Cog):
     @has_permissions(administrator=True)
     async def set_signal_pair(self, ctx, signal_pair: str):
         set_signal_pair(ctx.guild.id, signal_pair)
-        await ctx.send(f"Signal pair has been set to `{signal_pair}`/USDT")
+        await ctx.send(f"Signal pair has been set to `{signal_pair}`/usdt")
 
     async def fetch_signal_data(self):
         try:
@@ -61,12 +61,12 @@ class Signal(commands.Cog):
                 if user:
                     print(f"Sending signal message to user {user.id}")  # Debugging print statement
                     message = (
-                        f".\n\n"
+                        f".\n"
                         f"📡 **New Technical analysis Indicators: ** 📡\n\n"
-                        f"**Pair:** {self.signal_pair}/usdt\n\n"
-                        f"**MACD:** {signal_mapping[signal_data['macd']][1]} {signal_mapping[signal_data['macd']][0]}\n"
-                        f"**RSI:** {signal_mapping[signal_data['rsi']][1]} {signal_mapping[signal_data['rsi']][0]}\n"
-                        f"**BB:** {signal_mapping[signal_data['bollingerBands']][1]} {signal_mapping[signal_data['bollingerBands']][0]}\n"
+                        f"💵**Pair:**\n {self.signal_pair}/usdt\n"
+                        f"📊**MACD:**\n {signal_mapping[signal_data['macd']][1]} {signal_mapping[signal_data['macd']][0]}\n"
+                        f"📊**RSI:**\n {signal_mapping[signal_data['rsi']][1]} {signal_mapping[signal_data['rsi']][0]}\n"
+                        f"📜**BB:**\n {signal_mapping[signal_data['bollingerBands']][1]} {signal_mapping[signal_data['bollingerBands']][0]}\n"
                     )
                     try:
                         await user.send(message)

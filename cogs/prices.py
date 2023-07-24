@@ -225,7 +225,7 @@ class Moni(commands.Cog):
                         await asyncio.sleep(1)  # Add delay here
                         continue
 
-                    print(f"Transaction hash: {transactions[0]['hash']}")
+                    #print(f"Transaction hash: {transactions[0]['hash']}")
 
                     last_transaction = None
                     for transaction in transactions:
