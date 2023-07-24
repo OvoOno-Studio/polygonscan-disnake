@@ -91,11 +91,11 @@ class Signal(commands.Cog):
                     else:
                         print("No signal data to send.")
                         
-                    await asyncio.sleep(3600)  # 1 hour
                     
                 except Exception as e:
                     print(f"Error in send_signal: {e}")
                     await asyncio.sleep(60)  # In case of an error, wait 1 minute before retrying
+            await asyncio.sleep(3600)  # 1 hour
 
 def setup(bot):
     bot.add_cog(Signal(bot))
