@@ -235,7 +235,6 @@ class Moni(commands.Cog):
                             break
 
                     if last_transaction is None:
-                        print(f"No incoming transactions found for wallet {self.wallet_address}")
                         continue
 
                     if self.last_known_transaction is None:
@@ -247,7 +246,7 @@ class Moni(commands.Cog):
                             await self.send_transaction_message(last_transaction)
                             self.last_known_transaction = last_transaction 
                     
-                    await asyncio.sleep(30)
+                    await asyncio.sleep(120)
 
                 except Exception as e:
                     print(f"Error monitoring wallet transactions: {e}")
