@@ -5,7 +5,8 @@ import disnake
 from disnake.ext import commands
 from disnake.ext.commands import has_permissions
 from config import get_signal_pair, set_signal_pair
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+import numpy as np
 # import os
 
 class Signal(commands.Cog):
@@ -34,7 +35,31 @@ class Signal(commands.Cog):
                 return json_data["signal"]
         except Exception as e:
             print(f"Error in fetch_signal_data: {e}")
-            return None 
+            return None
+        
+    async def generate_graph(self, signal_data):
+        # Assuming signal_data is a dictionary with keys 'macd', 'rsi', and 'bollingerBands'
+        macd = signal_data['macd']
+        rsi = signal_data['rsi']
+        bb = signal_data['bollingerBands']
+
+        # Create a new figure
+        fig, axs = plt.subplots(3)
+
+        # Plot MACD
+        axs[0].plot(np.arange(len(macd)), macd)
+        axs[0].set_title('MACD')
+
+        # Plot RSI
+        axs[1].plot(np.arange(len(rsi)), rsi)
+        axs[1].set_title('RSI')
+
+        # Plot Bollinger Bands
+        axs[2].plot(np.arange(len(bb)), bb)
+        axs[2].set_title('Bollinger Bands')
+
+        # Save the figure to a file
+        fig.savefig('signal_graph.png')
 
     async def send_signal_message(self, signal_data):
         try:
@@ -55,19 +80,23 @@ class Signal(commands.Cog):
                 user = await self.bot.fetch_user(user_id)
                 if user:
                     print(f"Sending signal message to user {user.id}")  # Debugging print statement
-                    message = (
-                        f".\n"
-                        f"📡 **New Technical analysis Indicators: ** 📡\n\n"
-                        f"💵 **Pair:** {self.signal_pair}/usdt\n"
-                        f"📊 **MACD:**\n ----------- \n{signal_mapping[signal_data['macd']][1]} {signal_mapping[signal_data['macd']][0]}\n ----------- \n"
-                        f"📊 **RSI:**\n ----------- \n {signal_mapping[signal_data['rsi']][1]} {signal_mapping[signal_data['rsi']][0]}\n ----------- \n "
-                        f"📜 **BB:**\n ----------- \n {signal_mapping[signal_data['bollingerBands']][1]} {signal_mapping[signal_data['bollingerBands']][0]}\n ----------- \n"
-                    )
-                    try:
-                        await user.send(message)
-                        print(f"Signal message sent to: {user}")  # Debugging print statement
-                    except disnake.HTTPException as e:
-                        print(f"Error sending signal message to user with ID {user_id}: {e}")
+
+                    # Generate the graph and save it to a file
+                    await self.generate_graph(signal_data)
+
+                    # Create a File object for the graph
+                    file = disnake.File('signal_graph.png', filename='signal_graph.png')
+
+                    # Create an Embed object for the message
+                    embed = disnake.Embed(title="New Technical analysis Indicators", description=f"Pair: {self.signal_pair}/usdt")
+                    embed.add_field(name="MACD", value=f"{signal_mapping[signal_data['macd']][1]} {signal_mapping[signal_data['macd']][0]}")
+                    embed.add_field(name="RSI", value=f"{signal_mapping[signal_data['rsi']][1]} {signal_mapping[signal_data['rsi']][0]}")
+                    embed.add_field(name="BB", value=f"{signal_mapping[signal_data['bollingerBands']][1]} {signal_mapping[signal_data['bollingerBands']][0]}")
+                    embed.set_image(url="attachment://signal_graph.png")  # Use the image in the attachment
+
+                    # Send the message with the embed and the file
+                    await user.send(embed=embed, file=file)
+                    print(f"Signal message sent to: {user}")  # Debugging print statement
                 else:
                     print(f"User with ID {user_id} not found.")
             except disnake.NotFound:
@@ -86,10 +115,10 @@ class Signal(commands.Cog):
                 signal_data = await self.fetch_signal_data(self.signal_pair)
                 if signal_data is not None:
                     await self.send_signal_message(signal_data)
-                    await asyncio.sleep(3600)  # 1 hour
                 else:
                     print("No signal data to send.")
-                    
+
+                await asyncio.sleep(3600)  # 1 hour           
                 
             except Exception as e:
                 print(f"Error in send_signal: {e}")

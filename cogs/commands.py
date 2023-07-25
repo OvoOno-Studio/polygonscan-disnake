@@ -416,7 +416,7 @@ class Scrape(commands.Cog):
         await ctx.author.send(message)
 
     """
-    Define abi() - Returns the current Safe, Proposed and Fast gas prices.. 
+    Define abi() - Returns the contract Application Binary Interface ( ABI ) of a verified smart contract. 
     """
     @commands.command()
     async def abi(self, ctx: commands.Context, address: str):
@@ -448,7 +448,7 @@ class Scrape(commands.Cog):
         os.remove(temp_file)
     
     """
-    Define gas() - Returns the current Safe, Proposed and Fast gas prices.. 
+    Define gas() - Returns the current Safe, Proposed and Fast gas prices
     """
     @is_donator()
     @commands.command()
