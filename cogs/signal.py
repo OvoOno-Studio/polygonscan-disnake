@@ -26,8 +26,7 @@ class Signal(commands.Cog):
 
     async def fetch_signal_data(self, pair):
         try: 
-            url = self.api_url + pair
-            print(url)
+            url = self.api_url + pair 
             async with self.session.get(url) as response:
                 if response.status != 200:
                     print(f"Failed to fetch signal data, status code: {response.status}, message: {await response.text()}")
@@ -60,6 +59,7 @@ class Signal(commands.Cog):
         axs[2].set_title('Bollinger Bands')
 
         # Save the figure to a file
+        print("Chart generated!")
         fig.savefig('signal_graph.png')
 
     async def send_signal_message(self, signal_data):
@@ -75,21 +75,22 @@ class Signal(commands.Cog):
 
         user_ids = [donator['user_id'] for donator in donators]
         signal_mapping = {0: ('🟡', 'HODL'), -1: ('🔴', 'SELL'), 1: ('🟢', 'BUY')}
-
+        file = disnake.File('signal_graph.png', filename="signal_graph.png")
         for user_id in user_ids:
             try:
                 user = await self.bot.fetch_user(user_id)
                 if user:
                     print(f"Sending signal message to user {user.id}")  # Debugging print statement
                     # Create an Embed object for the message
-                    embed = disnake.Embed(title="New Technical analysis Indicators📡", description=f"💵Pair: **{self.signal_pair}/usdt**", color=0x9C84EF, timestamp=datetime.now())
+                    embed = disnake.Embed(title="📡 New Technical analysis Indicators 📡", description=f"💵Pair: **{self.signal_pair}/usdt**", color=0x9C84EF, timestamp=datetime.now())
+                    embed.set_image(url="attachment://signal_graph.png")  # Use the image in the attachment
                     embed.add_field(name="📊 MACD", value=f"{signal_mapping[signal_data['macd']][1]} {signal_mapping[signal_data['macd']][0]}")
                     embed.add_field(name="📊 RSI", value=f"{signal_mapping[signal_data['rsi']][1]} {signal_mapping[signal_data['rsi']][0]}")
                     embed.add_field(name="📜 BB", value=f"{signal_mapping[signal_data['bollingerBands']][1]} {signal_mapping[signal_data['bollingerBands']][0]}")
                     embed.set_footer(text=f"Powered by OvoOno Studio")
-                    # embed.set_image(url="attachment://signal_graph.png")  # Use the image in the attachment
+                    # 
                     try:
-                        await user.send(embed=embed)
+                        await user.send(embed=embed, file=file)
                         print(f"Signal message sent to: {user}")  # Debugging print statement
                     except disnake.HTTPException as e:
                         print(f"Error sending signal message to user with ID {user_id}: {e}")
@@ -110,6 +111,7 @@ class Signal(commands.Cog):
                 self.signal_pair = get_signal_pair(944377384872853555)
                 signal_data = await self.fetch_signal_data(self.signal_pair)
                 if signal_data is not None:
+                    await self.generate_graph(signal_data)
                     await self.send_signal_message(signal_data)
                 else:
                     print("No signal data to send.")
