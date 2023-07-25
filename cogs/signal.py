@@ -86,13 +86,15 @@ class Signal(commands.Cog):
 
         user_ids = [donator['user_id'] for donator in donators]
         signal_mapping = {0: ('🟡', 'HODL'), -1: ('🔴', 'SELL'), 1: ('🟢', 'BUY')}
-        buf = await self.generate_graph(signal_data)
-        file = disnake.File(fp=buf, filename="signal_graph.png")
+        buf = await self.generate_graph(signal_data) 
         for user_id in user_ids:
             try:
                 user = await self.bot.fetch_user(user_id)
                 if user:
                     print(f"Sending signal message to user {user.id}")  # Debugging print statement
+                    # Reset the pointer to the start of the BytesIO object
+                    buf.seek(0)
+                    file = disnake.File(fp=buf, filename="signal_graph.png")
                     # Create an Embed object for the message
                     embed = disnake.Embed(title="📡 New Technical analysis Indicators 📡", description=f"💵Pair: **{self.signal_pair}/usdt**", color=0x9C84EF, timestamp=datetime.now())
                     embed.set_image(url="attachment://signal_graph.png")  # Use the image in the attachment
