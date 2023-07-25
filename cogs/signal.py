@@ -2,6 +2,7 @@ import json
 import aiohttp
 import asyncio
 import disnake
+import seaborn as sns
 from disnake.ext import commands
 from disnake.ext.commands import has_permissions 
 from config import get_signal_pair, set_signal_pair
@@ -49,22 +50,31 @@ class Signal(commands.Cog):
         # Create a new figure
         fig, axs = plt.subplots(3, figsize=(8,9))
 
+        # Adjust the spacing between the subplots
+        fig.subplots_adjust(hspace=0.5)
+
+        # Set the Seaborn theme
+        sns.set_theme()
+
         # Plot MACD
-        axs[0].plot(np.arange(len(macd)), macd, label='MACD')
+        sns.lineplot(ax=axs[0], x=np.arange(len(macd)), y=macd, label='MACD')
         axs[0].set_title('MACD')
         axs[0].legend()
+        axs[0].grid(True)  # Add grid
 
         # Plot RSI
-        axs[1].plot(np.arange(len(rsi)), rsi, label='RSI')
+        sns.lineplot(ax=axs[1], x=np.arange(len(rsi)), y=rsi, label='RSI')
         axs[1].set_title('RSI')
         axs[1].legend()
+        axs[1].grid(True)  # Add grid
 
         # Plot Bollinger Bands
-        axs[2].plot(np.arange(len(bb_upper)), bb_upper, label='Upper Band')
-        axs[2].plot(np.arange(len(bb_middle)), bb_middle, label='Middle Band')
-        axs[2].plot(np.arange(len(bb_lower)), bb_lower, label='Lower Band')
+        sns.lineplot(ax=axs[2], x=np.arange(len(bb_upper)), y=bb_upper, label='Upper Band')
+        sns.lineplot(ax=axs[2], x=np.arange(len(bb_middle)), y=bb_middle, label='Middle Band')
+        sns.lineplot(ax=axs[2], x=np.arange(len(bb_lower)), y=bb_lower, label='Lower Band')
         axs[2].set_title('Bollinger Bands')
         axs[2].legend()
+        axs[2].grid(True)  # Add grid
 
         # Save the figure to a BytesIO object
         buf = BytesIO()
