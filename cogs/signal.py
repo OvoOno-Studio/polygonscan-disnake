@@ -82,11 +82,11 @@ class Signal(commands.Cog):
                 if user:
                     print(f"Sending signal message to user {user.id}")  # Debugging print statement
                     # Create an Embed object for the message
-                    embed = disnake.Embed(title="New TA Indicators📡", description=f"💵Pair: {self.signal_pair}/usdt", color=0x9C84EF, timestamp=datetime.now())
+                    embed = disnake.Embed(title="New Technical analysis Indicators📡", description=f"💵Pair: **{self.signal_pair}/usdt**", color=0x9C84EF, timestamp=datetime.now())
                     embed.add_field(name="📊 MACD", value=f"{signal_mapping[signal_data['macd']][1]} {signal_mapping[signal_data['macd']][0]}")
                     embed.add_field(name="📊 RSI", value=f"{signal_mapping[signal_data['rsi']][1]} {signal_mapping[signal_data['rsi']][0]}")
                     embed.add_field(name="📜 BB", value=f"{signal_mapping[signal_data['bollingerBands']][1]} {signal_mapping[signal_data['bollingerBands']][0]}")
-                    embed.set_footer(text=f"Powered by <a href='https://ovoono.studio'>OvoOno Studio</a>")
+                    embed.set_footer(text=f"Powered by OvoOno Studio")
                     # embed.set_image(url="attachment://signal_graph.png")  # Use the image in the attachment
                     try:
                         await user.send(embed=embed)
