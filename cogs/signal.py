@@ -32,7 +32,7 @@ class Signal(commands.Cog):
                     print(f"Failed to fetch signal data, status code: {response.status}, message: {await response.text()}")
                     return None
                 json_data = await response.json()
-                return json_data["signal"]
+                return json_data
         except Exception as e:
             print(f"Error in fetch_signal_data: {e}")
             return None
@@ -90,9 +90,9 @@ class Signal(commands.Cog):
                     # Create an Embed object for the message
                     embed = disnake.Embed(title="📡 New Technical analysis Indicators 📡", description=f"💵Pair: **{self.signal_pair}/usdt**", color=0x9C84EF, timestamp=datetime.now())
                     embed.set_image(url="attachment://signal_graph.png")  # Use the image in the attachment
-                    embed.add_field(name="📊 MACD", value=f"{signal_mapping[signal_data['macd']][1]} {signal_mapping[signal_data['macd']][0]}")
-                    embed.add_field(name="📊 RSI", value=f"{signal_mapping[signal_data['rsi']][1]} {signal_mapping[signal_data['rsi']][0]}")
-                    embed.add_field(name="📜 BB", value=f"{signal_mapping[signal_data['bollingerBands']][1]} {signal_mapping[signal_data['bollingerBands']][0]}")
+                    embed.add_field(name="📊 MACD", value=f"{signal_mapping[signal_data['signal']['macd']][1]} {signal_mapping[signal_data['signal']['macd']][0]}")
+                    embed.add_field(name="📊 RSI", value=f"{signal_mapping[signal_data['signal']['rsi']][1]} {signal_mapping[signal_data['signal']['rsi']][0]}")
+                    embed.add_field(name="📜 BB", value=f"{signal_mapping[signal_data['signal']['bollingerBands']][1]} {signal_mapping[signal_data['signal']['bollingerBands']][0]}")
                     embed.set_footer(text=f"Powered by OvoOno Studio")
                     # 
                     try:
