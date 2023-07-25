@@ -38,36 +38,28 @@ class Signal(commands.Cog):
             return None
         
     async def generate_graph(self, signal_data):
-        # Extract the data from the signal_data dictionary
-        macd = signal_data['indicators']['macd']['macd']
-        rsi = signal_data['indicators']['rsi']['rsi']
-        bb_upper = signal_data['indicators']['bollingerBands']['upper']
-        bb_middle = signal_data['indicators']['bollingerBands']['middle']
-        bb_lower = signal_data['indicators']['bollingerBands']['lower']
+        # Assuming signal_data is a dictionary with keys 'macd', 'rsi', and 'bollingerBands'
+        macd = signal_data['macd']
+        rsi = signal_data['rsi']
+        bb = signal_data['bollingerBands']
 
         # Create a new figure
-        fig, axs = plt.subplots(3, figsize=(10, 15))
+        fig, axs = plt.subplots(3)
 
         # Plot MACD
-        axs[0].plot(np.arange(len(macd)), macd, label='MACD')
+        axs[0].plot(np.arange(len(macd)), macd)
         axs[0].set_title('MACD')
-        axs[0].legend()
 
         # Plot RSI
-        axs[1].plot(np.arange(len(rsi)), rsi, label='RSI')
+        axs[1].plot(np.arange(len(rsi)), rsi)
         axs[1].set_title('RSI')
-        axs[1].legend()
 
         # Plot Bollinger Bands
-        axs[2].plot(np.arange(len(bb_upper)), bb_upper, label='Upper Band')
-        axs[2].plot(np.arange(len(bb_middle)), bb_middle, label='Middle Band')
-        axs[2].plot(np.arange(len(bb_lower)), bb_lower, label='Lower Band')
+        axs[2].plot(np.arange(len(bb)), bb)
         axs[2].set_title('Bollinger Bands')
-        axs[2].legend()
 
         # Save the figure to a file
         fig.savefig('signal_graph.png')
-
 
     async def send_signal_message(self, signal_data):
         try:
@@ -88,23 +80,17 @@ class Signal(commands.Cog):
                 user = await self.bot.fetch_user(user_id)
                 if user:
                     print(f"Sending signal message to user {user.id}")  # Debugging print statement
-
-                    # Generate the graph and save it to a file
-                    await self.generate_graph(signal_data)
-
-                    # Create a File object for the graph
-                    file = disnake.File('signal_graph.png', filename='signal_graph.png')
-
                     # Create an Embed object for the message
                     embed = disnake.Embed(title="New Technical analysis Indicators", description=f"Pair: {self.signal_pair}/usdt")
                     embed.add_field(name="MACD", value=f"{signal_mapping[signal_data['macd']][1]} {signal_mapping[signal_data['macd']][0]}")
                     embed.add_field(name="RSI", value=f"{signal_mapping[signal_data['rsi']][1]} {signal_mapping[signal_data['rsi']][0]}")
                     embed.add_field(name="BB", value=f"{signal_mapping[signal_data['bollingerBands']][1]} {signal_mapping[signal_data['bollingerBands']][0]}")
-                    embed.set_image(url="attachment://signal_graph.png")  # Use the image in the attachment
-
-                    # Send the message with the embed and the file
-                    await user.send(embed=embed, file=file)
-                    print(f"Signal message sent to: {user}")  # Debugging print statement
+                    # embed.set_image(url="attachment://signal_graph.png")  # Use the image in the attachment
+                    try:
+                        await user.send(embed=embed)
+                        print(f"Signal message sent to: {user}")  # Debugging print statement
+                    except disnake.HTTPException as e:
+                        print(f"Error sending signal message to user with ID {user_id}: {e}")
                 else:
                     print(f"User with ID {user_id} not found.")
             except disnake.NotFound:
