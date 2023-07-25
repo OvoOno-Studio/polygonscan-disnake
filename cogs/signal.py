@@ -5,6 +5,7 @@ import disnake
 from disnake.ext import commands
 from disnake.ext.commands import has_permissions 
 from config import get_signal_pair, set_signal_pair
+from datetime import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 # import os
@@ -81,7 +82,7 @@ class Signal(commands.Cog):
                 if user:
                     print(f"Sending signal message to user {user.id}")  # Debugging print statement
                     # Create an Embed object for the message
-                    embed = disnake.Embed(title="New TA Indicators📡", description=f"💵Pair: {self.signal_pair}/usdt" color=0x9C84EF, timestamp=datetime.now())
+                    embed = disnake.Embed(title="New TA Indicators📡", description=f"💵Pair: {self.signal_pair}/usdt", color=0x9C84EF, timestamp=datetime.now())
                     embed.add_field(name="📊 MACD", value=f"{signal_mapping[signal_data['macd']][1]} {signal_mapping[signal_data['macd']][0]}")
                     embed.add_field(name="📊 RSI", value=f"{signal_mapping[signal_data['rsi']][1]} {signal_mapping[signal_data['rsi']][0]}")
                     embed.add_field(name="📜 BB", value=f"{signal_mapping[signal_data['bollingerBands']][1]} {signal_mapping[signal_data['bollingerBands']][0]}")
