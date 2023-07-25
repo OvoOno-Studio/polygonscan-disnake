@@ -47,7 +47,7 @@ class Signal(commands.Cog):
         bb_lower = signal_data['indicators']['bollingerBands']['lower']
 
         # Create a new figure
-        fig, axs = plt.subplots(3, figsize=(10, 15))
+        fig, axs = plt.subplots(3, figsize=(15, 25))
 
         # Plot MACD
         axs[0].plot(np.arange(len(macd)), macd, label='MACD')
