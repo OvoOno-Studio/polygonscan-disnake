@@ -47,7 +47,7 @@ class Signal(commands.Cog):
         bb_lower = signal_data['indicators']['bollingerBands']['lower']
 
         # Create a new figure
-        fig, axs = plt.subplots(3, figsize=(8, 8))
+        fig, axs = plt.subplots(3, figsize=(5,9))
 
         # Plot MACD
         axs[0].plot(np.arange(len(macd)), macd, label='MACD')
@@ -96,7 +96,7 @@ class Signal(commands.Cog):
                     buf.seek(0)
                     file = disnake.File(fp=buf, filename="signal_graph.png")
                     # Create an Embed object for the message
-                    embed = disnake.Embed(title="📡 New Technical analysis Indicators 📡", description=f"💵Pair: **{self.signal_pair}/usdt**", color=0x9C84EF, timestamp=datetime.now())
+                    embed = disnake.Embed(title="📡 New Technical analysis Indicators", description=f"💵Pair: **{self.signal_pair}/usdt**", color=0x9C84EF, timestamp=datetime.now())
                     embed.set_image(url="attachment://signal_graph.png")  # Use the image in the attachment
                     embed.add_field(name="📊 MACD", value=f"{signal_mapping[signal_data['signal']['macd']][1]} {signal_mapping[signal_data['signal']['macd']][0]}")
                     embed.add_field(name="📊 RSI", value=f"{signal_mapping[signal_data['signal']['rsi']][1]} {signal_mapping[signal_data['signal']['rsi']][0]}")
