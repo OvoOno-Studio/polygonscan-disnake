@@ -8,6 +8,7 @@ from config import get_signal_pair, set_signal_pair
 from datetime import datetime
 import matplotlib.pyplot as plt
 import numpy as np
+from io import BytesIO 
 # import os
 
 class Signal(commands.Cog):
@@ -65,8 +66,12 @@ class Signal(commands.Cog):
         axs[2].set_title('Bollinger Bands')
         axs[2].legend()
 
-        # Save the figure to a file
-        fig.savefig('signal_graph.png')
+        # Save the figure to a BytesIO object
+        buf = BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+
+        return buf
 
     async def send_signal_message(self, signal_data):
         try:
@@ -81,7 +86,8 @@ class Signal(commands.Cog):
 
         user_ids = [donator['user_id'] for donator in donators]
         signal_mapping = {0: ('🟡', 'HODL'), -1: ('🔴', 'SELL'), 1: ('🟢', 'BUY')}
-        file = disnake.File('signal_graph.png', filename="signal_graph.png")
+        buf = await self.generate_graph(signal_data)
+        file = disnake.File(fp=buf, filename="signal_graph.png")
         for user_id in user_ids:
             try:
                 user = await self.bot.fetch_user(user_id)
@@ -116,8 +122,7 @@ class Signal(commands.Cog):
             try:
                 self.signal_pair = get_signal_pair(944377384872853555)
                 signal_data = await self.fetch_signal_data(self.signal_pair)
-                if signal_data is not None:
-                    await self.generate_graph(signal_data)
+                if signal_data is not None: 
                     await self.send_signal_message(signal_data)
                 else:
                     print("No signal data to send.")
