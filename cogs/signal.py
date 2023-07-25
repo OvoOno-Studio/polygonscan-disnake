@@ -38,28 +38,36 @@ class Signal(commands.Cog):
             return None
         
     async def generate_graph(self, signal_data):
-        # Assuming signal_data is a dictionary with keys 'macd', 'rsi', and 'bollingerBands'
-        macd = signal_data['macd']
-        rsi = signal_data['rsi']
-        bb = signal_data['bollingerBands']
+        # Extract the data from the signal_data dictionary
+        macd = signal_data['indicators']['macd']['macd']
+        rsi = signal_data['indicators']['rsi']['rsi']
+        bb_upper = signal_data['indicators']['bollingerBands']['upper']
+        bb_middle = signal_data['indicators']['bollingerBands']['middle']
+        bb_lower = signal_data['indicators']['bollingerBands']['lower']
 
         # Create a new figure
-        fig, axs = plt.subplots(3)
+        fig, axs = plt.subplots(3, figsize=(10, 15))
 
         # Plot MACD
-        axs[0].plot(np.arange(len(macd)), macd)
+        axs[0].plot(np.arange(len(macd)), macd, label='MACD')
         axs[0].set_title('MACD')
+        axs[0].legend()
 
         # Plot RSI
-        axs[1].plot(np.arange(len(rsi)), rsi)
+        axs[1].plot(np.arange(len(rsi)), rsi, label='RSI')
         axs[1].set_title('RSI')
+        axs[1].legend()
 
         # Plot Bollinger Bands
-        axs[2].plot(np.arange(len(bb)), bb)
+        axs[2].plot(np.arange(len(bb_upper)), bb_upper, label='Upper Band')
+        axs[2].plot(np.arange(len(bb_middle)), bb_middle, label='Middle Band')
+        axs[2].plot(np.arange(len(bb_lower)), bb_lower, label='Lower Band')
         axs[2].set_title('Bollinger Bands')
+        axs[2].legend()
 
         # Save the figure to a file
         fig.savefig('signal_graph.png')
+
 
     async def send_signal_message(self, signal_data):
         try:
