@@ -41,14 +41,14 @@ class Signal(commands.Cog):
         
     async def generate_graph(self, signal_data):
         # Extract the data from the signal_data dictionary
+        ema = signal_data['indicators']['ema']['ema']
+        volume = signal_data['indicators']['volumes']
         macd = signal_data['indicators']['macd']['macd']
+        signal = signal_data['indicators']['macd']['signal']
         rsi = signal_data['indicators']['rsi']['rsi']
-        bb_upper = signal_data['indicators']['bollingerBands']['upper']
-        bb_middle = signal_data['indicators']['bollingerBands']['middle']
-        bb_lower = signal_data['indicators']['bollingerBands']['lower']
 
-        # Create a new figure
-        fig, axs = plt.subplots(3, figsize=(8,9))
+        # Create a new figure with 4 subplots, arranged vertically
+        fig, axs = plt.subplots(4, figsize=(10,15))
 
         # Adjust the spacing between the subplots
         fig.subplots_adjust(hspace=0.5)
@@ -56,32 +56,38 @@ class Signal(commands.Cog):
         # Set the Seaborn theme
         sns.set_theme()
 
-        # Plot MACD
-        sns.lineplot(ax=axs[0], x=np.arange(len(macd)), y=macd, label='MACD')
-        axs[0].set_title('MACD')
+        # Plot EMA
+        sns.lineplot(ax=axs[0], x=np.arange(len(ema)), y=ema, label='EMA')
+        axs[0].set_title('Exponential Moving Average (EMA)')
         axs[0].legend()
         axs[0].grid(True)  # Add grid
 
-        # Plot RSI
-        sns.lineplot(ax=axs[1], x=np.arange(len(rsi)), y=rsi, label='RSI')
-        axs[1].set_title('RSI')
+        # Plot Volume
+        sns.lineplot(ax=axs[1], x=np.arange(len(volume)), y=volume, label='Volume')
+        axs[1].bar(np.arange(len(volume)), volume, alpha=0.3)  # Overlay a bar chart on the line chart
+        axs[1].set_title('Volume')
         axs[1].legend()
         axs[1].grid(True)  # Add grid
 
-        # Plot Bollinger Bands
-        sns.lineplot(ax=axs[2], x=np.arange(len(bb_upper)), y=bb_upper, label='Upper Band')
-        sns.lineplot(ax=axs[2], x=np.arange(len(bb_middle)), y=bb_middle, label='Middle Band')
-        sns.lineplot(ax=axs[2], x=np.arange(len(bb_lower)), y=bb_lower, label='Lower Band')
-        axs[2].set_title('Bollinger Bands')
+        # Create a color array for the histogram
+        hist_colors = ['g' if (y >= 0) else 'r' for y in macd-signal]
+        
+        # Plot MACD and Signal line
+        sns.lineplot(ax=axs[2], x=np.arange(len(macd)), y=macd, label='MACD')
+        sns.lineplot(ax=axs[2], x=np.arange(len(signal)), y=signal, label='Signal')
+        axs[2].bar(np.arange(len(macd)), macd-signal, alpha=0.3, color=hist_colors)  # Overlay a histogram (MACD - Signal)
+        axs[2].set_title('Moving Average Convergence Divergence (MACD)')
         axs[2].legend()
         axs[2].grid(True)  # Add grid
 
-        # Save the figure to a BytesIO object
-        buf = BytesIO()
-        plt.savefig(buf, format='png')
-        buf.seek(0)
+        # Plot RSI
+        sns.lineplot(ax=axs[3], x=np.arange(len(rsi)), y=rsi, label='RSI')
+        axs[3].set_title('Relative Strength Index (RSI)')
+        axs[3].legend()
+        axs[3].grid(True)  # Add grid
 
-        return buf
+        # Display the plot
+        plt.show()
 
     async def send_signal_message(self, signal_data):
         try:
@@ -106,8 +112,9 @@ class Signal(commands.Cog):
                     buf.seek(0)
                     file = disnake.File(fp=buf, filename="signal_graph.png")
                     # Create an Embed object for the message
-                    embed = disnake.Embed(title="📡 New Technical analysis Indicators", description=f"💵Pair: **{self.signal_pair}/usdt**", color=0x9C84EF, timestamp=datetime.now())
-                    embed.set_image(url="attachment://signal_graph.png")  # Use the image in the attachment
+                    embed = disnake.Embed(title="📡 New Technical analysis Indicators", description=f"🪙Pair: **{self.signal_pair}/usdt**\n\n 💵Price: **{signal_data['indicators']['currentPrice']}** \n\n 🔢 Volume 24h: **{signal_data['indicators']['volume24h']}**", color=0x9C84EF, timestamp=datetime.now())
+                    embed.set_image(url="attachment://signal_graph.png") 
+                    embed.add_field(name="📊 EMA", value=f"{signal_mapping[signal_data['signal']['ema']][1]} {signal_mapping[signal_data['signal']['ema']][0]}") # Use the image in the attachment
                     embed.add_field(name="📊 MACD", value=f"{signal_mapping[signal_data['signal']['macd']][1]} {signal_mapping[signal_data['signal']['macd']][0]}")
                     embed.add_field(name="📊 RSI", value=f"{signal_mapping[signal_data['signal']['rsi']][1]} {signal_mapping[signal_data['signal']['rsi']][0]}")
                     embed.add_field(name="📜 BB", value=f"{signal_mapping[signal_data['signal']['bollingerBands']][1]} {signal_mapping[signal_data['signal']['bollingerBands']][0]}")
