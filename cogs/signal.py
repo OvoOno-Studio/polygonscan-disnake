@@ -48,7 +48,7 @@ class Signal(commands.Cog):
         rsi = signal_data['indicators']['rsi']['rsi']
 
         # Create a new figure with 4 subplots, arranged vertically
-        fig, axs = plt.subplots(4, figsize=(10,8))
+        fig, axs = plt.subplots(4, figsize=(10,5))
 
         # Adjust the spacing between the subplots
         fig.subplots_adjust(hspace=0.5)
@@ -115,7 +115,7 @@ class Signal(commands.Cog):
                     buf.seek(0)
                     file = disnake.File(fp=buf, filename="signal_graph.png")
                     # Create an Embed object for the message
-                    embed = disnake.Embed(title="📡 New Technical analysis Indicators", description=f"🪙Pair: **{self.signal_pair}/usdt**\n 💵Price: **{signal_data['indicators']['currentPrice']}** \n 🔢Volume 24h: **{signal_data['indicators']['volume24h']}**", color=0x9C84EF, timestamp=datetime.now())
+                    embed = disnake.Embed(title="📡 New Technical analysis Indicators", description=f"🪙Pair: **{self.signal_pair}/usdt**\n 💵Price: **{signal_data['indicators']['currentPrice']}$** \n 🔢Volume 24h: **{signal_data['indicators']['volume24h']}**", color=0x9C84EF, timestamp=datetime.now())
                     embed.set_image(url="attachment://signal_graph.png") 
                     embed.add_field(name="📊 EMA", value=f"{signal_mapping[signal_data['signal']['ema']][1]} {signal_mapping[signal_data['signal']['ema']][0]}") # Use the image in the attachment
                     embed.add_field(name="📊 MACD", value=f"{signal_mapping[signal_data['signal']['macd']][1]} {signal_mapping[signal_data['signal']['macd']][0]}")
