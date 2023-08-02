@@ -41,14 +41,14 @@ class Signal(commands.Cog):
         
     async def generate_graph(self, signal_data):
         # Extract the data from the signal_data dictionary
-        ema = signal_data['indicators']['ema']['ema']
+        ema = signal_data['indicators']['ema']
         volume = signal_data['indicators']['volumes']
         macd = signal_data['indicators']['macd']['macd']
         signal = signal_data['indicators']['macd']['signal']
         rsi = signal_data['indicators']['rsi']['rsi']
 
         # Create a new figure with 4 subplots, arranged vertically
-        fig, axs = plt.subplots(4, figsize=(10,15))
+        fig, axs = plt.subplots(4, figsize=(10,8))
 
         # Adjust the spacing between the subplots
         fig.subplots_adjust(hspace=0.5)
@@ -70,12 +70,12 @@ class Signal(commands.Cog):
         axs[1].grid(True)  # Add grid
 
         # Create a color array for the histogram
-        hist_colors = ['g' if (y >= 0) else 'r' for y in macd-signal]
+        hist_colors = ['g' if (y >= 0) else 'r' for y in np.array(macd)-np.array(signal)]
         
         # Plot MACD and Signal line
         sns.lineplot(ax=axs[2], x=np.arange(len(macd)), y=macd, label='MACD')
         sns.lineplot(ax=axs[2], x=np.arange(len(signal)), y=signal, label='Signal')
-        axs[2].bar(np.arange(len(macd)), macd-signal, alpha=0.3, color=hist_colors)  # Overlay a histogram (MACD - Signal)
+        axs[2].bar(np.arange(len(macd)), np.array(macd)-np.array(signal), alpha=0.3, color=hist_colors)  # Overlay a histogram (MACD - Signal)
         axs[2].set_title('Moving Average Convergence Divergence (MACD)')
         axs[2].legend()
         axs[2].grid(True)  # Add grid
@@ -86,8 +86,11 @@ class Signal(commands.Cog):
         axs[3].legend()
         axs[3].grid(True)  # Add grid
 
-        # Display the plot
-        plt.show()
+        # Save the plot to a BytesIO object and return it
+        buf = BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        return buf
 
     async def send_signal_message(self, signal_data):
         try:
@@ -112,7 +115,7 @@ class Signal(commands.Cog):
                     buf.seek(0)
                     file = disnake.File(fp=buf, filename="signal_graph.png")
                     # Create an Embed object for the message
-                    embed = disnake.Embed(title="📡 New Technical analysis Indicators", description=f"🪙Pair: **{self.signal_pair}/usdt**\n\n 💵Price: **{signal_data['indicators']['currentPrice']}** \n\n 🔢 Volume 24h: **{signal_data['indicators']['volume24h']}**", color=0x9C84EF, timestamp=datetime.now())
+                    embed = disnake.Embed(title="📡 New Technical analysis Indicators", description=f"🪙Pair: **{self.signal_pair}/usdt**\n 💵Price: **{signal_data['indicators']['currentPrice']}** \n 🔢Volume 24h: **{signal_data['indicators']['volume24h']}**", color=0x9C84EF, timestamp=datetime.now())
                     embed.set_image(url="attachment://signal_graph.png") 
                     embed.add_field(name="📊 EMA", value=f"{signal_mapping[signal_data['signal']['ema']][1]} {signal_mapping[signal_data['signal']['ema']][0]}") # Use the image in the attachment
                     embed.add_field(name="📊 MACD", value=f"{signal_mapping[signal_data['signal']['macd']][1]} {signal_mapping[signal_data['signal']['macd']][0]}")
