@@ -48,7 +48,7 @@ class Signal(commands.Cog):
         rsi = signal_data['indicators']['rsi']['rsi']
 
         # Create a new figure with 4 subplots, arranged vertically
-        fig, axs = plt.subplots(4, figsize=(10,5))
+        fig, axs = plt.subplots(4, figsize=(8,8))
 
         # Adjust the spacing between the subplots
         fig.subplots_adjust(hspace=0.5)
