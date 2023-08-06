@@ -48,8 +48,8 @@ class Signal(commands.Cog):
         rsi = signal_data['indicators']['rsi']['rsi']
         so = signal_data['indicators']['stochastic_scillator']
 
-        # Create a new figure with 5 subplots, arranged vertically
-        fig, axs = plt.subplots(5, figsize=(8, 8))
+        # Create a new figure with 4 subplots, arranged vertically
+        fig, axs = plt.subplots(4, figsize=(8,8))
 
         # Adjust the spacing between the subplots
         fig.subplots_adjust(hspace=0.5)
@@ -71,12 +71,12 @@ class Signal(commands.Cog):
         axs[1].grid(True)  # Add grid
 
         # Create a color array for the histogram
-        hist_colors = ['g' if (y >= 0) else 'r' for y in np.array(macd) - np.array(signal)]
-
+        hist_colors = ['g' if (y >= 0) else 'r' for y in np.array(macd)-np.array(signal)]
+        
         # Plot MACD and Signal line
         sns.lineplot(ax=axs[2], x=np.arange(len(macd)), y=macd, label='MACD')
         sns.lineplot(ax=axs[2], x=np.arange(len(signal)), y=signal, label='Signal')
-        axs[2].bar(np.arange(len(macd)), np.array(macd) - np.array(signal), alpha=0.3, color=hist_colors)  # Overlay a histogram (MACD - Signal)
+        axs[2].bar(np.arange(len(macd)), np.array(macd)-np.array(signal), alpha=0.3, color=hist_colors)  # Overlay a histogram (MACD - Signal)
         axs[2].set_title('Moving Average Convergence Divergence (MACD)')
         axs[2].legend()
         axs[2].grid(True)  # Add grid
@@ -86,12 +86,6 @@ class Signal(commands.Cog):
         axs[3].set_title('Relative Strength Index (RSI)')
         axs[3].legend()
         axs[3].grid(True)  # Add grid
-
-        # Plot Stochastic Oscillator
-        sns.lineplot(ax=axs[4], x=np.arange(len(so)), y=so, label='Stochastic Oscillator')
-        axs[4].set_title('Stochastic Oscillator')
-        axs[4].legend()
-        axs[4].grid(True)  # Add grid
 
         # Save the plot to a BytesIO object and return it
         buf = BytesIO()
