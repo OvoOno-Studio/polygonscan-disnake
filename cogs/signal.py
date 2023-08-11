@@ -17,7 +17,7 @@ class Signal(commands.Cog):
         self.bot = bot
         self.session = aiohttp.ClientSession()
         self.signal_pair = None
-        self.api_url = "https://ovoonoapi.azurewebsites.net/crypto/"
+        self.api_url = "https://ovoono-express-eofcu.ondigitalocean.app/crypto/"
         self.bot.loop.create_task(self.send_signal())
 
     @commands.command(name="set_signal_pair")
