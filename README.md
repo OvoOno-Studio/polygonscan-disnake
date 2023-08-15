@@ -1,7 +1,7 @@
 <h1 align="center">
   <br>
     <a href="https://github.com/OvoOno-Studio/polygonscan-disnake">
-        <img src="https://imgur.com/Kaxo2vOY" alt="PolygonScan Scrapper - Discord Bot">
+        <img src="https://i.imgur.com/t9Cen8Y.png" alt="PolygonScan Scrapper - Discord Bot">
     </a>
   <br> 
   PolygonScan Scraper Discord bot
