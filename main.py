@@ -1,8 +1,7 @@
 """
-Copyright © DevEmel 2022 - https://github.com/ml350 
+Copyright © OvoOno Studio 2022 - https://github.com/OvoOno-Studio/polygonscan-disnake
 Description:
-Discord Bot based on PolygonScan API, CoingGecko API and Disnake lib for web scrapping data from PolygonScan. 
-Powered by PolygonScan APIs.
+Discord Bot based on PolygonScan, CoingGecko, Binance APIs and Disnake lib for web scrapping data from PolygonScan. 
 Version: 1.0
 """   
 import disnake
