@@ -3,8 +3,8 @@ import asyncio
 import disnake
 from disnake.ext import commands
 from disnake.ext.commands import has_permissions
-from config import set_transaction_channel, set_price_alert_channel, set_wallet_address, APIKey
-from config import get_transaction_channel, get_price_alert_channel, get_wallet_address
+from config import set_transaction_channel, set_price_alert_channel, set_wallet_address, set_moni_token APIKey
+from config import get_transaction_channel, get_price_alert_channel, get_wallet_address, get_moni_token
 
 class Moni(commands.Cog):
     def __init__(self, bot):
@@ -38,6 +38,12 @@ class Moni(commands.Cog):
     async def set_wallet_address(self, ctx, address: str):
         set_wallet_address(ctx.guild.id, address)
         await ctx.send(f"Wallet address has been set to `{address}`")
+
+    @commands.command(name="set_moni_token")
+    @has_permissions(administrator=True)
+    async def set_moni_token(self, ctx, token: str):
+        set_moni_token(ctx.guild.id, token)
+        await ctx.send(f"Token for monitoring has been set to `{token}`")
 
     async def get_coin_data(self):
         try:

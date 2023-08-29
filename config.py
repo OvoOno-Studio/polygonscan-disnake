@@ -48,6 +48,15 @@ def get_wallet_address(server_id):
     server_config = ensure_server_config(server_id)
     return server_config.get("wallet_address")
 
+def set_moni_token(server_id, token):
+    server_config = ensure_server_config(server_id)
+    server_config["token"] = token
+    return server_config.get("token")
+
+def get_moni_token(server_id):
+    server_config = ensure_server_config(server_id)
+    return server_config.get("token")
+
 def set_signal_pair(server_id, signal_pair):
     server_config = ensure_server_config(server_id)
     server_config["signal_pair"] = signal_pair
