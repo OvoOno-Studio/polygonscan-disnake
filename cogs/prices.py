@@ -14,6 +14,8 @@ class Moni(commands.Cog):
         self.polygon_scan_api_url = f"https://api.polygonscan.com/api?module=account&action=tokentx&apikey={APIKey}"
         self.sand_contract_address = "0xBbba073C31bF03b8ACf7c28EF0738DeCF3695683"  
         self.wallet_address = None
+        self.moni_token = None
+        self.moni_contract = None
         self.previous_matic_price = None
         self.last_known_transaction = None
         self.semaphore = asyncio.Semaphore(4)  
@@ -160,10 +162,24 @@ class Moni(commands.Cog):
     async def fetch_wallet_transactions(self):
         for guild in self.bot.guilds:
             self.wallet_address = get_wallet_address(guild.id)
+            self.moni_token = get_moni_token(guild.id)
             if self.wallet_address is None or len(self.wallet_address) != 42 or not self.wallet_address.startswith('0x'):
                 # print(f"Skipping guild {guild.name} due to invalid wallet address: {self.wallet_address}")
                 continue
-            url = f"{self.polygon_scan_api_url}&address={self.wallet_address}&contractaddress={self.sand_contract_address}&sort=desc"
+            if self.moni_token == 'WETH':
+                self.moni_contract = '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619'
+            if self.moni_token == 'SAND':
+                self.moni_contract  = '0xbbba073c31bf03b8acf7c28ef0738decf3695683'
+            if self.moni_token == 'MANA':
+                self.moni_contract  = '0xA1c57f48F0Deb89f569dFbE6E2B7f46D33606fD4'
+            if self.moni_token == 'USDT':
+                self.moni_contract  = '0xc2132D05D31c914a87C6611C10748AEb04B58e8F'
+            if self.moni_token == 'USDC':
+                self.moni_contract  = '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174'
+            if self.moni_token == 'DAI':
+                self.moni_contract  = '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063'
+
+            url = f"{self.polygon_scan_api_url}&address={self.wallet_address}&contractaddress={self.moni_contract}&sort=desc"
             try:
                 json_data = await self.limited_get(url)
                 if json_data and "result" in json_data:
@@ -179,6 +195,7 @@ class Moni(commands.Cog):
         for guild in self.bot.guilds:
             self.wallet_address = get_wallet_address(guild.id)
             self.transaction_channel_id = get_transaction_channel(guild.id)
+            self.moni_token = get_moni_token(guild.id)
 
             # Check if transaction_channel_id is not a valid Discord snowflake
             if not str(self.transaction_channel_id).isnumeric():
@@ -190,8 +207,8 @@ class Moni(commands.Cog):
                 if channel:
                     print(f"Sending message to channel {channel.id}")  # Debugging print statement
                     message = (
-                        f"🚨 New incoming SAND token transaction to `{self.wallet_address}` 🚨\n"
-                        f"💰 Value: {float(transaction['value']) / (10 ** 18):.2f} SAND\n"
+                        f"🚨 New incoming {self.moni_token} token transaction to `{self.wallet_address}` 🚨\n"
+                        f"💰 Value: {float(transaction['value'])} {self.moni_token}"
                         f"🧑 From: `{transaction['from']}`\n"
                         f"👉 To: `{transaction['to']}`\n"
                         f"🔗 Transaction Hash: [`{transaction['hash']}`](https://polygonscan.com/tx/{transaction['hash']})\n"
