@@ -11,8 +11,7 @@ class Moni(commands.Cog):
         self.bot = bot
         self.session = aiohttp.ClientSession()
         self.api_url = "https://api.coingecko.com/api/v3/simple/price?ids=matic-network&vs_currencies=usd&include_24hr_change=true"
-        self.polygon_scan_api_url = f"https://api.polygonscan.com/api?module=account&action=tokentx&apikey={APIKey}"
-        self.sand_contract_address = "0xBbba073C31bF03b8ACf7c28EF0738DeCF3695683"  
+        self.polygon_scan_api_url = f"https://api.polygonscan.com/api?module=account&action=tokentx&apikey={APIKey}" 
         self.wallet_address = None
         self.moni_token = None
         self.moni_contract = None
