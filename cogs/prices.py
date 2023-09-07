@@ -191,7 +191,7 @@ class Moni(commands.Cog):
                         if self.last_known_transaction["hash"] != last_transaction["hash"]:
                             print(f"New incoming transaction found: {last_transaction}")
                             print(f"Sending transaction message for {last_transaction['hash']}")
-                            await self.send_transaction_message(last_transaction)
+                            await self.send_transaction_message(last_transaction, guild.id)
                             self.last_known_transaction = last_transaction 
                     
                     await asyncio.sleep(120)  # This waits after each guild's transactions are processed
@@ -226,7 +226,7 @@ class Moni(commands.Cog):
         try:
             json_data = await self.limited_get(url)
             if json_data and "result" in json_data:
-                print(f'Transaction fetched: {json_data["result"]}')
+                print(f'Transaction fetched for Guild: {guild_id}')
                 return json_data["result"]
             else:
                 print(f"Error in fetch_wallet_transactions: {json_data}")
@@ -235,47 +235,46 @@ class Moni(commands.Cog):
             print(f"Error in fetch_wallet_transactions: {e}")
             return None
 
-    async def send_transaction_message(self, transaction):
-        for guild in self.bot.guilds:
-            self.wallet_address = get_wallet_address(guild.id)
-            self.transaction_channel_id = get_transaction_channel(guild.id)
-            self.moni_token = get_moni_token(guild.id)
+    async def send_transaction_message(self, transaction, guild_id): 
+        self.wallet_address = get_wallet_address(guild_id)
+        self.transaction_channel_id = get_transaction_channel(guild_id)
+        self.moni_token = get_moni_token(guild_id)
 
-            # Check if transaction_channel_id is not a valid Discord snowflake
-            if not str(self.transaction_channel_id).isnumeric():
-                print(f"Invalid channel ID: {self.transaction_channel_id}")
-                continue
+        # Check if transaction_channel_id is not a valid Discord snowflake
+        if not str(self.transaction_channel_id).isnumeric():
+            print(f"Invalid channel ID: {self.transaction_channel_id}")
+            return
 
-            try:
-                channel = await self.bot.fetch_channel(self.transaction_channel_id)
-                if channel:
-                    print(f"Sending message to channel {channel.id}")  # Debugging print statement
-                    message = (
-                        f"🚨 New incoming {self.moni_token} token transaction to `{self.wallet_address}` 🚨\n"
-                        f"💰 Value: {float(transaction['value'])} {self.moni_token} \n"
-                        f"🧑 From: `{transaction['from']}`\n"
-                        f"👉 To: `{transaction['to']}`\n"
-                        f"🔗 Transaction Hash: [`{transaction['hash']}`](https://polygonscan.com/tx/{transaction['hash']})\n"
-                        f"🧱 Block Number: `{transaction['blockNumber']}`\n"
-                        f"🔢 Transaction Index: `{transaction['transactionIndex']}`"
-                    )
-                    try:
-                        await channel.send(message)
-                        print(f"Message sent to: {channel}") # Debugging print statement
-                    except disnake.HTTPException as e:
-                        print(f"Error sending message to channel with ID {self.transaction_channel_id}: {e}")
-                    else:
-                        print('No channel optimized!')
-            except disnake.NotFound:
-                print(f"Channel with ID {self.transaction_channel_id} not found.")
-            except disnake.Forbidden:
-                print(f"Bot does not have permission to access channel with ID {self.transaction_channel_id}.")
-            except disnake.HTTPException as e:
-                if e.status == 429:  # Handle rate limit error
-                    print("Rate limit reached, sleeping for a bit...")
-                    await asyncio.sleep(10)  # sleep for 10 seconds before trying again
+        try:
+            channel = await self.bot.fetch_channel(self.transaction_channel_id)
+            if channel:
+                print(f"Sending message to channel {channel.id}")  # Debugging print statement
+                message = (
+                    f"🚨 New incoming {self.moni_token} token transaction to `{self.wallet_address}` 🚨\n"
+                    f"💰 Value: {float(transaction['value'])} {self.moni_token} \n"
+                    f"🧑 From: `{transaction['from']}`\n"
+                    f"👉 To: `{transaction['to']}`\n"
+                    f"🔗 Transaction Hash: [`{transaction['hash']}`](https://polygonscan.com/tx/{transaction['hash']})\n"
+                    f"🧱 Block Number: `{transaction['blockNumber']}`\n"
+                    f"🔢 Transaction Index: `{transaction['transactionIndex']}`"
+                )
+                try:
+                    await channel.send(message)
+                    print(f"Message sent to: {channel}") # Debugging print statement
+                except disnake.HTTPException as e:
+                    print(f"Error sending message to channel with ID {self.transaction_channel_id}: {e}")
                 else:
-                    print(f"Error fetching channel with ID {self.transaction_channel_id}: {e}") 
+                    print('No channel optimized!')
+        except disnake.NotFound:
+            print(f"Channel with ID {self.transaction_channel_id} not found.")
+        except disnake.Forbidden:
+            print(f"Bot does not have permission to access channel with ID {self.transaction_channel_id}.")
+        except disnake.HTTPException as e:
+            if e.status == 429:  # Handle rate limit error
+                print("Rate limit reached, sleeping for a bit...")
+                await asyncio.sleep(10)  # sleep for 10 seconds before trying again
+            else:
+                print(f"Error fetching channel with ID {self.transaction_channel_id}: {e}") 
 
 def setup(bot):
     bot.add_cog(Moni(bot))
