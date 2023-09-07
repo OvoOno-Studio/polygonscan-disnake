@@ -167,7 +167,10 @@ class Moni(commands.Cog):
                 self.transaction_channel_id = get_transaction_channel(guild.id)
                 try:
                     transactions = await self.fetch_wallet_transactions(guild.id)
-
+                    if transactions is not None and isinstance(transactions, (list, tuple, str)):
+                        print(f"Fetched {len(transactions)} transactions for guild {guild.id}")
+                    else:
+                        print(f"Unexpected type for transactions: {type(transactions)}")
                     if not transactions or isinstance(transactions, str):
                         print(f"Error in transactions response: {transactions}")
                         await asyncio.sleep(1)  # Add delay here
@@ -179,7 +182,8 @@ class Moni(commands.Cog):
                     for transaction in transactions:
                         if transaction["to"].lower() == self.wallet_address.lower():
                             last_transaction = transaction
-                            await asyncio.sleep(1)  # Add delay here
+                            print(f"Found transaction for {self.wallet_address} with hash {transaction['hash']}")
+                            await asyncio.sleep(3)  # Add delay here
                             break
 
                     if last_transaction is None:
