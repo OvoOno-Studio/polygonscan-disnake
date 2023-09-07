@@ -50,14 +50,7 @@ class Scrape(commands.Cog):
 
         csv_buffer.seek(0)
         file = disnake.File(csv_buffer, "token_holders.csv")
-        await ctx.author.send("Here is the list of token holders:", file=file)
-
-    """
-    Define load_contract_addresses - load contracts.json file for token/contract addresses.
-    """
-    def load_contract_addresses(self):
-        with open('contracts.json', 'r') as f:
-            return json.load(f)
+        await ctx.author.send("Here is the list of token holders:", file=file) 
 
     """
     Define get_token_holder - send CSV file as DM of token holders wallets .
@@ -77,6 +70,13 @@ class Scrape(commands.Cog):
             await self.send_csv(ctx, holders)
             await ctx.send("Token holders list sent as a CSV file in a direct message.")
 
+    """
+    Define load_contract_addresses - load contracts.json file for token/contract addresses.
+    """
+    def load_contract_addresses(self):
+        with open('contracts.json', 'r') as f:
+            return json.load(f)
+    
     """
     Define generate_csv() - generate csv file for donators.
     """
@@ -153,7 +153,7 @@ class Scrape(commands.Cog):
         if not contract_address:
             return await ctx.send(f"Unknown contract '{contract}' for type {contract_type}")
             
-        endpoint = f'https://api.polygonscan.com/api?module=account&action=token1155tx&contractaddress={str(contract)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(self.key)}'
+        endpoint = f'https://api.polygonscan.com/api?module=account&action=token1155tx&contractaddress={str(contract_address)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(self.key)}'
         r = requests.get(endpoint)
         data = json.loads(r.text) 
 
