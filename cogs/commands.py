@@ -152,8 +152,16 @@ class Scrape(commands.Cog):
         contract_address = contracts_data.get(contract_type, {}).get(contract, None)
         if not contract_address:
             return await ctx.send(f"Unknown contract '{contract}' for type {contract_type}")
-            
-        endpoint = f'https://api.polygonscan.com/api?module=account&action=token1155tx&contractaddress={str(contract_address)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(self.key)}'
+        
+        action = ''
+        if contract_type == "ERC20":
+            action = "tokentx"
+        if contract_type == "ERC721":
+            action = "tokennfttx"
+        if contract_type == "ERC1155":
+            action = "token1155tx"
+        
+        endpoint = f'https://api.polygonscan.com/api?module=account&action={str(action)}&contractaddress={str(contract)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(self.key)}'
         r = requests.get(endpoint)
         data = json.loads(r.text) 
 
