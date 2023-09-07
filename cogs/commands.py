@@ -161,7 +161,7 @@ class Scrape(commands.Cog):
         if contract_type == "ERC1155":
             action = "token1155tx"
         
-        endpoint = f'https://api.polygonscan.com/api?module=account&action={str(action)}&contractaddress={str(contract)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(self.key)}'
+        endpoint = f'https://api.polygonscan.com/api?module=account&action={str(action)}&contractaddress={str(contract_address)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(self.key)}'
         r = requests.get(endpoint)
         data = json.loads(r.text) 
 
