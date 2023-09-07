@@ -148,9 +148,10 @@ class Scrape(commands.Cog):
     """
     async def handle_erc_transactions(self, ctx, address, contract, offset, contract_type, counter=0):
         print(f"Inside handle_erc_transactions - Contract: {contract_type}")  # Add this print statement
-        contract_addresses = self.load_contract_addresses() 
-        if contract_type in contract_addresses and contract in contract_addresses[contract_type]:
-            contract = contract_addresses[contract_type][contract]
+        contracts_data = self.load_contract_addresses() 
+        contract_address = contracts_data.get(contract_type, {}).get(contract, None)
+        if not contract_address:
+            return await ctx.send(f"Unknown contract '{contract}' for type {contract_type}")
             
         endpoint = f'https://api.polygonscan.com/api?module=account&action=token1155tx&contractaddress={str(contract)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(self.key)}'
         r = requests.get(endpoint)
