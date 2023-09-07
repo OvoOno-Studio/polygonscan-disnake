@@ -2,7 +2,7 @@ import disnake
 import json
 import requests
 from disnake.ext import commands
-from config import APIKey
+from config import API2Key
 
 class Payment(commands.Cog):
     def _init_(self, bot):
@@ -11,13 +11,12 @@ class Payment(commands.Cog):
         self.api = 'https://api.etherscan.io/api'
 
     @commands.command(name='upgrade_version')
-    async def upgrade(self, ctx):
-        amount = 0.088
-        message = f"Please send exactly {amount} ETH to the address {self.payment_wallet} and let me know once done by typing `!confirm`."
+    async def upgrade_version(self, ctx): 
+        message = f"Please send exactly 0.088 ETH to the address {self.payment_wallet} and let me know once done by typing `ps-confirm_payment <your_wallet>`."
         await ctx.send(message)
 
-    @commands.command(name='confirm')
-    async def confirm(self, ctx, wallet_from: str):
+    @commands.command(name='confirm_payment')
+    async def confirm_payment(self, ctx, wallet_from: str):
         wallet = self.payment_wallet
         api = self.api
         amount = 0.088
@@ -30,7 +29,7 @@ class Payment(commands.Cog):
             "startblock": 0,
             "endblock": 99999999, 
             "sort": "desc", 
-            "apikey": APIKey
+            "apikey": API2Key
         }
 
         response = requests.get(api, params=params)
