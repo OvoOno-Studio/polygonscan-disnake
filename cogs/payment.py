@@ -5,7 +5,7 @@ from disnake.ext import commands
 from config import API2Key
 
 class Payment(commands.Cog):
-    def _init_(self, bot):
+    def __init__(self, bot):
         self.bot = bot
         self.payment_wallet = '0x48D0eEE30ec5BF5C7E167036a8c7f3e4820c19fa'
         self.api = 'https://api.etherscan.io/api'

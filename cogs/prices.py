@@ -209,7 +209,7 @@ class Moni(commands.Cog):
     async def fetch_wallet_transactions(self, guild_id):
         self.wallet_address = get_wallet_address(guild_id)
         self.moni_token = get_moni_token(guild_id)
-        print(f'Fetching transaction: token to monitor {self.moni_token}, wallet to monitor {self.wallet_address}, guild id: {guild_id}')
+        # print(f'Fetching transaction: token to monitor {self.moni_token}, wallet to monitor {self.wallet_address}, guild id: {guild_id}')
         if self.wallet_address is None or len(self.wallet_address) != 42 or not self.wallet_address.startswith('0x'):
             # print(f"Skipping guild {guild.name} due to invalid wallet address: {self.wallet_address}")
             return None
