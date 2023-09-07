@@ -162,7 +162,7 @@ class Moni(commands.Cog):
         while not self.bot.is_closed(): 
             self.wallet_address = get_wallet_address(guild_id)
             self.moni_token = get_moni_token(guild_id)
-            print(guild_id)
+            print(f'Fetching transaction: token to monitor {self.moni_token}, wallet to monitor {self.wallet_address}, guild id: {guild_id}')
             if self.wallet_address is None or len(self.wallet_address) != 42 or not self.wallet_address.startswith('0x'):
                 # print(f"Skipping guild {guild.name} due to invalid wallet address: {self.wallet_address}")
                 continue
@@ -183,6 +183,7 @@ class Moni(commands.Cog):
             try:
                 json_data = await self.limited_get(url)
                 if json_data and "result" in json_data:
+                    print(f'Transaction fetched: {json_data["result"]}')
                     return json_data["result"]
                 else:
                     print(f"Error in fetch_wallet_transactions: {json_data}")
@@ -275,7 +276,7 @@ class Moni(commands.Cog):
                     print(f"Error monitoring wallet transactions: {e}")
                     await asyncio.sleep(1)  # Sleep for a bit in case of an error before moving to the next guild
 
-            await asyncio.sleep(60)
+                await asyncio.sleep(60)
 
 def setup(bot):
     bot.add_cog(Moni(bot))
