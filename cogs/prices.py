@@ -268,13 +268,13 @@ class Moni(commands.Cog):
                             await self.send_transaction_message(last_transaction)
                             self.last_known_transaction = last_transaction 
                     
-                    await asyncio.sleep(120)
+                    await asyncio.sleep(120)  # This waits after each guild's transactions are processed
 
                 except Exception as e:
                     print(f"Error monitoring wallet transactions: {e}")
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(1)  # Sleep for a bit in case of an error before moving to the next guild
 
-                await asyncio.sleep(60)
+            await asyncio.sleep(60)
 
 def setup(bot):
     bot.add_cog(Moni(bot))
