@@ -14,7 +14,7 @@ class Payment(commands.Cog):
     def generate_uid(self):
         return round(random.uniform(0.000001, 0.000009), 6)
 
-    @commands.slash_command(name='upgrade_version', description="Make request to upgrade your version.")
+    @commands.slash_command(name='upgrade_version')
     async def upgrade_version(self, ctx): 
         uid = self.generate_uid()
         with open("payments.json", "r+") as file:
@@ -30,7 +30,7 @@ class Payment(commands.Cog):
         message = f"🟢 To upgrade, please send **0.088 + {uid} ETH** (for your unique ID) to `{self.payment_wallet}`.\nOnce done, confirm by typing `/confirm_payment <your_wallet> {uid}`."
         await ctx.response.send_message(content=message)
 
-    @commands.slash_command(name='confirm_payment', description="Confirm your payment on blockchain to upgrade your version")
+    @commands.slash_command(name='confirm_payment')
     async def confirm_payment(self, ctx, wallet_from: str, uid: float):
         with open("payments.json", "r") as file:
             payments = json.load(file)
@@ -78,7 +78,7 @@ class Payment(commands.Cog):
 
         await ctx.response.send_message(content=f"🔴 Payment not found from wallet `{wallet_from}`. Ensure the correct amount and UID was used.")
 
-    @commands.slash_command(name='help_payment', description="How to upgrade your version")
+    @commands.slash_command(name='help_payment')
     async def help_payment(self, ctx):
         message = """📘 **How to Upgrade Guide:**
             1. Use the `/upgrade_version` command to get your unique amount.
