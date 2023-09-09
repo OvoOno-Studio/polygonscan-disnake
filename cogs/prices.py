@@ -22,29 +22,25 @@ class Moni(commands.Cog):
         self.bot.loop.create_task(self.update_crypto_presence())
         self.bot.loop.create_task(self.monitor_wallet_transactions())
 
-    @commands.command(name="set_transaction_channel")
-    @has_permissions(administrator=True)
+    @commands.slash_command(name="set_transaction_channel", description="Set the channel for transaction alerts.")
     async def set_transaction_channel(self, ctx, channel: disnake.TextChannel):
         set_transaction_channel(ctx.guild.id, channel.id)
-        await ctx.send(f"Transaction channel has been set to {channel.mention}")
+        await ctx.response.send_message(f"Transaction channel has been set to {channel.mention}")
 
-    @commands.command(name="set_price_alert_channel")
-    @has_permissions(administrator=True)
+    @commands.slash_command(name="set_price_alert_channel", description="Set the channel for price alerts.")
     async def set_price_alert_channel(self, ctx, channel: disnake.TextChannel):
         set_price_alert_channel(ctx.guild.id, channel.id)
-        await ctx.send(f"Price alert channel has been set to {channel.mention}") 
+        await ctx.response.send_message(f"Price alert channel has been set to {channel.mention}")
 
-    @commands.command(name="set_wallet_address")
-    @has_permissions(administrator=True)
+    @commands.slash_command(name="set_wallet_address", description="Set the wallet address.")
     async def set_wallet_address(self, ctx, address: str):
         set_wallet_address(ctx.guild.id, address)
-        await ctx.send(f"Wallet address has been set to `{address}`")
+        await ctx.response.send_message(f"Wallet address has been set to `{address}`")
 
-    @commands.command(name="set_moni_token")
-    @has_permissions(administrator=True)
+    @commands.slash_command(name="set_moni_token", description="Set the token for monitoring.")
     async def set_moni_token(self, ctx, token: str):
         set_moni_token(ctx.guild.id, token)
-        await ctx.send(f"Token for monitoring has been set to `{token}`")
+        await ctx.response.send_message(f"Token for monitoring has been set to `{token}`")
 
     async def get_coin_data(self):
         try:
