@@ -81,10 +81,10 @@ class Payment(commands.Cog):
     @commands.slash_command(name='help_payment', description="How to upgrade your version")
     async def help_payment(self, ctx):
         message = """📘 **How to Upgrade Guide:**
-        1. Use the `/upgrade_version` command to get your unique amount.
-        2. Send the specified amount to the provided Ethereum address.
-        3. Once sent, confirm your payment using `/confirm_payment <your_wallet> <uid>`.
-        4. Enjoy your premium version!"""
+            1. Use the `/upgrade_version` command to get your unique amount.
+            2. Send the specified amount to the provided Ethereum address.
+            3. Once sent, confirm your payment using `/confirm_payment <your_wallet> <uid>`.
+            4. Enjoy your premium version!"""
         await ctx.response.send_message(content=message)
 
 def setup(bot):
