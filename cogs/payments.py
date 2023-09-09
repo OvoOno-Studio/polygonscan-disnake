@@ -5,16 +5,16 @@ import random
 from disnake.ext import commands
 from config import API2Key
 
-class Payment(commands.Cog):
+class Pay(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.payment_wallet = '0x48D0eEE30ec5BF5C7E167036a8c7f3e4820c19fa'
         self.api = 'https://api.etherscan.io/api'
-
+    
     def generate_uid(self):
         return round(random.uniform(0.000001, 0.000009), 6)
-
-    @commands.slash_command(name='upgrade_version')
+    
+    @commands.slash_command(name='upgrade_version', description="Make request payment to upgrade your version.")
     async def upgrade_version(self, ctx): 
         uid = self.generate_uid()
         with open("payments.json", "r+") as file:
@@ -88,4 +88,4 @@ class Payment(commands.Cog):
         await ctx.response.send_message(content=message)
 
 def setup(bot):
-    bot.add_cog(Payment(bot))
+    bot.add_cog(Pay(bot))
