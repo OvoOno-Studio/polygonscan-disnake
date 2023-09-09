@@ -483,7 +483,14 @@ class Scrape(commands.Cog):
     Define getErc20() - return list of ERC-20 transactions, can be filtered by specific smart contract address. 
     """
     @is_donator()
-    @commands.command() 
+    @commands.slash_command(
+        name="get_erc20_transactions", 
+            description="Return list of ERC-20 transactions, can be filtered by specific smart contract address",
+            options=[
+                disnake.Option("address", "Address for scrapping.", type=disnake.OptionType.string, required=True),
+                disnake.Option("contract", "ERC20 smart contract", type=disnake.OptionType.string, required=True) 
+            ]
+        ) 
     async def getErc20(self, ctx, address: str, contract: str = 'SAND', offset: int = 100):
         await self.handle_erc_transactions(ctx, address, contract, offset, 'ERC20')
 
