@@ -20,7 +20,7 @@ class Payment(commands.Cog):
     async def upgrade_version(self, ctx): 
         uid = self.generate_uid()
         amount_with_uid = 0.088 + uid
-        with open("donators.json", "r+") as file:
+        with open("payments.json", "r+") as file:
             donators = json.load(file)
             donators.append({
                 "user_id": ctx.author.id,
