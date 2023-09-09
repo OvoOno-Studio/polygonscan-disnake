@@ -13,7 +13,7 @@ class Payment(commands.Cog):
     @commands.slash_command(name='upgrade_version')
     async def upgrade_version(self, ctx): 
         message = f"Please send exactly 0.088 ETH to the address {self.payment_wallet} and let me know once done by typing `/confirm_payment <your_wallet>`."
-        await ctx.respond(content=message)
+        await ctx.response.send_message(content=message)
 
     @commands.slash_command(name='confirm_payment')
     async def confirm_payment(self, ctx, wallet_from: str):
@@ -35,13 +35,13 @@ class Payment(commands.Cog):
             response = requests.get(api, params=params)
             response.raise_for_status()
         except requests.RequestException as e:
-            await ctx.respond(content=f"Error fetching transaction details: {e}")
+            await ctx.response.send_message(content=f"Error fetching transaction details: {e}")
             return
 
         data = response.json()
 
         if not data.get("result"):
-            await ctx.respond(content="I couldn't verify the payment at this time. Please try again later.")
+            await ctx.response.send_message(content="I couldn't verify the payment at this time. Please try again later.")
             return
 
         for tx in data["result"]:
@@ -58,10 +58,10 @@ class Payment(commands.Cog):
                         file.seek(0)
                         json.dump(donators, file)
 
-                await ctx.respond(content="Payment verified! You have been upgraded to the premium version.")
+                await ctx.response.send_message(content="Payment verified! You have been upgraded to the premium version.")
                 return
 
-        await ctx.respond(content=f"Payment not found from wallet {wallet_from}. Ensure you've sent the correct amount to the right address.")
+        await ctx.response.send_message(content=f"Payment not found from wallet {wallet_from}. Ensure you've sent the correct amount to the right address.")
 
 def setup(bot):
     bot.add_cog(Payment(bot))
