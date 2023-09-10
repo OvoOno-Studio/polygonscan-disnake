@@ -56,7 +56,7 @@ class Scrape(commands.Cog):
     Define get_token_holder - send CSV file as DM of token holders wallets .
     """
     @is_donator()
-    @commands.command(name='getTokenHolder')
+    @commands.slash_command(name='get_token_holders', description="Send CSV file of token holders as DM")
     async def get_token_holder(self, ctx, token_address: str = None):
         if token_address is None:
             await ctx.send("Please provide a valid token address.")
@@ -488,7 +488,7 @@ class Scrape(commands.Cog):
             description="Return list of ERC-20 transactions, can be filtered by specific smart contract address",
             options=[
                 disnake.Option("address", "Address for scrapping.", type=disnake.OptionType.string, required=True),
-                disnake.Option("contract", "ERC20 smart contract", type=disnake.OptionType.string, required=True) 
+                disnake.Option("contract", "ERC-20 smart contract", type=disnake.OptionType.string, required=True) 
             ]
         ) 
     async def getErc20(self, ctx, address: str, contract: str = 'SAND', offset: int = 100):
@@ -498,7 +498,14 @@ class Scrape(commands.Cog):
     Define getErc721() - return list of ERC-721(NFT) transactions, can be filtered by specific smart contract address. 
     """
     @is_donator()
-    @commands.command()
+    @commands.slash_command(
+        name="get_erc_721_transactions",
+        description="Return list of ERC-721 transactions, can be filtered by specific smart contract address",
+        options=[
+            disnake.Option("address", "Address for scrapping.", type=disnake.OptionType.string, required=True),
+            disnake.Option("contract", "ERC-721 smart contract", type=disnake.OptionType.string, required=True)
+        ]
+    )
     async def getErc721(self, ctx, address: str, contract: str, offset: int = 30, contract_type: str = 'ERC721'):
         await self.handle_erc_transactions(ctx, address, contract, offset, contract_type)
 
@@ -506,7 +513,14 @@ class Scrape(commands.Cog):
     Define getErc1155() - return list of ERC-721 (NFT) transactions, can be filtered by specific smart contract address. 
     """
     @is_donator()
-    @commands.command()
+    @commands.slash_command(
+        name="get_erc_1155_transactions",
+        description="Return list of ERC-1155 transactions, can be filtered by specific smart contract address",
+        options=[
+            disnake.Option("address", "Address for scrapping.", type=disnake.OptionType.string, required=True),
+            disnake.Option("contract", "ERC-1155 smart contract", type=disnake.OptionType.string, required=True)
+        ]
+    )
     async def getErc1155(self, ctx, address: str, contract: str = 'ITEMS', offset: int = 30):
         await self.handle_erc_transactions(ctx, address, contract, offset, 'ERC1155')
     
