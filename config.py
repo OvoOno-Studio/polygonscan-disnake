@@ -16,6 +16,9 @@ BearerToken = os.getenv('TOKEN')
 ClientID = os.getenv('CLIENT')
 Secret = os.getenv('SECRET')
 
+DBUser = os.getenv('DBUser')
+DBPw = os.getenv('DBPw')
+
 # This creates a connection to your Replit database
 def create_connection():
     connection = db.connect()  
