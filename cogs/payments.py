@@ -4,7 +4,7 @@ import time
 import random
 from decimal import Decimal
 from disnake.ext import commands, tasks
-from config import API2Key, set_wallet_address, get_wallet_address, set_moni_token, get_moni_token, set_signal_pair, get_signal_pair
+from config import API2Key
 from replit import db
 
 class Pay(commands.Cog):
@@ -12,34 +12,63 @@ class Pay(commands.Cog):
         self.bot = bot
         self.payment_wallet = '0x48D0eEE30ec5BF5C7E167036a8c7f3e4820c19fa'
         self.api = 'https://api.etherscan.io/api'
+        if not self.cleanup_inactive_payments.is_running():
+            self.cleanup_inactive_payments.start()
 
     def generate_uid(self):
         uid_decimal = Decimal(random.uniform(0.000001, 0.000009))
         return uid_decimal.quantize(Decimal('0.000001'))
     
-    @staticmethod
+    @staticmethod 
     def ensure_user_table(user_id):
         """
         Ensure that a dictionary exists for the given user_id.
         If not, create an empty dictionary for the user.
         """
-        if not db.get(str(user_id)):
-            db[str(user_id)] = {}
+        if not db.get("payment_" + str(user_id)):
+            db["payment_" + str(user_id)] = {}
 
     def save_payment(self, user_id, timestamp, uid):
         self.ensure_user_table(user_id)
-        user_payments = db.get(str(user_id), {})
+        user_payments = db.get("payment_" + str(user_id), {})
         user_payments[str(uid)] = {"timestamp": timestamp, "verified": False}
-        db[str(user_id)] = user_payments
+        db["payment_" + str(user_id)] = user_payments
 
     def get_payment(self, user_id, uid):
-        return db.get(str(user_id), {}).get(str(uid), None)
+        return db.get("payment_" + str(user_id), {}).get(str(uid), None)
 
     def verify_payment(self, user_id, uid):
-        user_payments = db.get(str(user_id), {})
+        user_payments = db.get("payment_" + str(user_id), {})
         if str(uid) in user_payments:
             user_payments[str(uid)]["verified"] = True
-            db[str(user_id)] = user_payments
+            db["payment_" + str(user_id)] = user_payments
+
+    def cog_unload(self):
+        self.cleanup_inactive_payments.cancel()
+
+    @tasks.loop(hours=13)
+    async def cleanup_inactive_payments(self):
+        """
+        Cleanup inactive payments older than 12 hours.
+        """
+        cutoff_time = time.time() - (12 * 3600)  # 12 hours in seconds
+        keys = [key for key in db.keys() if key.startswith("payment_")]
+        
+        for key in keys:
+            try:
+                user_payments = db.get(key)
+                inactive_payments = {k: v for k, v in user_payments.items() if v["timestamp"] < cutoff_time and not v["verified"]}
+                
+                for inactive_key in inactive_payments:
+                    del user_payments[inactive_key]
+                
+                if user_payments:  # If the dict is not empty, update it.
+                    db[key] = user_payments
+                else:  # If empty, delete the key from the db.
+                    del db[key]
+            except Exception as e:
+                # Log the error or print it. Depending on your setup, you might want to use a logger.
+                print(f"Error cleaning up payments for key {key}: {e}")
 
     @commands.slash_command(name='upgrade_version', description="Make request payment to upgrade your version.")
     async def upgrade_version(self, ctx): 
