@@ -12,10 +12,7 @@ class Moni(commands.Cog):
         self.session = aiohttp.ClientSession()
         self.api_url = "https://api.coingecko.com/api/v3/simple/price?ids=matic-network&vs_currencies=usd&include_24hr_change=true"
         self.polygon_scan_api_url = f"https://api.polygonscan.com/api?module=account&action=tokentx&apikey={APIKey}" 
-        self.guild_data = {}
-        self.wallet_address = None
-        self.moni_token = None
-        self.moni_contract = None
+        self.guild_data = {} 
         self.previous_matic_price = None
         self.last_known_transaction = None
         self.semaphore = asyncio.Semaphore(4)  
@@ -174,9 +171,9 @@ class Moni(commands.Cog):
                 self.guild_data[guild_id]["wallet_address"] = get_wallet_address(guild_id)
                 self.guild_data[guild_id]["transaction_channel_id"] = get_transaction_channel(guild_id) 
                 try:
-                    transactions = await self.fetch_wallet_transactions(self.guild_data[guild_id])
+                    transactions = await self.fetch_wallet_transactions(guild_id)
                     if transactions is not None and isinstance(transactions, (list, tuple, str)):
-                        print(f"Fetched {len(transactions)} transactions for guild {self.guild_data[guild_id]}")
+                        print(f"Fetched {len(transactions)} transactions for guild {guild_id}")
                     else:
                         print(f"Unexpected type for transactions: {type(transactions)}")
                     if not transactions or isinstance(transactions, str):
@@ -203,7 +200,7 @@ class Moni(commands.Cog):
                         if self.guild_data[guild_id]['last_known_transaction']["hash"] != last_transaction["hash"]:
                             #print(f"New incoming transaction found: {last_transaction}")
                             print(f"Sending transaction message for {last_transaction['hash']}")
-                            await self.send_transaction_message(last_transaction, self.guild_data[guild_id])
+                            await self.send_transaction_message(last_transaction, guild_id)
                             self.guild_data[guild_id]['last_known_transaction'] = last_transaction 
                     
                     await asyncio.sleep(120)  # This waits after each guild's transactions are processed
@@ -221,20 +218,21 @@ class Moni(commands.Cog):
         if self.guild_data[guild_id]["wallet_address"] is None or len(self.guild_data[guild_id]["wallet_address"]) != 42 or not self.guild_data[guild_id]["wallet_address"].startswith('0x'):
             # print(f"Skipping guild {guild.name} due to invalid wallet address: {self.wallet_address}")
             return None
-        if self.moni_token == 'WETH':
-            self.moni_contract = '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619'
-        if self.moni_token == 'SAND':
-            self.moni_contract  = '0xbbba073c31bf03b8acf7c28ef0738decf3695683'
-        if self.moni_token == 'MANA':
-            self.moni_contract  = '0xA1c57f48F0Deb89f569dFbE6E2B7f46D33606fD4'
-        if self.moni_token == 'USDT':
-            self.moni_contract  = '0xc2132D05D31c914a87C6611C10748AEb04B58e8F'
-        if self.moni_token == 'USDC':
-            self.moni_contract  = '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174'
-        if self.moni_token == 'DAI':
-            self.moni_contract  = '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063'
+        moni_contract = None
+        if self.guild_data[guild_id]["moni_token"] == 'WETH':
+            moni_contract = '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619'
+        if self.guild_data[guild_id]["moni_token"] == 'SAND':
+            moni_contract  = '0xbbba073c31bf03b8acf7c28ef0738decf3695683'
+        if self.guild_data[guild_id]["moni_token"] == 'MANA':
+            moni_contract  = '0xA1c57f48F0Deb89f569dFbE6E2B7f46D33606fD4'
+        if self.guild_data[guild_id]["moni_token"] == 'USDT':
+            moni_contract  = '0xc2132D05D31c914a87C6611C10748AEb04B58e8F'
+        if self.guild_data[guild_id]["moni_token"] == 'USDC':
+            moni_contract  = '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174'
+        if self.guild_data[guild_id]["moni_token"] == 'DAI':
+            moni_contract  = '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063'
 
-        url = f"{self.polygon_scan_api_url}&address={self.guild_data[guild_id]['wallet_address']}&contractaddress={self.moni_contract}&sort=desc"
+        url = f"{self.polygon_scan_api_url}&address={self.guild_data[guild_id]['wallet_address']}&contractaddress={moni_contract}&sort=desc"
         try:
             json_data = await self.limited_get(url)
             if json_data and "result" in json_data:

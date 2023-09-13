@@ -1,8 +1,7 @@
 import json
 import requests
 import time
-import random
-import aiomysql
+import random 
 from disnake.ext import commands, tasks
 from config import API2Key, DBUser, DBPw
 
@@ -11,7 +10,7 @@ class Pay(commands.Cog):
         self.bot = bot
         self.payment_wallet = '0x48D0eEE30ec5BF5C7E167036a8c7f3e4820c19fa'
         self.api = 'https://api.etherscan.io/api'
-        self.pool = bot.loop.run_until_complete(self.init_pool())
+        #self.pool = bot.loop.run_until_complete(self.init_pool())
         self.clean_inactive_payments.start()
 
     # async def init_pool(self):
