@@ -14,29 +14,29 @@ class Pay(commands.Cog):
         self.pool = bot.loop.run_until_complete(self.init_pool())
         self.clean_inactive_payments.start()
 
-    async def init_pool(self):
-        try:
-            return await aiomysql.create_pool(host='67.223.118.135', port=3306,
-                                              user=DBUser, password=DBPw,
-                                              db='ovoovtvo_bot_payments', loop=self.bot.loop)
-        except Exception as e:
-            print(f"Error creating database pool: {e}")
-            return None
+    # async def init_pool(self):
+    #     try:
+    #         return await aiomysql.create_pool(host='67.223.118.135', port=3306,
+    #                                           user=DBUser, password=DBPw,
+    #                                           db='ovoovtvo_bot_payments', loop=self.bot.loop)
+    #     except Exception as e:
+    #         print(f"Error creating database pool: {e}")
+    #         return None
 
-    async def execute(self, query, *args, many=False, commit=False):
-        try:
-            async with self.pool.acquire() as conn:
-                async with conn.cursor() as cur:
-                    if many:
-                        await cur.executemany(query, args)
-                    else:
-                        await cur.execute(query, args)
-                    if commit:
-                        await conn.commit()
-                    return await cur.fetchall()
-        except Exception as e:
-            print(f"Database error: {e}")
-            return None
+    # async def execute(self, query, *args, many=False, commit=False):
+    #     try:
+    #         async with self.pool.acquire() as conn:
+    #             async with conn.cursor() as cur:
+    #                 if many:
+    #                     await cur.executemany(query, args)
+    #                 else:
+    #                     await cur.execute(query, args)
+    #                 if commit:
+    #                     await conn.commit()
+    #                 return await cur.fetchall()
+    #     except Exception as e:
+    #         print(f"Database error: {e}")
+    #         return None
 
     def generate_uid(self):
         return round(random.uniform(0.000001, 0.000009), 6)
