@@ -49,13 +49,14 @@ class Pay(commands.Cog):
         await ctx.response.send_message(content=message)
 
     @commands.slash_command(name='confirm_payment', description="Confirm your payment.")
-    async def confirm_payment(self, ctx, wallet_from: str, uid: Decimal):
+    async def confirm_payment(self, ctx, wallet_from: str, uid: str):
+        uid_decimal = Decimal(uid)
         payment = self.get_payment(ctx.author.id, uid)
         if not payment:
             await ctx.response.send_message(content="🔴 You haven't requested an upgrade or incorrect UID provided!")
             return
         timestamp = payment["timestamp"]
-        amount_with_uid = Decimal(0.088) + uid
+        amount_with_uid = Decimal(0.088) + uid_decimal
 
         params = {
             "module": "account",
