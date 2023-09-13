@@ -12,6 +12,7 @@ class Moni(commands.Cog):
         self.session = aiohttp.ClientSession()
         self.api_url = "https://api.coingecko.com/api/v3/simple/price?ids=matic-network&vs_currencies=usd&include_24hr_change=true"
         self.polygon_scan_api_url = f"https://api.polygonscan.com/api?module=account&action=tokentx&apikey={APIKey}" 
+        self.guild_data = {}
         self.wallet_address = None
         self.moni_token = None
         self.moni_contract = None
@@ -159,12 +160,23 @@ class Moni(commands.Cog):
 
         while not self.bot.is_closed():
             for guild in self.bot.guilds:
-                self.wallet_address = get_wallet_address(guild.id)
-                self.transaction_channel_id = get_transaction_channel(guild.id)
+                guild_id = guild.id
+                # Initialize a data dictionary for this guild if it doesn't already exist
+                if guild_id not in self.guild_data:
+                    self.guild_data[guild_id] = {
+                        "wallet_address": None,
+                        "moni_token": None,
+                        "moni_contract": None,
+                        "last_known_transaction": None,
+                        "transaction_channel_id": None
+                    }
+
+                self.guild_data[guild_id]["wallet_address"] = get_wallet_address(guild_id)
+                self.guild_data[guild_id]["transaction_channel_id"] = get_transaction_channel(guild_id) 
                 try:
-                    transactions = await self.fetch_wallet_transactions(guild.id)
+                    transactions = await self.fetch_wallet_transactions(self.guild_data[guild_id])
                     if transactions is not None and isinstance(transactions, (list, tuple, str)):
-                        print(f"Fetched {len(transactions)} transactions for guild {guild.id}")
+                        print(f"Fetched {len(transactions)} transactions for guild {self.guild_data[guild_id]}")
                     else:
                         print(f"Unexpected type for transactions: {type(transactions)}")
                     if not transactions or isinstance(transactions, str):
@@ -176,23 +188,23 @@ class Moni(commands.Cog):
 
                     last_transaction = None
                     for transaction in transactions:
-                        if transaction["to"].lower() == self.wallet_address.lower():
+                        if transaction["to"].lower() == self.guild_data[guild_id]["wallet_address"].lower():
                             last_transaction = transaction
-                            print(f"Found transaction for {self.wallet_address} with hash {transaction['hash']}")
+                            print(f"Found transaction for {self.guild_data[guild_id]['wallet_address']} with hash {transaction['hash']}")
                             await asyncio.sleep(3)  # Add delay here
                             break
 
                     if last_transaction is None:
                         continue
 
-                    if self.last_known_transaction is None:
-                        self.last_known_transaction = last_transaction
+                    if self.guild_data[guild_id]["last_known_transaction"] is None:
+                        self.guild_data[guild_id]["last_known_transaction"] = last_transaction
                     else:
-                        if self.last_known_transaction["hash"] != last_transaction["hash"]:
-                            print(f"New incoming transaction found: {last_transaction}")
+                        if self.guild_data[guild_id]['last_known_transaction']["hash"] != last_transaction["hash"]:
+                            #print(f"New incoming transaction found: {last_transaction}")
                             print(f"Sending transaction message for {last_transaction['hash']}")
-                            await self.send_transaction_message(last_transaction, guild.id)
-                            self.last_known_transaction = last_transaction 
+                            await self.send_transaction_message(last_transaction, self.guild_data[guild_id])
+                            self.guild_data[guild_id]['last_known_transaction'] = last_transaction 
                     
                     await asyncio.sleep(120)  # This waits after each guild's transactions are processed
 
@@ -203,10 +215,10 @@ class Moni(commands.Cog):
                 await asyncio.sleep(60)
 
     async def fetch_wallet_transactions(self, guild_id):
-        self.wallet_address = get_wallet_address(guild_id)
-        self.moni_token = get_moni_token(guild_id)
+        self.guild_data[guild_id]["wallet_address"] = get_wallet_address(guild_id)
+        self.guild_data[guild_id]["moni_token"] = get_moni_token(guild_id)
         # print(f'Fetching transaction: token to monitor {self.moni_token}, wallet to monitor {self.wallet_address}, guild id: {guild_id}')
-        if self.wallet_address is None or len(self.wallet_address) != 42 or not self.wallet_address.startswith('0x'):
+        if self.guild_data[guild_id]["wallet_address"] is None or len(self.guild_data[guild_id]["wallet_address"]) != 42 or not self.guild_data[guild_id]["wallet_address"].startswith('0x'):
             # print(f"Skipping guild {guild.name} due to invalid wallet address: {self.wallet_address}")
             return None
         if self.moni_token == 'WETH':
@@ -222,7 +234,7 @@ class Moni(commands.Cog):
         if self.moni_token == 'DAI':
             self.moni_contract  = '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063'
 
-        url = f"{self.polygon_scan_api_url}&address={self.wallet_address}&contractaddress={self.moni_contract}&sort=desc"
+        url = f"{self.polygon_scan_api_url}&address={self.guild_data[guild_id]['wallet_address']}&contractaddress={self.moni_contract}&sort=desc"
         try:
             json_data = await self.limited_get(url)
             if json_data and "result" in json_data:
@@ -236,22 +248,22 @@ class Moni(commands.Cog):
             return None
 
     async def send_transaction_message(self, transaction, guild_id): 
-        self.wallet_address = get_wallet_address(guild_id)
-        self.transaction_channel_id = get_transaction_channel(guild_id)
-        self.moni_token = get_moni_token(guild_id)
+        self.guild_data[guild_id]["wallet_address"] = get_wallet_address(guild_id)
+        self.guild_data[guild_id]["transaction_channel_id"] = get_transaction_channel(guild_id)
+        self.guild_data[guild_id]["moni_token"] = get_moni_token(guild_id)
 
         # Check if transaction_channel_id is not a valid Discord snowflake
-        if not str(self.transaction_channel_id).isnumeric():
-            print(f"Invalid channel ID: {self.transaction_channel_id}")
+        if not str(self.guild_data[guild_id]["transaction_channel_id"]).isnumeric():
+            print(f"Invalid channel ID: {self.guild_data[guild_id]['transaction_channel_id']}")
             return
 
         try:
-            channel = await self.bot.fetch_channel(self.transaction_channel_id)
+            channel = await self.bot.fetch_channel(self.guild_data[guild_id]["transaction_channel_id"])
             if channel:
-                print(f"Sending message to channel {channel.id}")  # Debugging print statement
+                # print(f"Sending message to channel {channel.id}")  # Debugging print statement
                 message = (
-                    f"🚨 New incoming {self.moni_token} token transaction to `{self.wallet_address}` 🚨\n"
-                    f"💰 Value: {float(transaction['value'])} {self.moni_token} \n"
+                    f"🚨 New incoming {self.guild_data[guild_id]['moni_token']} token transaction to `{self.guild_data[guild_id]['wallet_address']}` 🚨\n"
+                    f"💰 Value: {float(transaction['value'])} {self.guild_data[guild_id]['moni_token']} \n"
                     f"🧑 From: `{transaction['from']}`\n"
                     f"👉 To: `{transaction['to']}`\n"
                     f"🔗 Transaction Hash: [`{transaction['hash']}`](https://polygonscan.com/tx/{transaction['hash']})\n"
@@ -262,19 +274,19 @@ class Moni(commands.Cog):
                     await channel.send(message)
                     print(f"Message sent to: {channel}") # Debugging print statement
                 except disnake.HTTPException as e:
-                    print(f"Error sending message to channel with ID {self.transaction_channel_id}: {e}")
+                    print(f"Error sending message to channel with ID {self.guild_data[guild_id]['transaction_channel_id']}: {e}")
                 else:
                     print('No channel optimized!')
         except disnake.NotFound:
-            print(f"Channel with ID {self.transaction_channel_id} not found.")
+            print(f"Channel with ID {self.guild_data[guild_id]['transaction_channel_id']} not found.")
         except disnake.Forbidden:
-            print(f"Bot does not have permission to access channel with ID {self.transaction_channel_id}.")
+            print(f"Bot does not have permission to access channel with ID {self.guild_data[guild_id]['transaction_channel_id']}.")
         except disnake.HTTPException as e:
             if e.status == 429:  # Handle rate limit error
                 print("Rate limit reached, sleeping for a bit...")
                 await asyncio.sleep(10)  # sleep for 10 seconds before trying again
             else:
-                print(f"Error fetching channel with ID {self.transaction_channel_id}: {e}") 
+                print(f"Error fetching channel with ID {self.guild_data[guild_id]['transaction_channel_id']}: {e}") 
 
 def setup(bot):
     bot.add_cog(Moni(bot))
