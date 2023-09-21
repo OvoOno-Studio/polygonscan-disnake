@@ -483,8 +483,8 @@ class Scrape(commands.Cog):
         elif any(gas > 50 for gas in [safe_gas, propose_gas, fast_gas]):
             conclusion = "Medium"
         
-        embed = Embed(title=f":fuelpump: {blockchain_name} Gas Oracle", colour=color)
-        embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/")
+        embed = Embed(title=f":fuelpump: {blockchain_name} Gas Oracle", color=color)
+        embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://imgur.com/97feYXR")
         embed.add_field(name="Last Block", value=data['result']['LastBlock'], inline=False)
         embed.add_field(name="Safe Gas Price", value=f"{safe_gas} Gwei", inline=True)
         embed.add_field(name="Propose Gas Price", value=f"{propose_gas} Gwei", inline=True)
