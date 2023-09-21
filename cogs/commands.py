@@ -4,6 +4,7 @@ import disnake
 import time 
 from disnake.ext import commands
 from disnake.ext.commands import has_permissions
+from disnake import Option, OptionType
 from datetime import datetime
 import csv
 import io
@@ -435,49 +436,64 @@ class Scrape(commands.Cog):
     
     """
     Define gas() - Returns the current Safe, Proposed and Fast gas prices
-    """
-    @is_donator()
-    @commands.command()
-    async def gas(self, ctx): 
+    """ 
+    @commands.slash_command(
+        name="gas",
+        description="Returns the current Safe, Proposed and Fast gas prices",
+        options=[
+            Option(
+                name="blockchain",
+                description="Choose Ethereum or Polygon",
+                type=OptionType.STRING, # type: ignore
+                choices=["ethereum", "polygon"],
+                required=True
+            )
+        ]
+    )
+    async def gas(self, inter, blockchain: str):
         key = APIKey
         key2 = API2Key
-        
-        url_eth = f"https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey={key2}"
-        response = requests.get(url_eth)  
+
+        if blockchain.lower() == "ethereum":
+            url = f"https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey={key2}"
+            blockchain_name = "Ethereum"
+        elif blockchain.lower() == "polygon":
+            url = f"https://api.polygonscan.com/api?module=gastracker&action=gasoracle&apikey={key}"
+            blockchain_name = "Polygon"
+        else:
+            await inter.response.send_message("Invalid blockchain choice, choose either Ethereum or Polygon")
+            return
+
+        response = requests.get(url)
         data = json.loads(response.text)
 
-        # construct a message with the desired formatting and emojis
-        message = ( 
-            f"\n"
-            f"**Etherum Gas oracle** \n"
+        safe_gas = int(data['result']['SafeGasPrice'])
+        propose_gas = int(data['result']['ProposeGasPrice'])
+        fast_gas = int(data['result']['FastGasPrice'])
+
+        # Conclude whether gas is low, medium, or high.
+        conclusion = "Low"
+        if any(gas > 100 for gas in [safe_gas, propose_gas, fast_gas]):
+            conclusion = "High"
+        elif any(gas > 50 for gas in [safe_gas, propose_gas, fast_gas]):
+            conclusion = "Medium"
+
+        # Construct a message with the desired formatting and emojis
+        message = (
+            f"\n**{blockchain_name} Gas Oracle** \n"
             f"🔹 **Last Block:** {data['result']['LastBlock']}\n"
-            f"⛽ **Safe Gas Price:** {data['result']['SafeGasPrice']} Gwei\n"
-            f"📌 **Propose Gas Price:** {data['result']['ProposeGasPrice']} Gwei\n"
-            f"⚡ **Fast Gas Price:** {data['result']['FastGasPrice']} Gwei\n"
+            f"⛽ **Safe Gas Price:** {safe_gas} Gwei (Low if <= 50, Medium if <= 100, High if > 100)\n"
+            f"📌 **Propose Gas Price:** {propose_gas} Gwei\n"
+            f"⚡ **Fast Gas Price:** {fast_gas} Gwei\n"
             f"💰 **Suggested Base Fee:** {data['result']['suggestBaseFee']}\n"
             f"📊 **Gas Used Ratio:** {data['result']['gasUsedRatio']}\n"
+            f"🔍 **Conclusion:** Gas is {conclusion}\n"
         )
 
-        await ctx.send(message)
+        if 'UsdPrice' in data['result']:
+            message += f"💵 **USD Price:** ${data['result']['UsdPrice']}"
 
-        url_poly = f"https://api.polygonscan.com/api?module=gastracker&action=gasoracle&apikey={key}"
-        response = requests.get(url_poly)  
-        data = json.loads(response.text)
-
-        # construct a message with the desired formatting and emojis
-        message = ( 
-            f"\n"
-            f"**Polygon Gas oracle** \n"
-            f"🔹 **Last Block:** {data['result']['LastBlock']}\n"
-            f"⛽ **Safe Gas Price:** {data['result']['SafeGasPrice']} Gwei\n"
-            f"📌 **Propose Gas Price:** {data['result']['ProposeGasPrice']} Gwei\n"
-            f"⚡ **Fast Gas Price:** {data['result']['FastGasPrice']} Gwei\n"
-            f"💰 **Suggested Base Fee:** {data['result']['suggestBaseFee']}\n"
-            f"📊 **Gas Used Ratio:** {data['result']['gasUsedRatio']}\n"
-            f"💵 **USD Price:** ${data['result']['UsdPrice']}"
-        )
-
-        await ctx.send(message)
+        await inter.response.send_message(message)
 
     """
     Define getErc20() - return list of ERC-20 transactions, can be filtered by specific smart contract address. 

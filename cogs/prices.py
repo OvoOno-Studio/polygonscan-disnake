@@ -177,7 +177,7 @@ class Moni(commands.Cog):
                     else:
                         print(f"Unexpected type for transactions: {type(transactions)}")
                     if not transactions or isinstance(transactions, str):
-                        print(f"Error in transactions response: {transactions}")
+                        #print(f"Error in transactions response: {transactions}")
                         await asyncio.sleep(1)  # Add delay here
                         continue
 
