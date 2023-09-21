@@ -444,7 +444,7 @@ class Scrape(commands.Cog):
             Option(
                 name="blockchain",
                 description="Choose Ethereum or Polygon",
-                type=OptionType.STRING, # type: ignore
+                type=OptionType.str,  # type: ignore
                 choices=["ethereum", "polygon"],
                 required=True
             )
