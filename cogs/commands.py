@@ -484,13 +484,13 @@ class Scrape(commands.Cog):
             conclusion = "Medium"
         
         embed = Embed(title=f":fuelpump: {blockchain_name} Gas Oracle", color=color)
-        embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://imgur.com/97feYXR")
+        embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
         embed.add_field(name="Last Block", value=data['result']['LastBlock'], inline=False)
         embed.add_field(name="Safe Gas Price", value=f"{safe_gas} Gwei", inline=True)
         embed.add_field(name="Propose Gas Price", value=f"{propose_gas} Gwei", inline=True)
         embed.add_field(name="Fast Gas Price", value=f"{fast_gas} Gwei", inline=True)
         embed.add_field(name="Suggested Base Fee", value=data['result']['suggestBaseFee'], inline=False)
-        embed.add_field(name="Gas Used Ratio", value=data['result']['gasUsedRatio'], inline=True)
+        embed.add_field(name="Gas Used Ratio", value=data['result']['gasUsedRatio'], inline=False)
         embed.add_field(name="Conclusion", value=f"Gas is {conclusion}", inline=False)
         embed.set_footer(text=f"Powered by OvoOno Studio")
         
