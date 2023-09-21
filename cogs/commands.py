@@ -4,7 +4,7 @@ import disnake
 import time 
 from disnake.ext import commands
 from disnake.ext.commands import has_permissions
-from disnake import Option, OptionType
+from disnake import Option, OptionType, Embed, Color
 from datetime import datetime
 import csv
 import io
@@ -457,43 +457,45 @@ class Scrape(commands.Cog):
         if blockchain.lower() == "ethereum":
             url = f"https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey={key2}"
             blockchain_name = "Ethereum"
+            color = Color.blue()  # You can choose a color to represent Ethereum
         elif blockchain.lower() == "polygon":
             url = f"https://api.polygonscan.com/api?module=gastracker&action=gasoracle&apikey={key}"
             blockchain_name = "Polygon"
+            color = Color.red()  # You can choose a color to represent Polygon
         else:
             await inter.response.send_message("Invalid blockchain choice, choose either Ethereum or Polygon")
             return
-
+        
         response = requests.get(url)
         data = json.loads(response.text)
 
-        safe_gas = int(data['result']['SafeGasPrice'])
-        propose_gas = int(data['result']['ProposeGasPrice'])
-        fast_gas = int(data['result']['FastGasPrice'])
-
-        # Conclude whether gas is low, medium, or high.
+        try:
+            safe_gas = float(data['result']['SafeGasPrice'])
+            propose_gas = float(data['result']['ProposeGasPrice'])
+            fast_gas = float(data['result']['FastGasPrice'])
+        except ValueError:
+            await inter.response.send_message("Unable to retrieve valid gas prices from the API.")
+            return
+        
         conclusion = "Low"
         if any(gas > 100 for gas in [safe_gas, propose_gas, fast_gas]):
             conclusion = "High"
         elif any(gas > 50 for gas in [safe_gas, propose_gas, fast_gas]):
             conclusion = "Medium"
-
-        # Construct a message with the desired formatting and emojis
-        message = (
-            f"\n**{blockchain_name} Gas Oracle** \n"
-            f"🔹 **Last Block:** {data['result']['LastBlock']}\n"
-            f"⛽ **Safe Gas Price:** {safe_gas} Gwei (Low if <= 50, Medium if <= 100, High if > 100)\n"
-            f"📌 **Propose Gas Price:** {propose_gas} Gwei\n"
-            f"⚡ **Fast Gas Price:** {fast_gas} Gwei\n"
-            f"💰 **Suggested Base Fee:** {data['result']['suggestBaseFee']}\n"
-            f"📊 **Gas Used Ratio:** {data['result']['gasUsedRatio']}\n"
-            f"🔍 **Conclusion:** Gas is {conclusion}\n"
-        )
-
+        
+        embed = Embed(title=f"{blockchain_name} Gas Oracle", colour=color)
+        embed.add_field(name="Last Block", value=data['result']['LastBlock'], inline=False)
+        embed.add_field(name="Safe Gas Price", value=f"{safe_gas} Gwei", inline=True)
+        embed.add_field(name="Propose Gas Price", value=f"{propose_gas} Gwei", inline=True)
+        embed.add_field(name="Fast Gas Price", value=f"{fast_gas} Gwei", inline=True)
+        embed.add_field(name="Suggested Base Fee", value=data['result']['suggestBaseFee'], inline=False)
+        embed.add_field(name="Gas Used Ratio", value=data['result']['gasUsedRatio'], inline=True)
+        embed.add_field(name="Conclusion", value=f"Gas is {conclusion}", inline=False)
+        
         if 'UsdPrice' in data['result']:
-            message += f"💵 **USD Price:** ${data['result']['UsdPrice']}"
-
-        await inter.response.send_message(message)
+            embed.add_field(name="USD Price", value=f"${data['result']['UsdPrice']}", inline=True)
+        
+        await inter.response.send_message(embed=embed)
 
     """
     Define getErc20() - return list of ERC-20 transactions, can be filtered by specific smart contract address. 
