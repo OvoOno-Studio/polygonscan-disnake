@@ -230,13 +230,14 @@ class Friend(commands.Cog):
                 # Send the CSV file as a direct message (DM)
                 file = disnake.File(csv_data, filename="events.csv") # type: ignore
                 await ctx.author.send(file=file, content="Here is the CSV file with the recent events.")
+                await ctx.send(embed=embed)
 
         except Exception as e:
             print(f"Error in events: {e}")
         
     @is_donator()
     @commands.slash_command(
-        name="lists", 
+        name="lists",
         description="Gets a list of users by their token price or trending.",
         options=[
             Option(
@@ -247,25 +248,39 @@ class Friend(commands.Cog):
                 required=True
             )
         ])
-    async def lists(self, ctx, filters): 
+    async def lists(self, ctx, filters):
         if filters is None:
             return
+
         t = ''
         if filters.lower() == 'price':
             t = 'top-by-price'
         if filters.lower() == 'trending':
             t = 'trending'
+
         try:
-            endpoint = f'{str(self.friend_api)}/lists/{str(t)}'  
+            endpoint = f'{str(self.friend_api)}/lists/{str(t)}'
             async with self.session.get(endpoint) as response:
                 if response.status != 200:
                     print(f"Failed to connect to API, status code: {response.status}, message: {await response.text()}")
                     return None
+
                 json_data = await response.json()
-                print(json_data)
-                await ctx.send('Works')  
+
+                if "users" in json_data:
+                    users = json_data["users"]
+                    for user in users:
+                        embed = discord.Embed(title="User Information", color=0x00ff00)
+                        embed.add_field(name="Twitter Username", value=user.get("twitterUsername", "N/A"), inline=True)
+                        embed.add_field(name="Twitter Name", value=user.get("twitterName", "N/A"), inline=True)
+                        embed.add_field(name="Display Price", value=user.get("displayPrice", "N/A"), inline=True)
+                        embed.add_field(name="Volume", value=user.get("volume", "N/A"), inline=True)
+                        embed.add_field(name="Net Buy", value=user.get("netBuy", "N/A"), inline=True)
+                        embed.set_thumbnail(url=user.get("twitterPfpUrl", ""))
+                        await ctx.send(embed=embed)
+
         except Exception as e:
-            print(f"Error in get_user by ID: {e}")
+            print(f"Error in lists: {e}")
             return None
     
     # @is_donator()
