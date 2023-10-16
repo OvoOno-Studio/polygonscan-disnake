@@ -3,16 +3,54 @@ import csv
 import io
 import disnake
 import requests
+from config import get_transaction_channel
 from disnake.ext import commands 
 from disnake import Option, OptionType, Embed, Color
 from config import jwt
 from checks import is_donator
+from web3 import Web3
 
 class Friend(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.session = aiohttp.ClientSession()
         self.friend_api = 'https://prod-api.kosetto.com'
+        self.w3 = Web3(Web3.HTTPProvider('https://base-mainnet.g.alchemy.com/v2/8XQtglDUSx3Sp7MuWwhk3K1X9x2vrhJo'))
+        self.wallet_address = '0xCF205808Ed36593aa40a44F10c7f7C2F67d4A4d4' 
+        self.bot.loop.create_task(self.check_transactions)
+        
+    async def check_transactions(self):
+        while True:
+            try:
+                latest_block = self.w3.eth.blockNumber
+                block = self.w3.eth.getBlock(latest_block, full_transactions=True)
+                for tx in block['transactions']:
+                    if tx['to'] == self.wallet_address:
+                        # Check if the transaction meets your conditions (method and amount)
+                        if tx['input'].hex() == '0x6945b123' and tx['value'] == 0:
+                            await self.send_embedded_message(tx) 
+
+            except Exception as e:
+                print(f"Error checking transactions: {e}")
+
+    async def send_embedded_message(self, transaction):
+        # Create an embedded message with transaction details
+        embed = disnake.Embed(
+            title="New user registered!",
+            color=0x9C84EF,
+            description=f"New 'Buy Shares' transaction method with 0 ETH."
+        )
+        embed.add_field(name="From Address", value=transaction['from'], inline=False)
+        embed.add_field(name="To Address", value=transaction['to'], inline=False)
+        embed.add_field(name="Transaction Hash", value=transaction['hash'], inline=False)
+        embed.add_field(name="Gas Price", value=f"{transaction['gasPrice']} Wei", inline=False)
+        
+        for guild in self.bot.guilds:
+            channel_id = get_transaction_channel(guild.id)
+            channel = self.bot.get_channel(channel_id)
+            if channel is not None:
+                destination = self.bot.get_channel(channel)  # Replace with your channel ID or user ID
+                await destination.send(embed=embed)
         
     @is_donator()
     @commands.slash_command(name="user", description="Get details about a user by address.")
