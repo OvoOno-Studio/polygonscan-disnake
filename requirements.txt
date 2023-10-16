@@ -6,3 +6,4 @@ import
 asyncio
 json
 requests
+web3
