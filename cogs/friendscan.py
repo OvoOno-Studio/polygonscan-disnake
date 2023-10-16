@@ -39,10 +39,11 @@ class Friend(commands.Cog):
 
                 # Create an embedded message
                 embed = disnake.Embed(title="User Details", color=0x9C84EF)  # Set the embed title and color (Discord blue)
-
+                twitter_username = json_data.get("twitterUsername", "")
+                twitter_url = f"https://x.com/{twitter_username}"
                 # Add fields to the embed for user details
                 embed.add_field(name="User Address", value=json_data.get("address", ""), inline=False)
-                embed.add_field(name="Twitter Username", value=json_data.get("twitterUsername", ""), inline=True)
+                embed.add_field(name="Twitter Username", value=f"[{twitter_username}]({twitter_url})", inline=True)
                 embed.add_field(name="Twitter Name", value=json_data.get("twitterName", ""), inline=True)
                 embed.add_field(name="Twitter User ID", value=json_data.get("twitterUserId", ""), inline=False)
                 embed.add_field(name="Last Online", value=json_data.get("lastOnline", ""), inline=False)
