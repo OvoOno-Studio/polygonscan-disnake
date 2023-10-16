@@ -74,6 +74,19 @@ class Friend(commands.Cog):
                 'Referer': 'https://www.friend.tech/',
                 'Accept-Encoding': 'gzip'
             }
+            embed = disnake.Embed(
+                title=f"Search friends for: {username}",
+                description="Search users by their twitter handle.",
+                color=0x9C84EF
+            )
+            embed.add_field(
+                name="Response status:",
+                value=f'CSV file sent!',
+                inline=False 
+            )
+            embed.set_footer(
+                text=f"Requested by {ctx.author}"
+            )
 
             async with self.session.get(endpoint, headers=headers) as response:
                 if response.status != 200:
@@ -98,6 +111,7 @@ class Friend(commands.Cog):
                 # Send the CSV file as a direct message (DM)
                 file = disnake.File(csv_data, filename="friends.csv") # type: ignore
                 await ctx.author.send(file=file, content=f"Search results for: {username}.")
+                await ctx.author.send(embed=embed)
 
         except Exception as e:
             print(f"Error in search_friends: {e}")
