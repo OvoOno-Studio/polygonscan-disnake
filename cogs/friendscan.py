@@ -14,13 +14,14 @@ class Friend(commands.Cog):
         
     @is_donator()
     @commands.slash_command(name="user", description="Get details about user by address.")
-    async def user_by_address(self, ctx, user_wallet: str = None):
+    async def user_by_address(self, ctx, user_wallet):
         if user_wallet is None:
             await ctx.send("Please provide a valid user_wallet!.")
             return
         
         try:
             endpoint = f'{str(self.friend_api)}/users/{str(user_wallet)}'
+            
             headers = {
                 'Authorization': str(jwt),
                 'Content-Type': 'application/json',
@@ -28,6 +29,25 @@ class Friend(commands.Cog):
                 'Referer': 'https://www.friend.tech/'
             }
             async with self.session.get(endpoint, headers=headers) as response:
+                if response.status != 200:
+                    print(f"Failed to connect to API, status code: {response.status}, message: {await response.text()}")
+                    return None
+                json_data = await response.json()
+                await ctx.send(json_data)  
+        except Exception as e:
+            print(f"Error in get_user by ID: {e}")
+            return None
+        
+    @is_donator()
+    @commands.slash_command(name="holdings_activity", description="Gets a history of trades for a user.")
+    async def holdings_activity(self, ctx, user_wallet):
+        if user_wallet is None:
+            await ctx.send("Please provide a valid user_wallet!.")
+            return
+        
+        try:
+            endpoint = f'{str(self.friend_api)}/holdings-activity/{str(user_wallet)}' 
+            async with self.session.get(endpoint) as response:
                 if response.status != 200:
                     print(f"Failed to connect to API, status code: {response.status}, message: {await response.text()}")
                     return None
