@@ -270,7 +270,7 @@ class Friend(commands.Cog):
                 if "users" in json_data:
                     users = json_data["users"]
                     for user in users:
-                        embed = discord.Embed(title="User Information", color=0x00ff00)
+                        embed = disnake.Embed(title="User Information", color=0x00ff00)
                         embed.add_field(name="Twitter Username", value=user.get("twitterUsername", "N/A"), inline=True)
                         embed.add_field(name="Twitter Name", value=user.get("twitterName", "N/A"), inline=True)
                         embed.add_field(name="Display Price", value=user.get("displayPrice", "N/A"), inline=True)
