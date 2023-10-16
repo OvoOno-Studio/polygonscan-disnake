@@ -116,7 +116,7 @@ class Friend(commands.Cog):
                 'Referer': 'https://www.friend.tech/',
                 'Accept-Encoding': 'gzip'
             }
-            async with self.session.get(endpoint) as response:
+            async with self.session.get(endpoint, headers=headers) as response:
                 if response.status != 200:
                     print(f"Failed to connect to API, status code: {response.status}, message: {await response.text()}")
                     return None
