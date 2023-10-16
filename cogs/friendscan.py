@@ -81,5 +81,24 @@ class Friend(commands.Cog):
             print(f"Error in get_user by ID: {e}")
             return None
         
+    @is_donator()
+    @commands.slash_command(name="points", description="Gets the points for a user (potentially used for an airdrop).")
+    async def points(self, ctx, user_wallet):
+        if user_wallet is None:
+            await ctx.send("Please provide a valid user_wallet!.")
+            return
+
+        try:
+            endpoint = f'{str(self.friend_api)}/portfolio/{str(user_wallet)}'  
+            async with self.session.get(endpoint) as response:
+                if response.status != 200:
+                    print(f"Failed to connect to API, status code: {response.status}, message: {await response.text()}")
+                    return None
+                json_data = await response.json()
+                await ctx.send(json_data)  
+        except Exception as e:
+            print(f"Error in get_user by ID: {e}")
+            return None
+
 def setup(bot):
     bot.add_cog(Friend(bot))
