@@ -25,12 +25,10 @@ class Friend(commands.Cog):
             try:
                 latest_block = self.w3.eth.block_number
                 block = self.w3.eth.get_block(latest_block, full_transactions=True)
-                print(block)
                 for tx in block['transactions']:
-                    if tx['to'] == self.wallet_address:
+                    if tx['to'] == self.wallet_address: # type: ignore
                         # Check if the transaction meets your conditions (method and amount)
-                        if tx['input'].hex() == '0x6945b123' and tx['value'] == 0:
-                            print(tx)
+                        if tx['input'].hex() == '0x6945b123' and tx['value'] == 0:  # type: ignore
                             await self.send_embedded_message(tx) 
                              
                 await asyncio.sleep(15)
@@ -48,7 +46,7 @@ class Friend(commands.Cog):
         embed.add_field(name="To Address", value=transaction['to'], inline=False)
         embed.add_field(name="Transaction Hash", value=transaction['hash'], inline=False)
         embed.add_field(name="Gas Price", value=f"{transaction['gasPrice']} Wei", inline=False)
-        print('Sending transactions')
+        print('Sending new registered user to the servers.')
         for guild in self.bot.guilds:
             channel_id = get_transaction_channel(guild.id)
             channel = self.bot.get_channel(channel_id)
