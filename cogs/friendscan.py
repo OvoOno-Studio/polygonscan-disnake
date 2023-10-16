@@ -312,6 +312,7 @@ class Friend(commands.Cog):
             # Send the CSV file as a direct message (DM)
             file = disnake.File(csv_data, filename=filename)
             await ctx.author.send(file=file, content=f"Here is the CSV file for {filename}.")
+            await ctx.send(embed=embed)
 
         except Exception as e:
             print(f"Error in sending CSV as DM: {e}")
