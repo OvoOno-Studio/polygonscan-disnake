@@ -27,6 +27,8 @@ class Friend(commands.Cog):
                 block = self.w3.eth.get_block(latest_block, full_transactions=True)
 
                 for tx in block['transactions']:
+                    print(tx)
+                    return
                     tx_data = tx['input'].hex()
                     tx_value = int(tx['value'])
                     tx_to = tx['to']
