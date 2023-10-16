@@ -61,6 +61,7 @@ class Friend(commands.Cog):
 
         except Exception as e:
             print(f"Error in user_by_address: {e}")
+            await ctx.send('User not found!')
         
     @is_donator()
     @commands.slash_command(name="holdings_activity", description="Gets a history of trades for a user.")
