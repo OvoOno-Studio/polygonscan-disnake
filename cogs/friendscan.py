@@ -29,6 +29,8 @@ class Friend(commands.Cog):
                         # Check if the transaction meets your conditions (method and amount)
                         if tx['input'].hex() == '0x6945b123' and tx['value'] == 0:
                             await self.send_embedded_message(tx) 
+                             
+                await disnake.ext.tasks.sleep(10)  # type: ignore # Check every minute
 
             except Exception as e:
                 print(f"Error checking transactions: {e}")
