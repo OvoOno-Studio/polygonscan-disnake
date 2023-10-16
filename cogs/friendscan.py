@@ -111,7 +111,7 @@ class Friend(commands.Cog):
                 # Send the CSV file as a direct message (DM)
                 file = disnake.File(csv_data, filename="friends.csv") # type: ignore
                 await ctx.author.send(file=file, content=f"Search results for: {username}.")
-                await ctx.author.send(embed=embed)
+                await ctx.send(embed=embed)
 
         except Exception as e:
             print(f"Error in search_friends: {e}")
