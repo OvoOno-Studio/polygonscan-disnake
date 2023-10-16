@@ -237,7 +237,7 @@ class Friend(commands.Cog):
         
     @is_donator()
     @commands.slash_command(
-        name="lists",
+        name="lists", 
         description="Gets a list of users by their token price or trending.",
         options=[
             Option(
@@ -248,10 +248,10 @@ class Friend(commands.Cog):
                 required=True
             )
         ])
-    async def lists(self, ctx, filters):
+    async def lists(self, ctx, filters): 
         if filters is None:
             return
-
+        
         t = ''
         if filters.lower() == 'price':
             t = 'top-by-price'
@@ -259,7 +259,7 @@ class Friend(commands.Cog):
             t = 'trending'
 
         try:
-            endpoint = f'{str(self.friend_api)}/lists/{str(t)}'
+            endpoint = f'{str(self.friend_api)}/lists/{str(t)}'  
             async with self.session.get(endpoint) as response:
                 if response.status != 200:
                     print(f"Failed to connect to API, status code: {response.status}, message: {await response.text()}")
@@ -267,21 +267,54 @@ class Friend(commands.Cog):
 
                 json_data = await response.json()
 
-                if "users" in json_data:
-                    users = json_data["users"]
-                    for user in users:
-                        embed = disnake.Embed(title="User Information", color=0x00ff00)
-                        embed.add_field(name="Twitter Username", value=user.get("twitterUsername", "N/A"), inline=True)
-                        embed.add_field(name="Twitter Name", value=user.get("twitterName", "N/A"), inline=True)
-                        embed.add_field(name="Display Price", value=user.get("displayPrice", "N/A"), inline=True)
-                        embed.add_field(name="Volume", value=user.get("volume", "N/A"), inline=True)
-                        embed.add_field(name="Net Buy", value=user.get("netBuy", "N/A"), inline=True)
-                        embed.set_thumbnail(url=user.get("twitterPfpUrl", ""))
-                        await ctx.send(embed=embed)
+                # Check the endpoint type (price or trending) and call the respective function
+                if t == 'top-by-price':
+                    await self.send_csv_as_dm(ctx, json_data, "top-by-price.csv")
+                elif t == 'trending':
+                    await self.send_csv_as_dm(ctx, json_data, "trending.csv")
+                else:
+                    await ctx.send("Invalid endpoint type.")
 
         except Exception as e:
             print(f"Error in lists: {e}")
             return None
+    
+    @staticmethod
+    async def send_csv_as_dm(ctx, json_data, filename):
+        embed = disnake.Embed(
+            title=f"Result of lists.",
+            description="Gets a list of users by their token price or trending.",
+            color=0x9C84EF
+        )
+        embed.add_field(
+            name="Response status:",
+            value=f'CSV file sent!',
+            inline=False 
+        )
+        embed.set_footer(
+            text=f"Requested by {ctx.author}"
+        )
+        try:
+            # Create a CSV string from the JSON data
+            csv_data = io.StringIO()
+            csv_writer = csv.writer(csv_data)
+            
+            # Write the header row
+            header = list(json_data["users"][0].keys())
+            csv_writer.writerow(header)
+            
+            for user in json_data.get("users", []):
+                csv_writer.writerow([user.get(key, "") for key in header])
+
+            # Reset the file-like object for reading
+            csv_data.seek(0)
+
+            # Send the CSV file as a direct message (DM)
+            file = disnake.File(csv_data, filename=filename)
+            await ctx.author.send(file=file, content=f"Here is the CSV file for {filename}.")
+
+        except Exception as e:
+            print(f"Error in sending CSV as DM: {e}")
     
     # @is_donator()
     # @commands.slash_command(name="portfolio", description="Gets a history of friends-related activity for a user.")
