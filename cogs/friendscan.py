@@ -3,12 +3,13 @@ import asyncio
 import disnake
 import requests
 from disnake.ext import commands 
-from config import APIKey, API2Key
+from config import jwt
 from checks import is_donator
 
 class Friend(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.session = aiohttp.ClientSession()
         self.friend_api = 'https://prod-api.kosetto.com'
         
     @is_donator()
@@ -18,9 +19,22 @@ class Friend(commands.Cog):
             await ctx.send("Please provide a valid user_wallet!.")
             return
         
-        endpoint = f'{str(self.friend_api)}/users/{str(user_wallet)}'
-        response = requests.get(endpoint)
-        await ctx.send(response)
+        try:
+            endpoint = f'{str(self.friend_api)}/users/{str(user_wallet)}'
+            headers = {
+                'Authorization': jwt,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Referer': 'https://www.friend.tech/'
+            }
+            async with self.session.get(endpoint, headers=headers) as response:
+                if response.status != 200:
+                    return None
+                json_data = await response.json()
+                await ctx.send(json_data)  
+        except Exception as e:
+            print(f"Error in fetch_signal_data: {e}")
+            return None
         
 def setup(bot):
     bot.add_cog(Friend(bot))
