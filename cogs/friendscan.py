@@ -15,51 +15,51 @@ class Friend(commands.Cog):
         self.friend_api = 'https://prod-api.kosetto.com'
         
     @is_donator()
-@commands.slash_command(name="user", description="Get details about a user by address.")
-async def user_by_address(self, ctx, user_wallet):
-    if user_wallet is None:
-        await ctx.send("Please provide a valid user_wallet.")
-        return
+    @commands.slash_command(name="user", description="Get details about a user by address.")
+    async def user_by_address(self, ctx, user_wallet):
+        if user_wallet is None:
+            await ctx.send("Please provide a valid user_wallet.")
+            return
 
-    try:
-        endpoint = f'{str(self.friend_api)}/users/{str(user_wallet)}'
-        headers = {
-            'Authorization': str(jwt),
-            'Content-Type': 'application/json',
-            'Accept': 'application json',
-            'Referer': 'https://www.friend.tech/'
-        }
+        try:
+            endpoint = f'{str(self.friend_api)}/users/{str(user_wallet)}'
+            headers = {
+                'Authorization': str(jwt),
+                'Content-Type': 'application/json',
+                'Accept': 'application json',
+                'Referer': 'https://www.friend.tech/'
+            }
 
-        async with self.session.get(endpoint, headers=headers) as response:
-            if response.status != 200:
-                print(f"Failed to connect to API, status code: {response.status}, message: {await response.text()}")
-                return None
+            async with self.session.get(endpoint, headers=headers) as response:
+                if response.status != 200:
+                    print(f"Failed to connect to API, status code: {response.status}, message: {await response.text()}")
+                    return None
 
-            json_data = await response.json()
+                json_data = await response.json()
 
-            # Create an embedded message
-            embed = disnake.Embed(title="User Details", color=0x9C84EF)  # Set the embed title and color (Discord blue)
+                # Create an embedded message
+                embed = disnake.Embed(title="User Details", color=0x9C84EF)  # Set the embed title and color (Discord blue)
 
-            # Add fields to the embed for user details
-            embed.add_field(name="User Address", value=json_data.get("address", ""), inline=False)
-            embed.add_field(name="Twitter Username", value=json_data.get("twitterUsername", ""), inline=True)
-            embed.add_field(name="Twitter Name", value=json_data.get("twitterName", ""), inline=True)
-            embed.add_field(name="Twitter User ID", value=json_data.get("twitterUserId", ""), inline=False)
-            embed.add_field(name="Last Online", value=json_data.get("lastOnline", ""), inline=False)
-            embed.add_field(name="Holder Count", value=json_data.get("holderCount", ""), inline=True)
-            embed.add_field(name="Holding Count", value=json_data.get("holdingCount", ""), inline=True)
-            embed.add_field(name="Share Supply", value=json_data.get("shareSupply", ""), inline=False)
-            embed.add_field(name="Display Price", value=json_data.get("displayPrice", ""), inline=False)
-            embed.add_field(name="Lifetime Fees Collected", value=json_data.get("lifetimeFeesCollectedInWei", ""), inline=False)
+                # Add fields to the embed for user details
+                embed.add_field(name="User Address", value=json_data.get("address", ""), inline=False)
+                embed.add_field(name="Twitter Username", value=json_data.get("twitterUsername", ""), inline=True)
+                embed.add_field(name="Twitter Name", value=json_data.get("twitterName", ""), inline=True)
+                embed.add_field(name="Twitter User ID", value=json_data.get("twitterUserId", ""), inline=False)
+                embed.add_field(name="Last Online", value=json_data.get("lastOnline", ""), inline=False)
+                embed.add_field(name="Holder Count", value=json_data.get("holderCount", ""), inline=True)
+                embed.add_field(name="Holding Count", value=json_data.get("holdingCount", ""), inline=True)
+                embed.add_field(name="Share Supply", value=json_data.get("shareSupply", ""), inline=False)
+                embed.add_field(name="Display Price", value=json_data.get("displayPrice", ""), inline=False)
+                embed.add_field(name="Lifetime Fees Collected", value=json_data.get("lifetimeFeesCollectedInWei", ""), inline=False)
 
-            # Add the Twitter profile picture as the embed thumbnail
-            embed.set_thumbnail(url=json_data.get("twitterPfpUrl", ""))
+                # Add the Twitter profile picture as the embed thumbnail
+                embed.set_thumbnail(url=json_data.get("twitterPfpUrl", ""))
 
-            # Send the embedded message to the channel
-            await ctx.send(embed=embed)
+                # Send the embedded message to the channel
+                await ctx.send(embed=embed)
 
-    except Exception as e:
-        print(f"Error in user_by_address: {e}")
+        except Exception as e:
+            print(f"Error in user_by_address: {e}")
         
     @is_donator()
     @commands.slash_command(name="holdings_activity", description="Gets a history of trades for a user.")
@@ -109,7 +109,7 @@ async def user_by_address(self, ctx, user_wallet):
                 csv_data.seek(0)
 
                 # Send the CSV file as a direct message (DM)
-                file = disnake.File(csv_data, filename="holdings_activity.csv")
+                file = disnake.File(csv_data, filename="holdings_activity.csv") # type: ignore
                 await ctx.author.send(file=file, content="Here is the CSV file with the holdings activity.")
                 await ctx.send(embed=embed)
         except Exception as e:
