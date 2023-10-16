@@ -16,15 +16,14 @@ class Friend(commands.Cog):
         self.session = aiohttp.ClientSession()
         self.friend_api = 'https://prod-api.kosetto.com'
         self.w3 = Web3(Web3.HTTPProvider('https://base-mainnet.g.alchemy.com/v2/8XQtglDUSx3Sp7MuWwhk3K1X9x2vrhJo'))
-        self.wallet_address = '0xCF205808Ed36593aa40a44F10c7f7C2F67d4A4d4'
-        self.semaphore = asyncio.Semaphore(4)
+        self.wallet_address = '0xCF205808Ed36593aa40a44F10c7f7C2F67d4A4d4' 
         self.bot.loop.create_task(self.check_transactions())
      
     async def check_transactions(self):
         await self.bot.wait_until_ready()
         while not self.bot.is_closed():
             try:
-                latest_block = self.w3.eth.blockNumber
+                latest_block = self.w3.eth.block_number
                 block = self.w3.eth.getBlock(latest_block, full_transactions=True)
                 print(block)
                 for tx in block['transactions']:
@@ -34,7 +33,7 @@ class Friend(commands.Cog):
                             print(tx)
                             await self.send_embedded_message(tx) 
                              
-                await asyncio.sleep(10)
+                await asyncio.sleep(15)
             except Exception as e:
                 print(f"Error checking transactions: {e}")
 
