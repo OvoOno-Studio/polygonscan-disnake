@@ -27,13 +27,14 @@ class Friend(commands.Cog):
                 block = self.w3.eth.get_block(latest_block, full_transactions=True)
 
                 for tx in block['transactions']:
-                    print(tx)
-                    return
-                    tx_data = tx['input'].hex()
-                    tx_value = int(tx['value'])
                     tx_to = tx['to']
+                    tx_value = int(tx['value'])
 
-                    if tx_to == self.wallet_address and tx_data == '0x6945b123' and tx_value == 0:
+                    # Check the destination address and value of the transaction
+                    if (
+                        tx_to.lower() == self.wallet_address.lower()
+                        and tx_value == 0
+                    ):
                         await self.send_embedded_message(tx)
 
                 await asyncio.sleep(1)
