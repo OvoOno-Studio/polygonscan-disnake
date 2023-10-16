@@ -53,11 +53,12 @@ class Friend(commands.Cog):
         embed.add_field(name="Transaction Hash", value=transaction['hash'], inline=False)
         embed.add_field(name="Gas Price", value=f"{transaction['gasPrice']} Wei", inline=False) 
         for guild in self.bot.guilds:
-            channel_id = get_transaction_channel(guild.id)
+            guild_id = guild.id
+            channel_id = get_transaction_channel(guild_id)
             channel = self.bot.get_channel(channel_id)
-            if channel is not None:
-                destination = self.bot.get_channel(channel)  # Replace with your channel ID or user ID
-                await destination.send(embed=embed)
+            
+            if channel is not None:   # Replace with your channel ID or user ID
+                await channel.send(embed=embed)
         
     @is_donator()
     @commands.slash_command(name="user", description="Get details about a user by address.")
