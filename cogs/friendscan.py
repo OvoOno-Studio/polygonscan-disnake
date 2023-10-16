@@ -113,7 +113,8 @@ class Friend(commands.Cog):
                 'Authorization': str(jwt),
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'Referer': 'https://www.friend.tech/'
+                'Referer': 'https://www.friend.tech/',
+                'Accept-Encoding': 'gzip'
             }
             async with self.session.get(endpoint) as response:
                 if response.status != 200:
@@ -153,7 +154,8 @@ class Friend(commands.Cog):
                     print(f"Failed to connect to API, status code: {response.status}, message: {await response.text()}")
                     return None
                 json_data = await response.json()
-                await ctx.send(json_data)  
+                print(json_data)
+                await ctx.send('Works')  
         except Exception as e:
             print(f"Error in get_user by ID: {e}")
             return None
