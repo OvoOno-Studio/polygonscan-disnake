@@ -24,7 +24,7 @@ class Friend(commands.Cog):
         while not self.bot.is_closed():
             try:
                 latest_block = self.w3.eth.block_number
-                block = self.w3.eth.getBlock(latest_block, full_transactions=True)
+                block = self.w3.eth.get_block(latest_block, full_transactions=True)
                 print(block)
                 for tx in block['transactions']:
                     if tx['to'] == self.wallet_address:
