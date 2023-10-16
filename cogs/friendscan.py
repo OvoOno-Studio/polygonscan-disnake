@@ -176,17 +176,63 @@ class Friend(commands.Cog):
     @is_donator()
     @commands.slash_command(name="events", description="Gets a history of the 200 most recent trades.")
     async def events(self, ctx):
+        embed = disnake.Embed(
+            title=f"Result of events.",
+            description="Search users by their twitter handle.",
+            color=0x9C84EF
+        )
+        embed.add_field(
+            name="Response status:",
+            value=f'CSV file sent!',
+            inline=False 
+        )
+        embed.set_footer(
+            text=f"Requested by {ctx.author}"
+        )
         try:
-            endpoint = f'{str(self.friend_api)}/events' 
+            endpoint = f'{str(self.friend_api)}/events'
             async with self.session.get(endpoint) as response:
                 if response.status != 200:
                     print(f"Failed to connect to API, status code: {response.status}, message: {await response.text()}")
-                    return None
+                    return
+
                 json_data = await response.json()
-                await ctx.send(json_data)  
+
+                # Create a CSV string from the JSON data
+                csv_data = io.StringIO()
+                csv_writer = csv.writer(csv_data)
+                csv_writer.writerow(["ID", "Blurred URL", "Is NSFW", "Caption", "Value", "Surplus", "Previous Owner",
+                                    "Stealer", "Creator", "Previous Owner PFP URL", "Previous Owner Username",
+                                    "Stealer PFP URL", "Stealer Username", "Creator PFP URL", "Creator Username"])
+
+                for event in json_data.get("events", []):
+                    csv_writer.writerow([
+                        event.get("id", ""),
+                        event.get("blurredUrl", ""),
+                        event.get("isNSFW", ""),
+                        event.get("caption", ""),
+                        event.get("value", ""),
+                        event.get("surplus", ""),
+                        event.get("previousOwner", ""),
+                        event.get("stealer", ""),
+                        event.get("creator", ""),
+                        event.get("previousOwnerPfpUrl", ""),
+                        event.get("previousOwnerUsername", ""),
+                        event.get("stealerPfpUrl", ""),
+                        event.get("stealerUsername", ""),
+                        event.get("creatorPfpUrl", ""),
+                        event.get("creatorUsername", "")
+                    ])
+
+                # Reset the file-like object for reading
+                csv_data.seek(0)
+
+                # Send the CSV file as a direct message (DM)
+                file = disnake.File(csv_data, filename="events.csv") # type: ignore
+                await ctx.author.send(file=file, content="Here is the CSV file with the recent events.")
+
         except Exception as e:
             print(f"Error in events: {e}")
-            return None
         
     @is_donator()
     @commands.slash_command(
