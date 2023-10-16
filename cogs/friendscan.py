@@ -44,21 +44,29 @@ class Friend(commands.Cog):
     async def send_embedded_message(self, transaction):
         # Create an embedded message with transaction details
         embed = disnake.Embed(
-            title="New user registered!",
+            title="New user registered! 🆕",
             color=0x9C84EF,
-            description=f"New 'Buy Shares' transaction method with 0 ETH."
+            description="New 'Buy Shares' transaction method with 0 ETH."
         )
         embed.add_field(name="From Address", value=transaction['from'], inline=False)
         embed.add_field(name="To Address", value=transaction['to'], inline=False)
-        embed.add_field(name="Transaction Hash", value=transaction['hash'], inline=False)
+
+        # Format the transaction hash as a clickable link
+        transaction_hash = transaction['hash'].hex()
+        transaction_url = f"https://basescan.org/tx/{transaction_hash}"
+        embed.add_field(name="Transaction Hash", value=f"[{transaction_hash}]({transaction_url})", inline=False)
+
         embed.add_field(name="Gas Price", value=f"{transaction['gasPrice']} Wei", inline=False) 
+
         for guild in self.bot.guilds:
-            guild_id = guild.id
-            channel_id = get_transaction_channel(guild_id)
+            channel_id = get_transaction_channel(guild.id)
             channel = self.bot.get_channel(channel_id)
             
-            if channel is not None:   # Replace with your channel ID or user ID
-                await channel.send(embed=embed)
+            if channel is not None:
+                try:
+                    await channel.send(embed=embed)
+                except Exception as e:
+                    print(f"Error sending message: {e}")
         
     @is_donator()
     @commands.slash_command(name="user", description="Get details about a user by address.")
