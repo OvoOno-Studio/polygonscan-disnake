@@ -16,13 +16,13 @@ class Friend(commands.Cog):
         self.session = aiohttp.ClientSession()
         self.friend_api = 'https://prod-api.kosetto.com'
         self.w3 = Web3(Web3.HTTPProvider('https://base-mainnet.g.alchemy.com/v2/8XQtglDUSx3Sp7MuWwhk3K1X9x2vrhJo'))
-        self.wallet_address = '0xCF205808Ed36593aa40a44F10c7f7C2F67d4A4d4'  
-    
-    @commands.Cog.listener()
+        self.wallet_address = '0xCF205808Ed36593aa40a44F10c7f7C2F67d4A4d4'
+        self.semaphore = asyncio.Semaphore(4)
+        self.bot.loop.create_task(self.check_transactions())
+     
     async def check_transactions(self):
         await self.bot.wait_until_ready()
-        print('Checking transactions')
-        while True:
+        while not self.bot.is_closed():
             try:
                 latest_block = self.w3.eth.blockNumber
                 block = self.w3.eth.getBlock(latest_block, full_transactions=True)
