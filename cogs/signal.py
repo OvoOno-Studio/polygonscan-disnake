@@ -18,7 +18,7 @@ class Signal(commands.Cog):
         self.session = aiohttp.ClientSession()
         self.signal_pair = None
         self.api_url = "https://ovoono-express-eofcu.ondigitalocean.app/crypto/"
-        self.bot.loop.create_task(self.send_signal())
+        # self.bot.loop.create_task(self.send_signal())
 
     @commands.command(name="set_signal_pair")
     @has_permissions(administrator=True)

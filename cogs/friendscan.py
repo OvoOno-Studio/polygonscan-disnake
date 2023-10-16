@@ -31,7 +31,7 @@ class Friend(commands.Cog):
                         if tx['input'].hex() == '0x6945b123' and tx['value'] == 0:  # type: ignore
                             await self.send_embedded_message(tx) 
                              
-                await asyncio.sleep(15)
+                await asyncio.sleep(1)
             except Exception as e:
                 print(f"Error checking transactions: {e}")
 
@@ -45,8 +45,7 @@ class Friend(commands.Cog):
         embed.add_field(name="From Address", value=transaction['from'], inline=False)
         embed.add_field(name="To Address", value=transaction['to'], inline=False)
         embed.add_field(name="Transaction Hash", value=transaction['hash'], inline=False)
-        embed.add_field(name="Gas Price", value=f"{transaction['gasPrice']} Wei", inline=False)
-        print('Sending new registered user to the servers.')
+        embed.add_field(name="Gas Price", value=f"{transaction['gasPrice']} Wei", inline=False) 
         for guild in self.bot.guilds:
             channel_id = get_transaction_channel(guild.id)
             channel = self.bot.get_channel(channel_id)
