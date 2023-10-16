@@ -43,20 +43,55 @@ class Friend(commands.Cog):
     @commands.slash_command(name="holdings_activity", description="Gets a history of trades for a user.")
     async def holdings_activity(self, ctx, user_wallet):
         if user_wallet is None:
-            await ctx.send("Please provide a valid user_wallet!.")
+            await ctx.send("Please provide a valid user_wallet.")
             return
-        
+
+        embed = disnake.Embed(
+                title=f"Holding activity for: {user_wallet}",
+                description="Gets a history of trades for a user.",
+                color=0x9C84EF
+            )
+        embed.add_field(
+            name="Response status:",
+            value=f'CSV file sent!',
+            inline=False 
+        )
+        embed.set_footer(
+            text=f"Requested by {ctx.author}"
+        )
+
         try:
-            endpoint = f'{str(self.friend_api)}/holdings-activity/{str(user_wallet)}' 
+            endpoint = f'{str(self.friend_api)}/holdings-activity/{str(user_wallet)}'
+
             async with self.session.get(endpoint) as response:
                 if response.status != 200:
                     print(f"Failed to connect to API, status code: {response.status}, message: {await response.text()}")
                     return None
+
                 json_data = await response.json()
-                await ctx.send(json_data)  
+
+                # Create a CSV string from the JSON data
+                csv_data = io.StringIO()
+                csv_writer = csv.writer(csv_data)
+                csv_writer.writerow(["Trader Address", "Trader Username", "Subject Address", "Subject Username", "Is Buy", "Share Amount", "ETH Amount", "Created At"])
+
+                for event in json_data.get("events", []):
+                    trader = event.get("trader", {})
+                    subject = event.get("subject", {})
+                    csv_writer.writerow([trader.get("address", ""), trader.get("username", ""),
+                                        subject.get("address", ""), subject.get("username", ""),
+                                        event.get("isBuy", ""), event.get("shareAmount", ""),
+                                        event.get("ethAmount", ""), event.get("createdAt", "")])
+
+                # Reset the file-like object for reading
+                csv_data.seek(0)
+
+                # Send the CSV file as a direct message (DM)
+                file = disnake.File(csv_data, filename="holdings_activity.csv")
+                await ctx.author.send(file=file, content="Here is the CSV file with the holdings activity.")
+                await ctx.send(embed=embed)
         except Exception as e:
-            print(f"Error in get_user by ID: {e}")
-            return None 
+            print(f"Error in holdings_activity: {e}")
     
     @is_donator()
     @commands.slash_command(name="search_friends", description="Search users by their twitter handle.")
