@@ -25,12 +25,13 @@ class Friend(commands.Cog):
             try:
                 latest_block = self.w3.eth.block_number
                 block = self.w3.eth.get_block(latest_block, full_transactions=True)
-                for tx in block['transactions']:
-                    if tx['to'] == self.wallet_address: # type: ignore
+                
+                for tx in block.transactions:  # Iterate through the transactions # type: ignore
+                    if tx.to == self.wallet_address:
                         # Check if the transaction meets your conditions (method and amount)
-                        if tx['input'].hex() == '0x6945b123' and tx['value'] == 0:  # type: ignore
+                        if tx.input.hex() == '0x6945b123' and tx.value == 0:
                             await self.send_embedded_message(tx) 
-                             
+                            
                 await asyncio.sleep(1)
             except Exception as e:
                 print(f"Error checking transactions: {e}")
