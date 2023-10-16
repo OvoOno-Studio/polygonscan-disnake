@@ -1,5 +1,6 @@
 import aiohttp
-import asyncio
+import csv
+import io
 import disnake
 import requests
 from disnake.ext import commands 
@@ -55,58 +56,15 @@ class Friend(commands.Cog):
                 await ctx.send(json_data)  
         except Exception as e:
             print(f"Error in get_user by ID: {e}")
-            return None
-        
-    @is_donator()
-    @commands.slash_command(name="portfolio", description="Gets a history of friends-related activity for a user.")
-    async def portfolio(self, ctx, user_wallet):
-        if user_wallet is None:
-            await ctx.send("Please provide a valid user_wallet!.")
-            return
-
-        try:
-            endpoint = f'{str(self.friend_api)}/portfolio/{str(user_wallet)}' 
-            headers = {
-                'Authorization': str(jwt),
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Referer': 'https://www.friend.tech/'
-            }
-            async with self.session.get(endpoint, headers=headers) as response:
-                if response.status != 200:
-                    print(f"Failed to connect to API, status code: {response.status}, message: {await response.text()}")
-                    return None
-                json_data = await response.json()
-                await ctx.send(json_data)  
-        except Exception as e:
-            print(f"Error in get_user by ID: {e}")
-            return None
-        
-    @is_donator()
-    @commands.slash_command(name="points", description="Gets the points for a user (potentially used for an airdrop).")
-    async def points(self, ctx, user_wallet):
-        if user_wallet is None:
-            await ctx.send("Please provide a valid user_wallet!.")
-            return
-
-        try:
-            endpoint = f'{str(self.friend_api)}/portfolio/{str(user_wallet)}'  
-            async with self.session.get(endpoint) as response:
-                if response.status != 200:
-                    print(f"Failed to connect to API, status code: {response.status}, message: {await response.text()}")
-                    return None
-                json_data = await response.json()
-                await ctx.send(json_data)  
-        except Exception as e:
-            print(f"Error in get_user by ID: {e}")
-            return None
+            return None 
     
     @is_donator()
     @commands.slash_command(name="search_friends", description="Search users by their twitter handle.")
     async def search_friends(self, ctx, username):
         if username is None:
-            await ctx.send("Please provide valid username!")
+            await ctx.send("Please provide a valid username!")
             return
+
         try:
             endpoint = f'{str(self.friend_api)}/search/users?username={str(username)}'
             headers = {
@@ -116,14 +74,47 @@ class Friend(commands.Cog):
                 'Referer': 'https://www.friend.tech/',
                 'Accept-Encoding': 'gzip'
             }
+
             async with self.session.get(endpoint, headers=headers) as response:
+                if response.status != 200:
+                    print(f"Failed to connect to API, status code: {response.status}, message: {await response.text()}")
+                    return None
+
+                json_data = await response.json()
+
+                # Create a CSV string from the JSON data
+                csv_data = io.StringIO()
+                csv_writer = csv.writer(csv_data)
+                csv_writer.writerow(["Address", "Twitter Username", "Twitter Name", "Twitter Pfp URL", "Twitter User ID"])
+                
+                for user in json_data.get("users", []):
+                    csv_writer.writerow([user.get("address", ""), user.get("twitterUsername", ""),
+                                        user.get("twitterName", ""), user.get("twitterPfpUrl", ""),
+                                        user.get("twitterUserId", "")])
+
+                # Reset the file-like object for reading
+                csv_data.seek(0)
+
+                # Send the CSV file as a direct message (DM)
+                file = disnake.File(csv_data, filename="friends.csv") # type: ignore
+                await ctx.author.send(file=file, content=f"Search results for: {username}.")
+
+        except Exception as e:
+            print(f"Error in search_friends: {e}")
+      
+    @is_donator()
+    @commands.slash_command(name="events", description="Gets a history of the 200 most recent trades.")
+    async def events(self, ctx):
+        try:
+            endpoint = f'{str(self.friend_api)}/events' 
+            async with self.session.get(endpoint) as response:
                 if response.status != 200:
                     print(f"Failed to connect to API, status code: {response.status}, message: {await response.text()}")
                     return None
                 json_data = await response.json()
                 await ctx.send(json_data)  
         except Exception as e:
-            print(f"Error in get_user by ID: {e}")
+            print(f"Error in events: {e}")
             return None
         
     @is_donator()
@@ -159,6 +150,50 @@ class Friend(commands.Cog):
         except Exception as e:
             print(f"Error in get_user by ID: {e}")
             return None
+    
+    # @is_donator()
+    # @commands.slash_command(name="portfolio", description="Gets a history of friends-related activity for a user.")
+    # async def portfolio(self, ctx, user_wallet):
+    #     if user_wallet is None:
+    #         await ctx.send("Please provide a valid user_wallet!.")
+    #         return
+
+    #     try:
+    #         endpoint = f'{str(self.friend_api)}/portfolio/{str(user_wallet)}' 
+    #         headers = {
+    #             'Authorization': str(jwt),
+    #             'Content-Type': 'application/json',
+    #             'Accept': 'application/json',
+    #             'Referer': 'https://www.friend.tech/'
+    #         }
+    #         async with self.session.get(endpoint, headers=headers) as response:
+    #             if response.status != 200:
+    #                 print(f"Failed to connect to API, status code: {response.status}, message: {await response.text()}")
+    #                 return None
+    #             json_data = await response.json()
+    #             await ctx.send(json_data)  
+    #     except Exception as e:
+    #         print(f"Error in get_user by ID: {e}")
+    #         return None
+        
+    # @is_donator()
+    # @commands.slash_command(name="points", description="Gets the points for a user (potentially used for an airdrop).")
+    # async def points(self, ctx, user_wallet):
+    #     if user_wallet is None:
+    #         await ctx.send("Please provide a valid user_wallet!.")
+    #         return
+
+    #     try:
+    #         endpoint = f'{str(self.friend_api)}/portfolio/{str(user_wallet)}'  
+    #         async with self.session.get(endpoint) as response:
+    #             if response.status != 200:
+    #                 print(f"Failed to connect to API, status code: {response.status}, message: {await response.text()}")
+    #                 return None
+    #             json_data = await response.json()
+    #             await ctx.send(json_data)  
+    #     except Exception as e:
+    #         print(f"Error in get_user by ID: {e}")
+    #         return None
     
 def setup(bot):
     bot.add_cog(Friend(bot))
