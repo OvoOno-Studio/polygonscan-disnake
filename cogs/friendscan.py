@@ -22,18 +22,19 @@ class Friend(commands.Cog):
         try:
             endpoint = f'{str(self.friend_api)}/users/{str(user_wallet)}'
             headers = {
-                'Authorization': jwt,
+                'Authorization': str(jwt),
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'Referer': 'https://www.friend.tech/'
             }
             async with self.session.get(endpoint, headers=headers) as response:
                 if response.status != 200:
+                    print(f"Failed to connect to API, status code: {response.status}, message: {await response.text()}")
                     return None
                 json_data = await response.json()
                 await ctx.send(json_data)  
         except Exception as e:
-            print(f"Error in fetch_signal_data: {e}")
+            print(f"Error in get_user by ID: {e}")
             return None
         
 def setup(bot):
