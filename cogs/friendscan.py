@@ -99,7 +99,10 @@ class Friend(commands.Cog):
                             embed.add_field(name="Transaction Hash", value=tx['hash'].hex(), inline=False)
                             embed.add_field(name="Gas Price", value=f"{tx['gasPrice']} Wei", inline=False)
                             
-                            await channel.send(embed=embed)
+                            if channel:
+                                await channel.send(embed=embed)
+                            else:
+                                print(f"Invalid channel for guild_id: {guild_id}")
                     await asyncio.sleep(60)  # Check every 60 seconds
                 except Exception as e:
                     print(f"Error checking transactions: {e}")
