@@ -77,11 +77,11 @@ class Friend(commands.Cog):
                 guild_id = guild.id
                 wallet_address = get_wallet_address(guild_id)
                 if wallet_address == 'default_wallet_address':
-                    continue 
+                    continue
                 wallet_address = self.w3.to_checksum_address(wallet_address)
                 channel_id = get_price_alert_channel(guild_id)
                 if channel_id == 'default_price_alert_channel':
-                    continue 
+                    continue
                 channel = self.bot.get_channel(channel_id)
 
                 try:
@@ -91,21 +91,22 @@ class Friend(commands.Cog):
                         continue  # No transactions for this wallet
 
                     # Check if this transaction is already known
-                    last_known_tx = self.last_known_transactions.get(
-                        wallet_address)
+                    last_known_tx = self.last_known_transactions.get(wallet_address)
                     if last_known_tx == tx_count:
                         continue  # No new transactions since the last check
 
                     # Update the last known transaction for this wallet
                     self.last_known_transactions[wallet_address] = tx_count
 
-                    # Get the transaction hash of the latest transaction
-                    tx_hash = self.w3.eth.get_transaction_by_block(
-                        'latest', tx_count - 1)['hash']
+                    # Check the latest block for transactions involving the wallet
+                    latest_block = self.w3.eth.get_block('latest')
+                    for transaction in reversed(latest_block['transactions']):
+                        tx = self.w3.eth.getTransaction(transaction)
+                        if tx['from'] == wallet_address or tx['to'] == wallet_address:
+                            break
+                    else:
+                        continue  # No transaction found for the wallet in the latest block
 
-                    # Fetch the transaction details using the hash
-                    tx = self.w3.eth.get_transaction(tx_hash)
-                    print(tx)
                     # Notify about the transaction
                     print(f"New key trade for wallet {wallet_address}:")
                     print({
@@ -117,22 +118,12 @@ class Friend(commands.Cog):
 
                     embed = disnake.Embed(
                         title="Keys trade alert!",
-                        description=
-                        "Incoming or outgoing transaction detected!",
+                        description="Incoming or outgoing transaction detected!",
                         color=0x9C84EF)
-                    embed.add_field(name="From Address",
-                                    value=f'{tx["from"]}',
-                                    inline=False)
-                    embed.add_field(name="To Address",
-                                    value=f'{tx["to"]}',
-                                    inline=False)
-                    embed.add_field(name="Transaction Hash",
-                                    value=tx['hash'].hex(),
-                                    inline=False)
-                    embed.add_field(
-                        name="Value",
-                        value=f"{self.w3.fromWei(tx['value'], 'ether')} ETH",
-                        inline=False)
+                    embed.add_field(name="From Address", value=f'{tx["from"]}', inline=False)
+                    embed.add_field(name="To Address", value=f'{tx["to"]}', inline=False)
+                    embed.add_field(name="Transaction Hash", value=tx['hash'].hex(), inline=False)
+                    embed.add_field(name="Value", value=f"{self.w3.fromWei(tx['value'], 'ether')} ETH", inline=False)
 
                     if channel:
                         await channel.send(embed=embed)
