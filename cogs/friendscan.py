@@ -101,7 +101,7 @@ class Friend(commands.Cog):
                     # Check the latest block for transactions involving the wallet
                     latest_block = self.w3.eth.get_block('latest')
                     for transaction in reversed(latest_block['transactions']):
-                        tx = self.w3.eth.getTransaction(transaction)
+                        tx = self.w3.eth.get_transaction(transaction)
                         if tx['from'] == wallet_address or tx['to'] == wallet_address:
                             break
                     else:
@@ -113,7 +113,7 @@ class Friend(commands.Cog):
                         "hash": tx['hash'].hex(),
                         "from": tx["from"],
                         "to": tx['to'],
-                        "value": self.w3.fromWei(tx["value"], 'ether')
+                        # "value": self.w3.fromWei(tx["value"], 'ether')
                     })
 
                     embed = disnake.Embed(
@@ -123,7 +123,7 @@ class Friend(commands.Cog):
                     embed.add_field(name="From Address", value=f'{tx["from"]}', inline=False)
                     embed.add_field(name="To Address", value=f'{tx["to"]}', inline=False)
                     embed.add_field(name="Transaction Hash", value=tx['hash'].hex(), inline=False)
-                    embed.add_field(name="Value", value=f"{self.w3.fromWei(tx['value'], 'ether')} ETH", inline=False)
+                    # embed.add_field(name="Value", value=f"{self.w3.fromWei(tx['value'], 'ether')} ETH", inline=False)
 
                     if channel:
                         await channel.send(embed=embed)
