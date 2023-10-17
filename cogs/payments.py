@@ -79,6 +79,7 @@ class Pay(commands.Cog):
             return
         timestamp = payment["timestamp"]
         amount_with_uid = Decimal(0.008) + uid_decimal
+        amount_with_uid_wei = amount_with_uid * Decimal(10**18)
 
         params = {
             "module": "account",
@@ -103,8 +104,13 @@ class Pay(commands.Cog):
             await ctx.response.send_message(content=f"🔴 Error fetching transaction details: `{e}`")
             return
 
+        tolerance = Decimal(10**12)  # A small tolerance to account for potential rounding errors
         for tx in data["result"]:
-            if tx["to"] == self.payment_wallet and tx["from"] == wallet_from.lower() and int(tx["timeStamp"]) > timestamp and Decimal(tx["value"]) == amount_with_uid * Decimal(10**18):
+            tx_value = Decimal(tx["value"])
+            if (tx["to"] == self.payment_wallet and 
+                tx["from"] == wallet_from.lower() and 
+                int(tx["timeStamp"]) > timestamp and 
+                abs(tx_value - amount_with_uid_wei) <= tolerance):
                 self.verify_payment(ctx.author.id, uid)
                 await ctx.response.send_message(content="✅ Payment verified! Welcome to the premium version.")
                 return
