@@ -77,37 +77,40 @@ class Friend(commands.Cog):
                 guild_id = guild.id
                 wallet_address = get_wallet_address(guild_id)
                 channel_id = get_price_alert_channel(guild_id)
-                channel = self.bot.get_channel(channel_id) 
-                if wallet_address == 'default_wallet_address':
-                    return 
+                channel = self.bot.get_channel(channel_id)
+
                 try:
-                    latest_block = self.w3.eth.block_number 
-                    block = self.w3.eth.get_block(latest_block, full_transactions=True)
-                    # print('Block:')
-                    # print(block)
-                    for tx in block['transactions']:
-                        tx_to = tx['to']
-                        tx_from = tx['from'] 
-                        print(tx_to)
-                        print(wallet_address)
-                        
-                        if tx_to == wallet_address or tx_from == wallet_address: 
-                            print('Creating embed message..')
-                            embed = disnake.Embed(
-                                title="Transaction Alert",
-                                description="Incoming or outgoing transaction detected!",
-                                color=0x9C84EF
-                            )
-                            embed.add_field(name="From Address", value=f'{str(tx_from)}', inline=False)
-                            embed.add_field(name="To Address", value=f'{str(tx_to)}', inline=False)
-                            embed.add_field(name="Transaction Hash", value=tx['hash'].hex(), inline=False)
-                            embed.add_field(name="Gas Price", value=f"{tx['gasPrice']} Wei", inline=False)
-                            
-                            if channel:
-                                await channel.send(embed=embed)
-                            else:
-                                print(f"Invalid channel for guild_id: {guild_id}")
-                    await asyncio.sleep(60)  # Check every 60 seconds
+                    block = self.w3.eth.get_block('latest')
+                    print(f"Searching in block {block.number}")
+
+                    if block and block.transactions:
+                        for tx_hash in block.transactions:
+                            tx = self.web3.eth.get_transaction(tx_hash.hex())
+                            if tx.to and (tx.to == wallet_address or tx['from'] == wallet_address):
+                                print(f"Transaction found in block {block.number}:")
+                                print({
+                                    "hash": tx_hash.hex(),
+                                    "from": tx["from"],
+                                    "to": tx.to,
+                                    "value": self.w3.from_wei(tx["value"], 'ether')
+                                })
+
+                                embed = disnake.Embed(
+                                    title="Transaction Alert",
+                                    description="Incoming or outgoing transaction detected!",
+                                    color=0x9C84EF
+                                )
+                                embed.add_field(name="From Address", value=f'{tx["from"]}', inline=False)
+                                embed.add_field(name="To Address", value=f'{tx.to}', inline=False)
+                                embed.add_field(name="Transaction Hash", value=tx_hash.hex(), inline=False)
+                                embed.add_field(name="Value", value=f"{self.w3.from_wei(tx['value'], 'ether')} ETH", inline=False)
+
+                                if channel:
+                                    await channel.send(embed=embed)
+                                else:
+                                    print(f"Invalid channel for guild_id: {guild_id}")
+
+                    await asyncio.sleep(5)  # Check every 5 seconds as in the example
                 except Exception as e:
                     print(f"Error checking transactions: {e}")
         
