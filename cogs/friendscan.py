@@ -78,6 +78,7 @@ class Friend(commands.Cog):
                 wallet_address = get_wallet_address(guild_id)
                 if wallet_address == 'default_wallet_address':
                     continue 
+                wallet_address = self.w3.to_checksum_address(wallet_address)
                 channel_id = get_price_alert_channel(guild_id)
                 channel = self.bot.get_channel(channel_id)
                 print(channel_id)
