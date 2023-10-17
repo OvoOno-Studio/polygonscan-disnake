@@ -86,7 +86,7 @@ class Friend(commands.Cog):
                     for tx in block['transactions']:
                         tx_to = tx['to']
                         tx_from = tx['from'] 
-                        print(tx)
+                        # print(tx)
                         if tx_to.lower() == wallet_address.lower() or tx_from.lower() == wallet_address.lower(): 
                             print('Creating embed message..')
                             embed = disnake.Embed(
