@@ -3,7 +3,7 @@ import asyncio
 import csv
 import io
 import disnake 
-from config import get_transaction_channel, get_wallet_address
+from config import get_transaction_channel, get_price_alert_channel, get_wallet_address
 from disnake.ext import commands 
 from disnake import Option, OptionType, Embed, Color
 from config import jwt
@@ -75,7 +75,7 @@ class Friend(commands.Cog):
             for guild in self.bot.guilds:
                 guild_id = guild.id
                 wallet_address = get_wallet_address(guild_id)
-                channel_id = get_transaction_channel(guild_id)
+                channel_id = get_price_alert_channel(guild_id)
                 channel = self.bot.get_channel(channel_id)  
                 try:
                     latest_block = self.w3.eth.block_number
