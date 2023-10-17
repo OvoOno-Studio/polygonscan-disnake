@@ -48,12 +48,13 @@ class Friend(commands.Cog):
     async def send_embedded_message(self, transaction):
         # Create an embedded message with transaction details
         embed = disnake.Embed(
-            title="New user registered! 🆕",
+            title="🚨 New user registered! 🚨",
             color=0x9C84EF,
-            description="New 'Buy Shares' transaction method with 0 ETH."
+            description="New 'Buy Shares' 💰 transaction method with 0 ETH."
         )
-        embed.add_field(name="From Address", value=transaction['from'], inline=False)
-        embed.add_field(name="To Address", value=transaction['to'], inline=False)
+        embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
+        embed.add_field(name="🧑 From Address", value=transaction['from'], inline=False)
+        embed.add_field(name="👉 To Address", value=transaction['to'], inline=False)
 
         # Format the transaction hash as a clickable link
         transaction_hash = transaction['hash'].hex()
@@ -119,6 +120,7 @@ class Friend(commands.Cog):
 
                             tx_from = latest_tx["from"]
                             tx_to = latest_tx["to"]
+                            transaction_url = f"https://basescan.org/tx/{tx_hash}"
 
                             print(f"New key trade for wallet {wallet_address}:")
                             print({
@@ -128,13 +130,14 @@ class Friend(commands.Cog):
                             })
 
                             embed = disnake.Embed(
-                                title="Keys trade alert!",
+                                title="🚨 Keys trade alert!",
                                 description="Incoming or outgoing transaction detected!",
                                 color=0x9C84EF)
-                            embed.add_field(name="From Address", value=tx_from, inline=False)
-                            embed.add_field(name="To Address", value=tx_to, inline=False)
-                            embed.add_field(name="Transaction Hash", value=tx_hash, inline=False)
-
+                            embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
+                            embed.add_field(name="🧑From Address:", value=tx_from, inline=False)
+                            embed.add_field(name="👉 To Address:", value=tx_to, inline=False)
+                            embed.add_field(name="🔗 Transaction Hash:", value=f"[{tx_hash}]({transaction_url})", inline=False)
+                            embed.set_footer(text=f"Powered by OvoOno Studio")
                             if channel:
                                 await channel.send(embed=embed)
                             else:
