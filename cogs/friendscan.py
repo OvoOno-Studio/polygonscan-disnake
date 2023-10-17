@@ -17,7 +17,7 @@ class Friend(commands.Cog):
         self.friend_api = 'https://prod-api.kosetto.com'
         self.w3 = Web3(Web3.HTTPProvider('https://base-mainnet.g.alchemy.com/v2/8XQtglDUSx3Sp7MuWwhk3K1X9x2vrhJo'))
         self.wallet_address = '0xCF205808Ed36593aa40a44F10c7f7C2F67d4A4d4' 
-        self.guild_data = {}
+        self.last_known_transactions = {}
         self.bot.loop.create_task(self.check_transactions())
         self.bot.loop.create_task(self.keys_alerts())
      
@@ -80,41 +80,50 @@ class Friend(commands.Cog):
                     continue 
                 channel_id = get_price_alert_channel(guild_id)
                 channel = self.bot.get_channel(channel_id)
+                print(channel_id)
 
                 try:
-                    block = self.w3.eth.get_block('latest')
-                    print(f"Searching in block {block['number']}")
+                    # Get the latest transaction for the wallet
+                    tx_count = self.w3.eth.get_transaction_count(wallet_address)
+                    if tx_count == 0:
+                        continue  # No transactions for this wallet
 
-                    if block and block['transactions']:
-                        for tx_hash in block['transactions']:
-                            tx = self.w3.eth.get_transaction(tx_hash.hex())
-                            #print(tx)
-                            if tx['to'] == wallet_address or tx['from'] == wallet_address:
-                                print(f"Transaction found in block {block['number']}:")
-                                print({
-                                    "hash": tx_hash.hex(),
-                                    "from": tx["from"],
-                                    "to": tx['to'],
-                                    "value": self.w3.from_wei(tx["value"], 'ether')
-                                })
+                    # Check if this transaction is already known
+                    last_known_tx = self.last_known_transactions.get(wallet_address)
+                    if last_known_tx == tx_count:
+                        continue  # No new transactions since the last check
 
-                                embed = disnake.Embed(
-                                    title="Transaction Alert",
-                                    description="Incoming or outgoing transaction detected!",
-                                    color=0x9C84EF
-                                )
-                                tx_to = tx['to']
-                                embed.add_field(name="From Address", value=f'{tx["from"]}', inline=False)
-                                embed.add_field(name="To Address", value=f'{tx_to}', inline=False)
-                                embed.add_field(name="Transaction Hash", value=tx_hash.hex(), inline=False)
-                                embed.add_field(name="Value", value=f"{self.w3.from_wei(tx['value'], 'ether')} ETH", inline=False)
+                    # Update the last known transaction for this wallet
+                    self.last_known_transactions[wallet_address] = tx_count
 
-                                if channel:
-                                    await channel.send(embed=embed)
-                                else:
-                                    print(f"Invalid channel for guild_id: {guild_id}")
+                    # Get the transaction details
+                    tx = self.w3.eth.get_transaction_by_block_number_and_index('latest', tx_count - 1)
 
-                    await asyncio.sleep(5)  # Check every 5 seconds as in the example
+                    # Notify about the transaction
+                    print(f"New transaction for wallet {wallet_address}:")
+                    print({
+                        "hash": tx['hash'].hex(),
+                        "from": tx["from"],
+                        "to": tx['to'],
+                        "value": self.w3.from_wei(tx["value"], 'ether')
+                    })
+
+                    embed = disnake.Embed(
+                        title="Transaction Alert",
+                        description="Incoming or outgoing transaction detected!",
+                        color=0x9C84EF
+                    )
+                    embed.add_field(name="From Address", value=f'{tx["from"]}', inline=False)
+                    embed.add_field(name="To Address", value=f'{tx["to"]}', inline=False)
+                    embed.add_field(name="Transaction Hash", value=tx['hash'].hex(), inline=False)
+                    embed.add_field(name="Value", value=f"{self.w3.from_wei(tx['value'], 'ether')} ETH", inline=False)
+
+                    if channel:
+                        await channel.send(embed=embed)
+                    else:
+                        print(f"Invalid channel for guild_id: {guild_id}")
+
+                    await asyncio.sleep(10)
                 except Exception as e:
                     print(f"Error checking transactions: {e}")
         
