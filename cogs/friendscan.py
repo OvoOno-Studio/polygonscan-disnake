@@ -8,7 +8,7 @@ from disnake.ext import commands
 from disnake import Option, OptionType, Embed, Color
 from config import jwt
 from checks import is_donator
-from web3 import Web3, eth, utils
+from web3 import Web3
 
 class Friend(commands.Cog):
     def __init__(self, bot):
