@@ -82,36 +82,36 @@ class Friend(commands.Cog):
 
                 try:
                     block = self.w3.eth.get_block('latest')
-                    print(f"Searching in block {block.number}")
+                    print(f"Searching in block {block['number']}")
 
-                    if block and block.transactions:
-                        for tx_hash in block.transactions:
+                    if block and block['transactions']:
+                        for tx_hash in block['transactions']:
                             tx = self.w3.eth.get_transaction(tx_hash.hex())
                             #print(tx)
-                            if hasattr(tx, 'to') and tx.to:
-                                if tx.to == wallet_address or tx['from'] == wallet_address:
-                                    print(f"Transaction found in block {block.number}:")
-                                    print({
-                                        "hash": tx_hash.hex(),
-                                        "from": tx["from"],
-                                        "to": tx.to,
-                                        "value": self.w3.from_wei(tx["value"], 'ether')
-                                    })
+                            if tx['to'] == wallet_address or tx['from'] == wallet_address:
+                                print(f"Transaction found in block {block['number']}:")
+                                print({
+                                    "hash": tx_hash.hex(),
+                                    "from": tx["from"],
+                                    "to": tx['to'],
+                                    "value": self.w3.from_wei(tx["value"], 'ether')
+                                })
 
-                                    embed = disnake.Embed(
-                                        title="Transaction Alert",
-                                        description="Incoming or outgoing transaction detected!",
-                                        color=0x9C84EF
-                                    )
-                                    embed.add_field(name="From Address", value=f'{tx["from"]}', inline=False)
-                                    embed.add_field(name="To Address", value=f'{tx.to}', inline=False)
-                                    embed.add_field(name="Transaction Hash", value=tx_hash.hex(), inline=False)
-                                    embed.add_field(name="Value", value=f"{self.w3.from_wei(tx['value'], 'ether')} ETH", inline=False)
+                                embed = disnake.Embed(
+                                    title="Transaction Alert",
+                                    description="Incoming or outgoing transaction detected!",
+                                    color=0x9C84EF
+                                )
+                                tx_to = tx['to']
+                                embed.add_field(name="From Address", value=f'{tx["from"]}', inline=False)
+                                embed.add_field(name="To Address", value=f'{tx_to}', inline=False)
+                                embed.add_field(name="Transaction Hash", value=tx_hash.hex(), inline=False)
+                                embed.add_field(name="Value", value=f"{self.w3.from_wei(tx['value'], 'ether')} ETH", inline=False)
 
-                                    if channel:
-                                        await channel.send(embed=embed)
-                                    else:
-                                        print(f"Invalid channel for guild_id: {guild_id}")
+                                if channel:
+                                    await channel.send(embed=embed)
+                                else:
+                                    print(f"Invalid channel for guild_id: {guild_id}")
 
                     await asyncio.sleep(5)  # Check every 5 seconds as in the example
                 except Exception as e:
