@@ -80,8 +80,9 @@ class Friend(commands.Cog):
                     continue 
                 wallet_address = self.w3.to_checksum_address(wallet_address)
                 channel_id = get_price_alert_channel(guild_id)
-                channel = self.bot.get_channel(channel_id)
-                print(channel_id)
+                if channel_id == 'default_price_alert_channel':
+                    continue
+                channel = self.bot.get_channel(channel_id) 
 
                 try:
                     # Get the latest transaction for the wallet
@@ -98,7 +99,7 @@ class Friend(commands.Cog):
                     self.last_known_transactions[wallet_address] = tx_count
 
                     # Get the transaction details
-                    tx = self.w3.eth.get_transaction_by_block_number_and_index('latest', tx_count - 1)
+                    tx = self.w3.eth.get_transaction_by_block(block_number='latest', transaction_index=tx_count - 1)
 
                     # Notify about the transaction
                     print(f"New transaction for wallet {wallet_address}:")
