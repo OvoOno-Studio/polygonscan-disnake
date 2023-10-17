@@ -8,7 +8,8 @@ from disnake.ext import commands
 from disnake import Option, OptionType, Embed, Color
 from config import jwt
 from checks import is_donator
-from web3 import Web3
+from web3 import Web3 
+from web3utils import web3, eth
 
 class Friend(commands.Cog):
     def __init__(self, bot):
@@ -78,7 +79,7 @@ class Friend(commands.Cog):
                 wallet_address = get_wallet_address(guild_id)
                 if wallet_address == 'default_wallet_address':
                     continue 
-                wallet_address = self.w3.toChecksumAddress(wallet_address)
+                wallet_address = web3.utils.toChecksumAddress(wallet_address)
                 channel_id = get_price_alert_channel(guild_id)
                 if channel_id == 'default_price_alert_channel':
                     continue
@@ -86,7 +87,7 @@ class Friend(commands.Cog):
 
                 try:
                     # Get the latest transaction for the wallet
-                    tx_count = self.w3.eth.get_transaction_count(wallet_address)
+                    tx_count = web3.eth.get_transaction_count(wallet_address)
                     if tx_count == 0:
                         continue  # No transactions for this wallet
 
@@ -100,7 +101,7 @@ class Friend(commands.Cog):
 
                     # Get the transaction details
                     tx_count_f = tx_count -1
-                    tx = self.w3.eth.get_transaction_by_block('latest', tx_count_f)
+                    tx = web3.eth.get_transaction_by_block('latest', tx_count_f)
 
                     # Notify about the transaction
                     print(f"New transaction for wallet {wallet_address}:")

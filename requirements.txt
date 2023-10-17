@@ -7,3 +7,4 @@ asyncio
 json
 requests
 web3
+web3utils
