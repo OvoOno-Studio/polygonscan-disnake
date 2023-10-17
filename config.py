@@ -11,6 +11,7 @@ DiscordToken = os.getenv('DISCORD_TOKEN')
 PublicKey = os.getenv('PUBLIC_KEY')
 APIKey = os.getenv('API_KEY')
 API2Key = os.getenv('API2_KEY')
+API3Key = os.getenv('API3_KEY')
 jwt = os.getenv('JWT')
 # Upgrate.Chat API 
 BearerToken = os.getenv('TOKEN')

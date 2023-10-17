@@ -1,12 +1,13 @@
 import aiohttp
 import asyncio
+import requests
 import csv
 import io
 import disnake 
 from config import get_transaction_channel, get_price_alert_channel, get_wallet_address
 from disnake.ext import commands 
-from disnake import Option, OptionType, Embed, Color
-from config import jwt
+from disnake import Option, OptionType 
+from config import jwt, API3Key
 from checks import is_donator
 from web3 import Web3
 
@@ -15,6 +16,7 @@ class Friend(commands.Cog):
         self.bot = bot
         self.session = aiohttp.ClientSession()
         self.friend_api = 'https://prod-api.kosetto.com'
+        self.basescan_api = 'https://api.basescan.org/api'
         self.w3 = Web3(Web3.HTTPProvider('https://base-mainnet.g.alchemy.com/v2/8XQtglDUSx3Sp7MuWwhk3K1X9x2vrhJo'))
         self.wallet_address = '0xCF205808Ed36593aa40a44F10c7f7C2F67d4A4d4' 
         self.last_known_transactions = {}
@@ -39,7 +41,7 @@ class Friend(commands.Cog):
                     ):
                         await self.send_embedded_message(tx)
 
-                await asyncio.sleep(1)
+                await asyncio.sleep(10)
             except Exception as e:
                 print(f"Error checking transactions: {e}")
 
@@ -85,45 +87,46 @@ class Friend(commands.Cog):
                 channel = self.bot.get_channel(channel_id)
 
                 try:
-                    # Get the latest transaction for the wallet
-                    tx_count = self.w3.eth.get_transaction_count(wallet_address)
-                    if tx_count == 0:
-                        continue  # No transactions for this wallet
+                    # Get the latest transactions for the wallet using basescan.org API
+                    params = {
+                        "module": "account",
+                        "action": "txlist",
+                        "address": wallet_address,
+                        "startblock": "0",
+                        "endblock": "99999999",
+                        "page": "1",
+                        "offset": "10",
+                        "sort": "asc",
+                        "apikey": API3Key
+                    }
+                    response = requests.get(self.basescan_api, params=params)
+                    data = response.json()
 
-                    # Check if this transaction is already known
-                    last_known_tx = self.last_known_transactions.get(wallet_address)
-                    if last_known_tx == tx_count:
-                        continue  # No new transactions since the last check
+                    if data["status"] != "1":
+                        print(f"Error fetching transactions: {data['message']}")
+                        continue
 
-                    # Update the last known transaction for this wallet
-                    self.last_known_transactions[wallet_address] = tx_count
-
-                    # Check the latest block for transactions involving the wallet
-                    latest_block = self.w3.eth.get_block('latest')
-                    for transaction in reversed(latest_block['transactions']):
-                        tx = self.w3.eth.get_transaction(transaction)
-                        if tx['from'] == wallet_address or tx['to'] == wallet_address:
-                            break
-                    else:
-                        continue  # No transaction found for the wallet in the latest block
+                    # Assuming you want to check the latest transaction
+                    latest_tx = data["result"][0]
+                    tx_hash = latest_tx["hash"]
+                    tx_from = latest_tx["from"]
+                    tx_to = latest_tx["to"]
 
                     # Notify about the transaction
                     print(f"New key trade for wallet {wallet_address}:")
                     print({
-                        "hash": tx['hash'].hex(),
-                        "from": tx["from"],
-                        "to": tx['to'],
-                        # "value": self.w3.fromWei(tx["value"], 'ether')
+                        "hash": tx_hash,
+                        "from": tx_from,
+                        "to": tx_to
                     })
 
                     embed = disnake.Embed(
                         title="Keys trade alert!",
                         description="Incoming or outgoing transaction detected!",
                         color=0x9C84EF)
-                    embed.add_field(name="From Address", value=f'{tx["from"]}', inline=False)
-                    embed.add_field(name="To Address", value=f'{tx["to"]}', inline=False)
-                    embed.add_field(name="Transaction Hash", value=tx['hash'].hex(), inline=False)
-                    # embed.add_field(name="Value", value=f"{self.w3.fromWei(tx['value'], 'ether')} ETH", inline=False)
+                    embed.add_field(name="From Address", value=tx_from, inline=False)
+                    embed.add_field(name="To Address", value=tx_to, inline=False)
+                    embed.add_field(name="Transaction Hash", value=tx_hash, inline=False)
 
                     if channel:
                         await channel.send(embed=embed)
@@ -131,7 +134,7 @@ class Friend(commands.Cog):
                         print(f"Invalid channel for guild_id: {guild_id}")
                     await asyncio.sleep(30)
                 except Exception as e:
-                    print(f"Error checking keys activity: {e}") 
+                    print(f"Error checking keys activity: {e}")
         
     @is_donator()
     @commands.slash_command(name="user", description="Get details about a user by address.")
