@@ -11,7 +11,8 @@ class Pay(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.payment_wallet = '0x48D0eEE30ec5BF5C7E167036a8c7f3e4820c19fa'
-        self.api = 'https://api.etherscan.io/api'
+        #self.api = 'https://api.etherscan.io/api'
+        self.api = ' https://api-goerli.etherscan.io/api'
         if not self.cleanup_inactive_payments.is_running():
             self.cleanup_inactive_payments.start()
 
@@ -66,7 +67,7 @@ class Pay(commands.Cog):
     async def upgrade_version(self, ctx): 
         uid = self.generate_uid()
         self.save_payment(ctx.author.id, time.time(), uid)
-        message = f"🟢 To upgrade, please send **0.088 + {uid} ETH** (for your unique ID) to `{self.payment_wallet}`.\nOnce done, confirm by typing `/confirm_payment <your_wallet> {uid}`."
+        message = f"🟢 To upgrade, please send **0.008 + {uid} ETH** (for your unique ID) to `{self.payment_wallet}`.\nOnce done, confirm by typing `/confirm_payment <your_wallet> {uid}`."
         await ctx.response.send_message(content=message)
 
     @commands.slash_command(name='confirm_payment', description="Confirm your payment.")
@@ -77,7 +78,7 @@ class Pay(commands.Cog):
             await ctx.response.send_message(content="🔴 You haven't requested an upgrade or incorrect UID provided!")
             return
         timestamp = payment["timestamp"]
-        amount_with_uid = Decimal(0.088) + uid_decimal
+        amount_with_uid = Decimal(0.008) + uid_decimal
 
         params = {
             "module": "account",
