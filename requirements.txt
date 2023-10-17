@@ -6,4 +6,5 @@ import
 asyncio
 json
 requests
-web3 
+web3
+eth-utils
