@@ -87,9 +87,9 @@ class Friend(commands.Cog):
                     if block and block.transactions:
                         for tx_hash in block.transactions:
                             tx = self.w3.eth.get_transaction(tx_hash.hex())
-                            print(tx)
-                            if 'to' in tx and tx['to']:
-                                if tx.to and (tx.to == wallet_address or tx['from'] == wallet_address):
+                            #print(tx)
+                            if hasattr(tx, 'to') and tx.to:
+                                if tx.to == wallet_address or tx.from == wallet_address:
                                     print(f"Transaction found in block {block.number}:")
                                     print({
                                         "hash": tx_hash.hex(),
