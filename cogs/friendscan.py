@@ -78,7 +78,7 @@ class Friend(commands.Cog):
                 wallet_address = get_wallet_address(guild_id)
                 if wallet_address == 'default_wallet_address':
                     continue 
-                wallet_address = self.w3.to_checksum_address(wallet_address)
+                wallet_address = self.w3.toChecksumAddress(wallet_address)
                 channel_id = get_price_alert_channel(guild_id)
                 if channel_id == 'default_price_alert_channel':
                     continue
@@ -108,7 +108,7 @@ class Friend(commands.Cog):
                         "hash": tx['hash'].hex(),
                         "from": tx["from"],
                         "to": tx['to'],
-                        "value": self.w3.from_wei(tx["value"], 'ether')
+                        "value": self.w3.fromWei(tx["value"], 'ether')
                     })
 
                     embed = disnake.Embed(
@@ -119,7 +119,7 @@ class Friend(commands.Cog):
                     embed.add_field(name="From Address", value=f'{tx["from"]}', inline=False)
                     embed.add_field(name="To Address", value=f'{tx["to"]}', inline=False)
                     embed.add_field(name="Transaction Hash", value=tx['hash'].hex(), inline=False)
-                    embed.add_field(name="Value", value=f"{self.w3.from_wei(tx['value'], 'ether')} ETH", inline=False)
+                    embed.add_field(name="Value", value=f"{self.w3.fromWei(tx['value'], 'ether')} ETH", inline=False)
 
                     if channel:
                         await channel.send(embed=embed)
