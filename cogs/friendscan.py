@@ -76,6 +76,8 @@ class Friend(commands.Cog):
             for guild in self.bot.guilds:
                 guild_id = guild.id
                 wallet_address = get_wallet_address(guild_id)
+                if wallet_address == 'default_wallet_address':
+                    break
                 print(wallet_address)
                 channel_id = get_price_alert_channel(guild_id)
                 channel = self.bot.get_channel(channel_id)
