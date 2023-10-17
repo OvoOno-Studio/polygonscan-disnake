@@ -21,10 +21,6 @@ class Pay(commands.Cog):
     
     @staticmethod 
     def ensure_user_table(user_id):
-        """
-        Ensure that a dictionary exists for the given user_id.
-        If not, create an empty dictionary for the user.
-        """
         if not db.get("payment_" + str(user_id)):
             db["payment_" + str(user_id)] = {}
 
@@ -48,26 +44,22 @@ class Pay(commands.Cog):
 
     @tasks.loop(hours=13)
     async def cleanup_inactive_payments(self):
-        """
-        Cleanup inactive payments older than 12 hours.
-        """
-        cutoff_time = time.time() - (12 * 3600)  # 12 hours in seconds
+        cutoff_time = time.time() - (12 * 3600)
         keys = [key for key in db.keys() if key.startswith("payment_")]
         
         for key in keys:
             try:
                 user_payments = db.get(key)
-                inactive_payments = {k: v for k, v in user_payments.items() if v["timestamp"] < cutoff_time and not v["verified"]}
+                inactive_keys = [k for k, v in user_payments.items() if v["timestamp"] < cutoff_time and not v["verified"]]
                 
-                for inactive_key in inactive_payments:
+                for inactive_key in inactive_keys:
                     del user_payments[inactive_key]
                 
-                if user_payments:  # If the dict is not empty, update it.
+                if user_payments:
                     db[key] = user_payments
-                else:  # If empty, delete the key from the db.
+                else:
                     del db[key]
             except Exception as e:
-                # Log the error or print it. Depending on your setup, you might want to use a logger.
                 print(f"Error cleaning up payments for key {key}: {e}")
 
     @commands.slash_command(name='upgrade_version', description="Make request payment to upgrade your version.")
