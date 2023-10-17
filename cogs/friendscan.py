@@ -73,25 +73,18 @@ class Friend(commands.Cog):
                     print(f"Error sending message: {e}")
                 
     async def keys_alerts(self):
-        await self.bot.wait_until_ready()
+        await self.bot.wait_until_ready() 
 
-        # Initialize the dictionary to store the last alerted transaction hash for each guild
-        self.last_alerted_tx = {}
+        async with aiohttp.ClientSession() as session:
+            while not self.bot.is_closed():
+                # First, check for new transactions for all guilds
+                for guild in self.bot.guilds:
+                    guild_id = guild.id
+                    wallet_address = get_wallet_address(guild_id)
+                    if wallet_address == 'default_wallet_address':
+                        continue
+                    wallet_address = self.w3.to_checksum_address(wallet_address)
 
-        while not self.bot.is_closed():
-            for guild in self.bot.guilds:
-                guild_id = guild.id
-                wallet_address = get_wallet_address(guild_id)
-                if wallet_address == 'default_wallet_address':
-                    continue
-                wallet_address = self.w3.to_checksum_address(wallet_address)
-                channel_id = get_price_alert_channel(guild_id)
-                if channel_id == 'default_price_alert_channel':
-                    continue
-                channel = self.bot.get_channel(channel_id)
-
-                try:
-                    # Get the latest transactions for the wallet using basescan.org API
                     params = {
                         "module": "account",
                         "action": "txlist",
@@ -103,50 +96,52 @@ class Friend(commands.Cog):
                         "sort": "asc",
                         "apikey": API3Key
                     }
-                    response = requests.get(self.basescan_api, params=params)
-                    data = response.json()
+                    async with session.get(self.basescan_api, params=params) as response:
+                        data = await response.json()
 
-                    if data["status"] != "1":
-                        print(f"Error fetching transactions: {data['message']}")
-                        continue
+                        if data["status"] != "1":
+                            print(f"Error fetching transactions for {wallet_address}: {data['message']}")
+                            continue
 
-                    # Assuming you want to check the latest transaction
-                    latest_tx = data["result"][0]
-                    tx_hash = latest_tx["hash"]
+                        latest_tx = data["result"][0]
+                        tx_hash = latest_tx["hash"]
 
-                    # Check if you've already alerted for this transaction for this guild
-                    if self.last_alerted_tx.get(guild_id) == tx_hash:
-                        continue
+                        # Check if you've already alerted for this transaction for this guild
+                        if self.last_alerted_tx.get(guild_id) != tx_hash:
+                            # Update the last alerted transaction hash for this guild
+                            self.last_alerted_tx[guild_id] = tx_hash
 
-                    # Update the last alerted transaction hash for this guild
-                    self.last_alerted_tx[guild_id] = tx_hash
+                            # Send the alert
+                            channel_id = get_price_alert_channel(guild_id)
+                            if channel_id == 'default_price_alert_channel':
+                                continue
+                            channel = self.bot.get_channel(channel_id)
 
-                    tx_from = latest_tx["from"]
-                    tx_to = latest_tx["to"]
+                            tx_from = latest_tx["from"]
+                            tx_to = latest_tx["to"]
 
-                    # Notify about the transaction
-                    print(f"New key trade for wallet {wallet_address}:")
-                    print({
-                        "hash": tx_hash,
-                        "from": tx_from,
-                        "to": tx_to
-                    })
+                            print(f"New key trade for wallet {wallet_address}:")
+                            print({
+                                "hash": tx_hash,
+                                "from": tx_from,
+                                "to": tx_to
+                            })
 
-                    embed = disnake.Embed(
-                        title="Keys trade alert!",
-                        description="Incoming or outgoing transaction detected!",
-                        color=0x9C84EF)
-                    embed.add_field(name="From Address", value=tx_from, inline=False)
-                    embed.add_field(name="To Address", value=tx_to, inline=False)
-                    embed.add_field(name="Transaction Hash", value=tx_hash, inline=False)
+                            embed = disnake.Embed(
+                                title="Keys trade alert!",
+                                description="Incoming or outgoing transaction detected!",
+                                color=0x9C84EF)
+                            embed.add_field(name="From Address", value=tx_from, inline=False)
+                            embed.add_field(name="To Address", value=tx_to, inline=False)
+                            embed.add_field(name="Transaction Hash", value=tx_hash, inline=False)
 
-                    if channel:
-                        await channel.send(embed=embed)
-                    else:
-                        print(f"Invalid channel for guild_id: {guild_id}")
-                    await asyncio.sleep(30)
-                except Exception as e:
-                    print(f"Error checking keys activity: {e}")
+                            if channel:
+                                await channel.send(embed=embed)
+                            else:
+                                print(f"Invalid channel for guild_id: {guild_id}")
+
+                # Sleep for a short duration before checking again
+                await asyncio.sleep(10)
         
     @is_donator()
     @commands.slash_command(name="user", description="Get details about a user by address.")
