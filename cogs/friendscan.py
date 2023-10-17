@@ -85,7 +85,7 @@ class Friend(commands.Cog):
 
                     if block and block.transactions:
                         for tx_hash in block.transactions:
-                            tx = self.web3.eth.get_transaction(tx_hash.hex())
+                            tx = self.w3.eth.get_transaction(tx_hash.hex())
                             if tx.to and (tx.to == wallet_address or tx['from'] == wallet_address):
                                 print(f"Transaction found in block {block.number}:")
                                 print({
