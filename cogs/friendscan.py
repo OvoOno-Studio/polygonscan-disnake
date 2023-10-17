@@ -98,9 +98,11 @@ class Friend(commands.Cog):
                     # Update the last known transaction for this wallet
                     self.last_known_transactions[wallet_address] = tx_count
 
-                    # Get the transaction details
-                    tx_count_f = tx_count -1
-                    tx = self.w3.eth.get_transaction_by_block('latest', tx_count_f)
+                    # Get the transaction hash of the latest transaction
+                    tx_hash = self.w3.eth.get_transaction_by_block('latest', tx_count - 1)['hash']
+
+                    # Fetch the transaction details using the hash
+                    tx = self.w3.eth.getTransaction(tx_hash)
 
                     # Notify about the transaction
                     print(f"New transaction for wallet {wallet_address}:")
