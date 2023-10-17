@@ -70,8 +70,7 @@ class Friend(commands.Cog):
                 except Exception as e:
                     print(f"Error sending message: {e}")
                 
-    async def keys_alerts(self): 
-        print("keys_alerts function is running.")  # Add this line
+    async def keys_alerts(self):  
         await self.bot.wait_until_ready()
         while not self.bot.is_closed():
             for guild in self.bot.guilds:
@@ -86,9 +85,8 @@ class Friend(commands.Cog):
                     # print(block)
                     for tx in block['transactions']:
                         tx_to = tx['to']
-                        tx_from = tx['from']
-                        print('This is tx_to')
-                        print(tx_to)
+                        tx_from = tx['from'] 
+                        print(tx)
                         if tx_to.lower() == wallet_address.lower() or tx_from.lower() == wallet_address.lower(): 
                             print('Creating embed message..')
                             embed = disnake.Embed(
@@ -102,7 +100,7 @@ class Friend(commands.Cog):
                             embed.add_field(name="Gas Price", value=f"{tx['gasPrice']} Wei", inline=False)
                             
                             await channel.send(embed=embed)
-                        await asyncio.sleep(60)  # Check every 60 seconds
+                    await asyncio.sleep(60)  # Check every 60 seconds
                 except Exception as e:
                     print(f"Error checking transactions: {e}")
         
