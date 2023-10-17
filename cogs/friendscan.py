@@ -19,7 +19,7 @@ class Friend(commands.Cog):
         self.basescan_api = 'https://api.basescan.org/api'
         self.w3 = Web3(Web3.HTTPProvider('https://base-mainnet.g.alchemy.com/v2/8XQtglDUSx3Sp7MuWwhk3K1X9x2vrhJo'))
         self.wallet_address = '0xCF205808Ed36593aa40a44F10c7f7C2F67d4A4d4' 
-        self.last_known_transactions = {}
+        self.last_alerted_tx = {}
         self.bot.loop.create_task(self.check_transactions())
         self.bot.loop.create_task(self.keys_alerts())
      
@@ -74,6 +74,10 @@ class Friend(commands.Cog):
                 
     async def keys_alerts(self):
         await self.bot.wait_until_ready()
+
+        # Initialize the dictionary to store the last alerted transaction hash for each guild
+        self.last_alerted_tx = {}
+
         while not self.bot.is_closed():
             for guild in self.bot.guilds:
                 guild_id = guild.id
@@ -109,6 +113,14 @@ class Friend(commands.Cog):
                     # Assuming you want to check the latest transaction
                     latest_tx = data["result"][0]
                     tx_hash = latest_tx["hash"]
+
+                    # Check if you've already alerted for this transaction for this guild
+                    if self.last_alerted_tx.get(guild_id) == tx_hash:
+                        continue
+
+                    # Update the last alerted transaction hash for this guild
+                    self.last_alerted_tx[guild_id] = tx_hash
+
                     tx_from = latest_tx["from"]
                     tx_to = latest_tx["to"]
 
