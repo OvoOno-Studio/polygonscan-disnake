@@ -128,11 +128,10 @@ class Friend(commands.Cog):
                     if channel:
                         await channel.send(embed=embed)
                     else:
-                        print(f"Invalid channel for guild_id: {guild_id}")
-
-                    await asyncio.sleep(30)
+                        print(f"Invalid channel for guild_id: {guild_id}")  
                 except Exception as e:
                     print(f"Error checking keys activity: {e}")
+                await asyncio.sleep(30)
         
     @is_donator()
     @commands.slash_command(name="user", description="Get details about a user by address.")
