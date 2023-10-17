@@ -78,7 +78,8 @@ class Pay(commands.Cog):
             await ctx.response.send_message(content="🔴 You haven't requested an upgrade or incorrect UID provided!")
             return
         timestamp = payment["timestamp"]
-        amount_with_uid = Decimal(0.008) + uid_decimal 
+        amount_with_uid = Decimal(0.008) + uid_decimal
+        amount_with_uid_wei = amount_with_uid * Decimal(10**18)
 
         params = {
             "module": "account",
@@ -102,16 +103,13 @@ class Pay(commands.Cog):
         except requests.RequestException as e:
             await ctx.response.send_message(content=f"🔴 Error fetching transaction details: `{e}`")
             return
- 
+
         for tx in data["result"]:
             tx_value = Decimal(tx["value"])
-            print(tx_value)
-            print(amount_with_uid)
-            return
             if (tx["to"] == self.payment_wallet and 
                 tx["from"] == wallet_from.lower() and 
                 int(tx["timeStamp"]) > timestamp and 
-                tx_value == amount_with_uid):
+                tx_value == amount_with_uid_wei):  # Corrected this line
                 self.verify_payment(ctx.author.id, uid)
                 await ctx.response.send_message(content="✅ Payment verified! Welcome to the premium version.")
                 return
