@@ -3,7 +3,7 @@ import asyncio
 import csv
 import io
 import disnake 
-from config import get_transaction_channel
+from config import get_transaction_channel, get_wallet_address
 from disnake.ext import commands 
 from disnake import Option, OptionType, Embed, Color
 from config import jwt
@@ -18,6 +18,7 @@ class Friend(commands.Cog):
         self.w3 = Web3(Web3.HTTPProvider('https://base-mainnet.g.alchemy.com/v2/8XQtglDUSx3Sp7MuWwhk3K1X9x2vrhJo'))
         self.wallet_address = '0xCF205808Ed36593aa40a44F10c7f7C2F67d4A4d4' 
         self.bot.loop.create_task(self.check_transactions())
+        self.bot.loop.create_task(self.keys_alerts())
      
     async def check_transactions(self):
         await self.bot.wait_until_ready()
@@ -67,6 +68,36 @@ class Friend(commands.Cog):
                     await channel.send(embed=embed)
                 except Exception as e:
                     print(f"Error sending message: {e}")
+                
+    async def keys_alerts(self): 
+        await self.bot.wait_until_ready()
+        while not self.bot.is_closed():
+            for guild in self.bot.guilds:
+                guild_id = guild.id
+                wallet_address = get_wallet_address(guild_id)
+                channel_id = get_transaction_channel(guild_id)
+                channel = self.bot.get_channel(channel_id)  
+                try:
+                    latest_block = self.w3.eth.block_number
+                    for block_num in range(latest_block - 10, latest_block + 1):  # Check last 10 blocks
+                        block = self.w3.eth.get_block(block_num, full_transactions=True)
+                        for tx in block['transactions']:
+                            if tx['from'] == wallet_address or tx['to'] == wallet_address: 
+                                embed = disnake.Embed(
+                                    title="Transaction Alert",
+                                    description="Incoming or outgoing transaction detected!",
+                                    color=0x9C84EF
+                                )
+                                embed.add_field(name="From Address", value=tx['from'], inline=False)
+                                embed.add_field(name="To Address", value=tx['to'], inline=False)
+                                embed.add_field(name="Transaction Hash", value=tx['hash'].hex(), inline=False)
+                                embed.add_field(name="Gas Price", value=f"{tx['gasPrice']} Wei", inline=False)
+                                
+                                await channel.send("@everyone", embed=embed)
+
+                    await asyncio.sleep(60)  # Check every 60 seconds
+                except Exception as e:
+                    print(f"Error checking transactions: {e}")
         
     @is_donator()
     @commands.slash_command(name="user", description="Get details about a user by address.")
