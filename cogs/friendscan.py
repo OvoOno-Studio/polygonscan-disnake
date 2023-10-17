@@ -77,7 +77,9 @@ class Friend(commands.Cog):
                 guild_id = guild.id
                 wallet_address = get_wallet_address(guild_id)
                 channel_id = get_price_alert_channel(guild_id)
-                channel = self.bot.get_channel(channel_id)  
+                channel = self.bot.get_channel(channel_id) 
+                if wallet_address == 'default_wallet_address':
+                    return 
                 try:
                     latest_block = self.w3.eth.block_number 
                     block = self.w3.eth.get_block(latest_block, full_transactions=True)
@@ -88,7 +90,8 @@ class Friend(commands.Cog):
                         tx_from = tx['from'] 
                         print(tx_to)
                         print(wallet_address)
-                        if tx_to.lower() == wallet_address.lower() or tx_from.lower() == wallet_address.lower(): 
+                        
+                        if tx_to == wallet_address or tx_from == wallet_address: 
                             print('Creating embed message..')
                             embed = disnake.Embed(
                                 title="Transaction Alert",
