@@ -7,4 +7,3 @@ asyncio
 json
 requests
 web3
-eth-utils
