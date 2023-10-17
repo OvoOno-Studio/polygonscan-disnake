@@ -170,7 +170,8 @@ class Friend(commands.Cog):
                 json_data = await response.json()
 
                 # Create an embedded message
-                embed = disnake.Embed(title="User Details", color=0x9C84EF)  # Set the embed title and color (Discord blue)
+                embed = disnake.Embed(title="User Details", color=0x9C84EF) 
+                embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
                 twitter_username = json_data.get("twitterUsername", "")
                 twitter_url = f"https://x.com/{twitter_username}"
                 # Add fields to the embed for user details
@@ -207,6 +208,7 @@ class Friend(commands.Cog):
                 description="Gets a history of trades for a user.",
                 color=0x9C84EF
             )
+        embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
         embed.add_field(
             name="Response status:",
             value=f'CSV file sent!',
@@ -270,6 +272,7 @@ class Friend(commands.Cog):
                 description="Search users by their twitter handle.",
                 color=0x9C84EF
             )
+            embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
             embed.add_field(
                 name="Response status:",
                 value=f'CSV file sent!',
@@ -315,6 +318,7 @@ class Friend(commands.Cog):
             description="Search users by their twitter handle.",
             color=0x9C84EF
         )
+        embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
         embed.add_field(
             name="Response status:",
             value=f'CSV file sent!',
