@@ -70,7 +70,7 @@ class Friend(commands.Cog):
                 except Exception as e:
                     print(f"Error sending message: {e}")
                 
-    async def keys_alerts(self):  
+    async def keys_alerts(self):
         await self.bot.wait_until_ready()
         while not self.bot.is_closed():
             for guild in self.bot.guilds:
@@ -78,20 +78,21 @@ class Friend(commands.Cog):
                 wallet_address = get_wallet_address(guild_id)
                 if wallet_address == 'default_wallet_address':
                     continue 
-                wallet_address = self.w3.toChecksumAddress(wallet_address)
+                wallet_address = self.w3.to_checksum_address(wallet_address)
                 channel_id = get_price_alert_channel(guild_id)
                 if channel_id == 'default_price_alert_channel':
-                    continue
-                channel = self.bot.get_channel(channel_id) 
+                    continue 
+                channel = self.bot.get_channel(channel_id)
 
                 try:
                     # Get the latest transaction for the wallet
-                    tx_count = self.w3.eth.getTransactionCount(wallet_address)
+                    tx_count = self.w3.eth.get_transaction_count(wallet_address)
                     if tx_count == 0:
                         continue  # No transactions for this wallet
 
                     # Check if this transaction is already known
-                    last_known_tx = self.last_known_transactions.get(wallet_address)
+                    last_known_tx = self.last_known_transactions.get(
+                        wallet_address)
                     if last_known_tx == tx_count:
                         continue  # No new transactions since the last check
 
@@ -99,13 +100,14 @@ class Friend(commands.Cog):
                     self.last_known_transactions[wallet_address] = tx_count
 
                     # Get the transaction hash of the latest transaction
-                    tx_hash = self.w3.eth.get_transaction_by_block('latest', tx_count - 1)['hash']
+                    tx_hash = self.w3.eth.get_transaction_by_block(
+                        'latest', tx_count - 1)['hash']
 
                     # Fetch the transaction details using the hash
-                    tx = self.w3.eth.getTransaction(tx_hash)
-
+                    tx = self.w3.eth.get_transaction(tx_hash)
+                    print(tx)
                     # Notify about the transaction
-                    print(f"New transaction for wallet {wallet_address}:")
+                    print(f"New key trade for wallet {wallet_address}:")
                     print({
                         "hash": tx['hash'].hex(),
                         "from": tx["from"],
@@ -114,23 +116,32 @@ class Friend(commands.Cog):
                     })
 
                     embed = disnake.Embed(
-                        title="Transaction Alert",
-                        description="Incoming or outgoing transaction detected!",
-                        color=0x9C84EF
-                    )
-                    embed.add_field(name="From Address", value=f'{tx["from"]}', inline=False)
-                    embed.add_field(name="To Address", value=f'{tx["to"]}', inline=False)
-                    embed.add_field(name="Transaction Hash", value=tx['hash'].hex(), inline=False)
-                    embed.add_field(name="Value", value=f"{self.w3.fromWei(tx['value'], 'ether')} ETH", inline=False)
+                        title="Keys trade alert!",
+                        description=
+                        "Incoming or outgoing transaction detected!",
+                        color=0x9C84EF)
+                    embed.add_field(name="From Address",
+                                    value=f'{tx["from"]}',
+                                    inline=False)
+                    embed.add_field(name="To Address",
+                                    value=f'{tx["to"]}',
+                                    inline=False)
+                    embed.add_field(name="Transaction Hash",
+                                    value=tx['hash'].hex(),
+                                    inline=False)
+                    embed.add_field(
+                        name="Value",
+                        value=f"{self.w3.fromWei(tx['value'], 'ether')} ETH",
+                        inline=False)
 
                     if channel:
                         await channel.send(embed=embed)
                     else:
                         print(f"Invalid channel for guild_id: {guild_id}")
 
-                    await asyncio.sleep(10)
+                    await asyncio.sleep(30)
                 except Exception as e:
-                    print(f"Error checking transactions: {e}")
+                    print(f"Error checking keys activity: {e}")
         
     @is_donator()
     @commands.slash_command(name="user", description="Get details about a user by address.")
