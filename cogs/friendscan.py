@@ -80,22 +80,27 @@ class Friend(commands.Cog):
                 channel_id = get_price_alert_channel(guild_id)
                 channel = self.bot.get_channel(channel_id)  
                 try:
-                    latest_block = self.w3.eth.block_number
-                    for block_num in range(latest_block - 10, latest_block + 1):  # Check last 10 blocks
-                        block = self.w3.eth.get_block(block_num, full_transactions=True)
-                        for tx in block['transactions']:
-                            if tx['from'] == wallet_address or tx['to'] == wallet_address: 
-                                embed = disnake.Embed(
-                                    title="Transaction Alert",
-                                    description="Incoming or outgoing transaction detected!",
-                                    color=0x9C84EF
-                                )
-                                embed.add_field(name="From Address", value=tx['from'], inline=False)
-                                embed.add_field(name="To Address", value=tx['to'], inline=False)
-                                embed.add_field(name="Transaction Hash", value=tx['hash'].hex(), inline=False)
-                                embed.add_field(name="Gas Price", value=f"{tx['gasPrice']} Wei", inline=False)
-                                
-                                await channel.send("@everyone", embed=embed)
+                    latest_block = self.w3.eth.block_number 
+                    block = self.w3.eth.get_block(latest_block, full_transactions=True)
+                    print('Block:')
+                    print(block)
+                    for tx in block['transactions']:
+                        tx_to = tx['to']
+                        tx_from = tx['from']
+                        
+                        if tx_to.lower() == wallet_address.lower() or tx_from.lower() == wallet_address.lower(): 
+                             
+                            embed = disnake.Embed(
+                                title="Transaction Alert",
+                                description="Incoming or outgoing transaction detected!",
+                                color=0x9C84EF
+                            )
+                            embed.add_field(name="From Address", value=f'{str(tx_from)}', inline=False)
+                            embed.add_field(name="To Address", value=f'{str(tx_to)}', inline=False)
+                            embed.add_field(name="Transaction Hash", value=tx['hash'].hex(), inline=False)
+                            embed.add_field(name="Gas Price", value=f"{tx['gasPrice']} Wei", inline=False)
+                            
+                            await channel.send(embed=embed)
 
                     await asyncio.sleep(60)  # Check every 60 seconds
                 except Exception as e:
