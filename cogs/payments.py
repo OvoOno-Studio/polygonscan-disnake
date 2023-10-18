@@ -72,14 +72,14 @@ class Pay(commands.Cog):
 
     @commands.slash_command(name='confirm_payment', description="Confirm your payment.")
     async def confirm_payment(self, ctx, wallet_from: str, uid: str):
-        uid_decimal = Decimal(uid)
+        uid_decimal = Decimal(uid).quantize(Decimal('1e-18'))  # Ensure 18 decimal places
         payment = self.get_payment(ctx.author.id, uid)
         if not payment:
             await ctx.response.send_message(content="🔴 You haven't requested an upgrade or incorrect UID provided!")
             return
         timestamp = payment["timestamp"]
-        amount_with_uid = Decimal(0.008) + uid_decimal
-        amount_with_uid_wei = amount_with_uid * Decimal(10**18)
+        amount_with_uid = (Decimal(0.008) + uid_decimal).quantize(Decimal('1e-18'))  # Ensure 18 decimal places
+        amount_with_uid_wei = int((amount_with_uid * Decimal(10**18)).quantize(Decimal('1')))  # Convert to integer wei value
 
         params = {
             "module": "account",
@@ -105,11 +105,11 @@ class Pay(commands.Cog):
             return
 
         for tx in data["result"]:
-            tx_value = Decimal(tx["value"])
+            tx_value = int(tx["value"])  # Convert tx_value to integer for comparison 
             if (tx["to"] == self.payment_wallet and 
                 tx["from"] == wallet_from.lower() and 
                 int(tx["timeStamp"]) > timestamp and 
-                tx_value == amount_with_uid_wei):  # Corrected this line
+                tx_value == amount_with_uid_wei):
                 self.verify_payment(ctx.author.id, uid)
                 await ctx.response.send_message(content="✅ Payment verified! Welcome to the premium version.")
                 return
