@@ -85,7 +85,12 @@ class Friend(commands.Cog):
                     if wallet_address == 'default_wallet_address':
                         continue
                     wallet_address = self.w3.to_checksum_address(wallet_address)
-
+                    # Send the alert
+                    channel_id = get_price_alert_channel(guild_id)
+                    if channel_id == 'default_price_alert_channel':
+                        continue
+                    channel = self.bot.get_channel(channel_id)
+                    
                     params = {
                         "module": "account",
                         "action": "txlist",
@@ -110,13 +115,7 @@ class Friend(commands.Cog):
                         # Check if you've already alerted for this transaction for this guild
                         if self.last_alerted_tx.get(guild_id) != tx_hash:
                             # Update the last alerted transaction hash for this guild
-                            self.last_alerted_tx[guild_id] = tx_hash
-
-                            # Send the alert
-                            channel_id = get_price_alert_channel(guild_id)
-                            if channel_id == 'default_price_alert_channel':
-                                continue
-                            channel = self.bot.get_channel(channel_id)
+                            self.last_alerted_tx[guild_id] = tx_hash 
 
                             tx_from = latest_tx["from"]
                             tx_to = latest_tx["to"]
@@ -130,7 +129,7 @@ class Friend(commands.Cog):
                             })
 
                             embed = disnake.Embed(
-                                title="🚨 Keys trade alert!",
+                                title="🚨 Keys trade alert! 🚨",
                                 description="Incoming or outgoing transaction detected!",
                                 color=0x9C84EF)
                             embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
@@ -144,7 +143,7 @@ class Friend(commands.Cog):
                                 print(f"Invalid channel for guild_id: {guild_id}")
 
                 # Sleep for a short duration before checking again
-                await asyncio.sleep(10)
+                await asyncio.sleep(30)
         
     @is_donator()
     @commands.slash_command(name="user", description="Get details about a user by address.")
