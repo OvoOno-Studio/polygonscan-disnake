@@ -104,8 +104,17 @@ class Friend(commands.Cog):
 
                 # Use run_in_executor to run the synchronous requests.get in a separate thread
                 loop = asyncio.get_event_loop()
-                response = await loop.run_in_executor(None, requests.get, self.basescan_api, params)
-                data = response.json()
+                response = await loop.run_in_executor(None, requests.get, self.basescan_api, params) 
+                # Check if the response status code is 200 (OK)
+                if response.status_code == 200:
+                    try:
+                        data = response.json()
+                    except requests.exceptions.JSONDecodeError:
+                        print(f"Failed to decode JSON from response for wallet {wallet_address} in Server with ID: {guild_id}")
+                        continue
+                else:
+                    print(f"Received unexpected status code {response.status_code} for wallet {wallet_address} in Server with ID: {guild_id}")
+                    continue
 
                 print(f'Data for wallet:', wallet_address)
                 print(data)
