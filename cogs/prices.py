@@ -240,10 +240,10 @@ class Moni(commands.Cog):
         try:
             json_data = await self.limited_get(url)
             if json_data and "result" in json_data:
-                print(f'Transaction fetched for Guild: {guild_id}')
+                #print(f'Transaction fetched for Guild: {guild_id}')
                 return json_data["result"]
             else:
-                print(f"Error in fetch_wallet_transactions: {json_data}")
+                #print(f"Error in fetch_wallet_transactions: {json_data}")
                 return None
         except Exception as e:
             print(f"Error in fetch_wallet_transactions: {e}")
