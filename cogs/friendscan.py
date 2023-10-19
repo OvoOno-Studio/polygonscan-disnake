@@ -20,7 +20,7 @@ class Friend(commands.Cog):
         self.w3 = Web3(Web3.HTTPProvider('https://base-mainnet.g.alchemy.com/v2/8XQtglDUSx3Sp7MuWwhk3K1X9x2vrhJo'))
         self.wallet_address = '0xCF205808Ed36593aa40a44F10c7f7C2F67d4A4d4' 
         self.last_alerted_tx = {}
-        self.bot.loop.create_task(self.check_transactions())
+        # self.bot.loop.create_task(self.check_transactions())
         self.bot.loop.create_task(self.keys_alerts())
      
     async def check_transactions(self):
@@ -102,6 +102,10 @@ class Friend(commands.Cog):
                         "apikey": API3Key
                     }
                     async with session.get(self.basescan_api, params=params) as response:
+                        if response.headers.get('Content-Type') != 'application/json':
+                            content = await response.text()
+                            print(f"Unexpected response from API: {content}")
+                            continue
                         data = await response.json()
 
                         if data["status"] != "1":
