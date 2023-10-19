@@ -88,12 +88,26 @@ class Friend(commands.Cog):
                 channel = self.bot.get_channel(channel_id)
 
                 # Get the nonce (number of transactions) of the address
-                nonce = self.w3.eth.get_transaction_count(wallet_address) - 1  # Subtract 1 to get the latest transaction
+                current_nonce = self.w3.eth.get_transaction_count(wallet_address)
+                if current_nonce == 0:
+                    continue  # No transactions for this address
+                latest_tx_nonce = current_nonce - 1
 
-                # Use the nonce to get the latest transaction
-                latest_tx = self.w3.eth.get_transaction_by_block('latest', nonce)
+                # Get the latest block with full transactions
+                latest_block = self.w3.eth.get_block('latest', full_transactions=True)
+
+                # Find the transaction that matches the address and nonce
+                latest_tx = None
+                for tx in latest_block.transactions:
+                    if tx['from'] == wallet_address and tx['nonce'] == latest_tx_nonce:
+                        latest_tx = tx
+                        break
+
+                if not latest_tx:
+                    continue
+
                 tx_hash = latest_tx['hash'].hex()
-                print(tx_hash)
+
                 # Check if you've already alerted for this transaction for this guild
                 if self.last_alerted_tx.get(guild_id) != tx_hash:
                     # Update the last alerted transaction hash for this guild
