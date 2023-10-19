@@ -11,14 +11,13 @@ import os, traceback
 
 class Bot(commands.Bot):
     def __init__(self):
-        super().__init__(command_prefix=commands.when_mentioned_or("ps-"), intents=disnake.Intents.all())
-
+        print("Welcome to the PS Scanner!") 
+        super().__init__(command_prefix=commands.when_mentioned_or("ps-"), intents=disnake.Intents.all()) 
+        print(f"Loading cogs files..")
         for file in os.listdir('./cogs'):
             if file.endswith('.py') and file != '__init__.py':
                 try:
-                    self.load_extension(f"cogs.{file[:-3]}") 
-                    print("Welcome to the PS Scanner!") 
-                    print(f"Loading cogs files..")
+                    self.load_extension(f"cogs.{file[:-3]}")  
                     print(f"{file[:-3]} Loaded successfully.")
                 except:
                     print(f"Unable to load {file[:-3]}.")

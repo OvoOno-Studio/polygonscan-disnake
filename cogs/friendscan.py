@@ -102,13 +102,8 @@ class Friend(commands.Cog):
                         "apikey": API3Key
                     }
                     print(f'Checking key trades for {wallet_address} in Server with ID: {guild_id}')
-                    async with session.get(self.basescan_api, params=params) as response:
-                        content_type = response.headers.get("Content-Type")
-                        if "application/json" in content_type:
-                            data = await response.json()
-                        else:
-                            print(f"Unexpected content type: {content_type}")
-                            continue
+                    async with session.get(self.basescan_api, params=params) as response: 
+                        data = response.json() 
                         print(f'Data for wallet:', wallet_address)
                         print(data)
                         if data["status"] != "1":
@@ -157,7 +152,6 @@ class Friend(commands.Cog):
         if user_wallet is None:
             await ctx.send("Please provide a valid user_wallet.")
             return
-
         try:
             endpoint = f'{str(self.friend_api)}/users/{str(user_wallet)}'
             headers = {
