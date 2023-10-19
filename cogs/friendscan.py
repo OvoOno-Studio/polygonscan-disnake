@@ -86,15 +86,21 @@ class Friend(commands.Cog):
             for block_hash in new_block_filter.get_new_entries():
                 block = self.w3.eth.get_block(block_hash, full_transactions=True)
 
-                for tx in block['transactions']:
-                    # Assuming you're interested in transactions involving a specific address
-                    if tx['to'] == self.wallet_address or tx['from'] == self.wallet_address:
-                        # Process the transaction
-                        tx_hash = tx['hash'].hex()
-                        print(f'Wallet: {self.wallet_address} Tx Hash: {tx_hash} ')
+                for guild in self.bot.guilds:
+                    guild_id = guild.id
+                    wallet_address = get_wallet_address(guild_id)
+                    if wallet_address == 'default_wallet_address':
+                        print('Skipping wallet!')
+                        continue
+                    wallet_address = self.w3.to_checksum_address(wallet_address)
 
-                        for guild in self.bot.guilds:
-                            guild_id = guild.id
+                    for tx in block['transactions']:
+                        # Check if the transaction involves the specific wallet address for the guild
+                        if tx['to'] == wallet_address or tx['from'] == wallet_address:
+                            # Process the transaction
+                            tx_hash = tx['hash'].hex()
+                            print(f'Wallet: {wallet_address} Tx Hash: {tx_hash} ')
+
                             channel_id = get_price_alert_channel(guild_id)
                             if channel_id == 'default_price_alert_channel':
                                 print('Skipping channel!')
@@ -110,7 +116,7 @@ class Friend(commands.Cog):
                                 tx_to = tx["to"]
                                 transaction_url = f"https://basescan.org/tx/{tx_hash}"
 
-                                print(f"New key trade for wallet {self.wallet_address}:")
+                                print(f"New key trade for wallet {wallet_address}:")
                                 print({
                                     "hash": tx_hash,
                                     "from": tx_from,
@@ -130,7 +136,7 @@ class Friend(commands.Cog):
                                     await channel.send(embed=embed)
                                 else:
                                     print(f"Invalid channel for guild_id: {guild_id}")
-
+                await asyncio.sleep(1)
             # Sleep for a short duration before checking again
             await asyncio.sleep(30)
         
