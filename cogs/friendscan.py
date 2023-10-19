@@ -74,57 +74,29 @@ class Friend(commands.Cog):
                     print(f"Error sending message: {e}")
                 
     async def keys_alerts(self):
-        await self.bot.wait_until_ready()
+        # Set up a Web3 instance connected to an Ethereum node
+        w3 = self.w3
 
         while not self.bot.is_closed():
-            # First, check for new transactions for all guilds
             for guild in self.bot.guilds:
                 guild_id = guild.id
                 wallet_address = get_wallet_address(guild_id)
                 if wallet_address == 'default_wallet_address':
                     continue
-                wallet_address = self.w3.to_checksum_address(wallet_address)
-                # Send the alert
+                wallet_address = w3.toChecksumAddress(wallet_address)
+
                 channel_id = get_price_alert_channel(guild_id)
                 if channel_id == 'default_price_alert_channel':
                     continue
                 channel = self.bot.get_channel(channel_id)
-                params = {
-                    "module": "account",
-                    "action": "txlist",
-                    "address": wallet_address,
-                    "startblock": "0",
-                    "endblock": "99999999",
-                    "page": "1",
-                    "offset": "10",
-                    "sort": "desc",
-                    "apikey": API3Key
-                }
-                print(f'Checking key trades for {wallet_address} in Server with ID: {guild_id}')
 
-                # Use run_in_executor to run the synchronous requests.get in a separate thread
-                loop = asyncio.get_event_loop()
-                response = await loop.run_in_executor(None, requests.get, self.basescan_api, params) 
-                # Check if the response status code is 200 (OK)
-                if response.status_code == 200:
-                    try:
-                        data = response.json()
-                    except requests.exceptions.JSONDecodeError:
-                        print(f"Failed to decode JSON from response for wallet {wallet_address} in Server with ID: {guild_id}")
-                        continue
-                else:
-                    print(f"Received unexpected status code {response.status_code} for wallet {wallet_address} in Server with ID: {guild_id}")
-                    continue
+                # Get the nonce (number of transactions) of the address
+                nonce = w3.eth.getTransactionCount(wallet_address) - 1  # Subtract 1 to get the latest transaction
 
-                print(f'Data for wallet:', wallet_address)
-                print(data)
-                if data["status"] != "1":
-                    print(f"Error fetching transactions for {wallet_address}: {data['message']}")
-                    continue
-
-                latest_tx = data["result"][0]
-                tx_hash = latest_tx["hash"]
-
+                # Use the nonce to get the latest transaction
+                latest_tx = w3.eth.getTransactionFromBlock('latest', nonce)
+                tx_hash = latest_tx['hash'].hex()
+                print(tx_hash)
                 # Check if you've already alerted for this transaction for this guild
                 if self.last_alerted_tx.get(guild_id) != tx_hash:
                     # Update the last alerted transaction hash for this guild
