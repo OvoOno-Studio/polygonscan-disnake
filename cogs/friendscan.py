@@ -90,7 +90,6 @@ class Friend(commands.Cog):
                     if channel_id == 'default_price_alert_channel':
                         continue
                     channel = self.bot.get_channel(channel_id)
-                    
                     params = {
                         "module": "account",
                         "action": "txlist",
@@ -99,7 +98,7 @@ class Friend(commands.Cog):
                         "endblock": "99999999",
                         "page": "1",
                         "offset": "10",
-                        "sort": "asc",
+                        "sort": "desc",
                         "apikey": API3Key
                     }
                     async with session.get(self.basescan_api, params=params) as response:
