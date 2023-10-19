@@ -73,17 +73,14 @@ class Friend(commands.Cog):
                 except Exception as e:
                     print(f"Error sending message: {e}")
                 
-    async def keys_alerts(self):
-        # Set up a Web3 instance connected to an Ethereum node
-        w3 = self.w3
-
+    async def keys_alerts(self):  
         while not self.bot.is_closed():
             for guild in self.bot.guilds:
                 guild_id = guild.id
                 wallet_address = get_wallet_address(guild_id)
                 if wallet_address == 'default_wallet_address':
                     continue
-                wallet_address = w3.to_checksum_address(wallet_address)
+                wallet_address = self.w3.to_checksum_address(wallet_address)
 
                 channel_id = get_price_alert_channel(guild_id)
                 if channel_id == 'default_price_alert_channel':
@@ -91,10 +88,10 @@ class Friend(commands.Cog):
                 channel = self.bot.get_channel(channel_id)
 
                 # Get the nonce (number of transactions) of the address
-                nonce = w3.eth.get_transaction_count(wallet_address) - 1  # Subtract 1 to get the latest transaction
+                nonce = self.w3.eth.get_transaction_count(wallet_address) - 1  # Subtract 1 to get the latest transaction
 
                 # Use the nonce to get the latest transaction
-                latest_tx = w3.eth.get_transaction_by_block('latest', nonce)
+                latest_tx = self.w3.eth.get_transaction_by_block('latest', nonce)
                 tx_hash = latest_tx['hash'].hex()
                 print(tx_hash)
                 # Check if you've already alerted for this transaction for this guild
