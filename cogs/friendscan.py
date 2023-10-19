@@ -83,7 +83,7 @@ class Friend(commands.Cog):
                 wallet_address = get_wallet_address(guild_id)
                 if wallet_address == 'default_wallet_address':
                     continue
-                wallet_address = w3.toChecksumAddress(wallet_address)
+                wallet_address = w3.to_checks_sum_ddress(wallet_address)
 
                 channel_id = get_price_alert_channel(guild_id)
                 if channel_id == 'default_price_alert_channel':
@@ -91,10 +91,10 @@ class Friend(commands.Cog):
                 channel = self.bot.get_channel(channel_id)
 
                 # Get the nonce (number of transactions) of the address
-                nonce = w3.eth.getTransactionCount(wallet_address) - 1  # Subtract 1 to get the latest transaction
+                nonce = w3.eth.get_transaction_count(wallet_address) - 1  # Subtract 1 to get the latest transaction
 
                 # Use the nonce to get the latest transaction
-                latest_tx = w3.eth.getTransactionFromBlock('latest', nonce)
+                latest_tx = w3.eth.get_transaction_by_block('latest', nonce)
                 tx_hash = latest_tx['hash'].hex()
                 print(tx_hash)
                 # Check if you've already alerted for this transaction for this guild
