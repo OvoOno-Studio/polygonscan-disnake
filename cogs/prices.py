@@ -172,10 +172,10 @@ class Moni(commands.Cog):
                 self.guild_data[guild_id]["transaction_channel_id"] = get_transaction_channel(guild_id) 
                 try:
                     transactions = await self.fetch_wallet_transactions(guild_id)
-                    if transactions is not None and isinstance(transactions, (list, tuple, str)):
-                        print(f"Fetched {len(transactions)} transactions for guild {guild_id}")
-                    else:
-                        print(f"Unexpected type for transactions: {type(transactions)}")
+                    # if transactions is not None and isinstance(transactions, (list, tuple, str)):
+                    #     print(f"Fetched {len(transactions)} transactions for guild {guild_id}")
+                    # else:
+                    #     print(f"Unexpected type for transactions: {type(transactions)}")
                     if not transactions or isinstance(transactions, str):
                         #print(f"Error in transactions response: {transactions}")
                         await asyncio.sleep(1)  # Add delay here
