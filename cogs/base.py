@@ -1,5 +1,4 @@
-from disnake.ext import commands 
-# from checks import update_donators_periodically
+from disnake.ext import commands
 
 class BaseCog(commands.Cog):
     def __init__(self, bot):

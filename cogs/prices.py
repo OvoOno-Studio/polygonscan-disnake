@@ -170,6 +170,10 @@ class Moni(commands.Cog):
 
                 self.guild_data[guild_id]["wallet_address"] = get_wallet_address(guild_id)
                 self.guild_data[guild_id]["transaction_channel_id"] = get_transaction_channel(guild_id) 
+                if self.guild_data[guild_id]["wallet_address"] == 'default_wallet_address':
+                    continue
+                if self.guild_data[guild_id]['transaction_channel_id'] == 'default_price_alert_channel':
+                    continue
                 try:
                     transactions = await self.fetch_wallet_transactions(guild_id)
                     # if transactions is not None and isinstance(transactions, (list, tuple, str)):

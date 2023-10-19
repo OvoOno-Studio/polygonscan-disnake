@@ -103,6 +103,7 @@ class Friend(commands.Cog):
                     }
                     print(f'Checking key trades for {wallet_address} in Server with ID: {guild_id}')
                     async with session.get(self.basescan_api, params=params) as response:
+                        print(response)
                         if response.headers.get('Content-Type') != 'application/json':
                             content = await response.text()
                             print(f"Unexpected response from API: {content}")
