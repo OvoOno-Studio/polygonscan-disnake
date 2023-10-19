@@ -103,7 +103,6 @@ class Friend(commands.Cog):
                     }
                     print(f'Checking key trades for {wallet_address} in Server with ID: {guild_id}')
                     async with session.get(self.basescan_api, params=params) as response:
-                         
                         data = await response.json()
                         print(f'Data for wallet:', wallet_address)
                         print(data)
