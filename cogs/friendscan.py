@@ -74,6 +74,7 @@ class Friend(commands.Cog):
                     print(f"Error sending message: {e}")
                 
     async def keys_alerts(self):  
+        await self.bot.wait_until_ready()
         while not self.bot.is_closed():
             for guild in self.bot.guilds:
                 guild_id = guild.id
@@ -86,56 +87,61 @@ class Friend(commands.Cog):
                     continue
                 channel = self.bot.get_channel(channel_id)
 
-                # Get the nonce (number of transactions) of the address
-                current_nonce = self.w3.eth.get_transaction_count(wallet_address)
-                if current_nonce == 0:
-                    continue  # No transactions for this address
-                latest_tx_nonce = current_nonce - 1
+                try:
+                    # Get the nonce (number of transactions) of the address
+                    current_nonce = self.w3.eth.get_transaction_count(wallet_address)
+                    if current_nonce == 0:
+                        continue  # No transactions for this address
+                    latest_tx_nonce = current_nonce - 1
 
-                # Get the latest block with full transactions
-                latest_block = self.w3.eth.get_block('latest', full_transactions=True)
+                    # Get the latest block with full transactions
+                    latest_block = self.w3.eth.get_block('latest', full_transactions=True)
 
-                # Find the transaction that matches the address and nonce
-                latest_tx = None
-                for tx in latest_block.transactions:
-                    if tx['from'] == wallet_address and tx['nonce'] == latest_tx_nonce:
-                        latest_tx = tx
-                        break
+                    # Find the transaction that matches the address and nonce
+                    latest_tx = None
+                    for tx in latest_block.transactions:
+                        if tx['from'] == wallet_address and tx['nonce'] == latest_tx_nonce:
+                            latest_tx = tx
+                            break
 
-                if not latest_tx:
-                    continue
+                    if not latest_tx:
+                        continue
 
-                tx_hash = latest_tx['hash'].hex()
-                print(f'Wallet: {wallet_address} Tx Hash: {tx_hash} ')
-                # Check if you've already alerted for this transaction for this guild
-                if self.last_alerted_tx.get(guild_id) != tx_hash:
-                    # Update the last alerted transaction hash for this guild
-                    self.last_alerted_tx[guild_id] = tx_hash
+                    tx_hash = latest_tx['hash'].hex()
+                    print(f'Wallet: {wallet_address} Tx Hash: {tx_hash} ')
 
-                    tx_from = latest_tx["from"]
-                    tx_to = latest_tx["to"]
-                    transaction_url = f"https://basescan.org/tx/{tx_hash}"
+                    # Check if you've already alerted for this transaction for this guild
+                    if self.last_alerted_tx.get(guild_id) != tx_hash:
+                        # Update the last alerted transaction hash for this guild
+                        self.last_alerted_tx[guild_id] = tx_hash
 
-                    print(f"New key trade for wallet {wallet_address}:")
-                    print({
-                        "hash": tx_hash,
-                        "from": tx_from,
-                        "to": tx_to
-                    })
+                        tx_from = latest_tx["from"]
+                        tx_to = latest_tx["to"]
+                        transaction_url = f"https://basescan.org/tx/{tx_hash}"
 
-                    embed = disnake.Embed(
-                        title="🚨 Keys trade alert! 🚨",
-                        description="Incoming or outgoing transaction detected!",
-                        color=0x9C84EF)
-                    embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
-                    embed.add_field(name="🧑 From Address:", value=tx_from, inline=False)
-                    embed.add_field(name="👉 To Address:", value=tx_to, inline=False)
-                    embed.add_field(name="🔗 Transaction Hash:", value=f"[{tx_hash}]({transaction_url})", inline=False)
-                    embed.set_footer(text=f"Powered by OvoOno Studio")
-                    if channel:
-                        await channel.send(embed=embed)
-                    else:
-                        print(f"Invalid channel for guild_id: {guild_id}")
+                        print(f"New key trade for wallet {wallet_address}:")
+                        print({
+                            "hash": tx_hash,
+                            "from": tx_from,
+                            "to": tx_to
+                        })
+
+                        embed = disnake.Embed(
+                            title="🚨 Keys trade alert! 🚨",
+                            description="Incoming or outgoing transaction detected!",
+                            color=0x9C84EF)
+                        embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
+                        embed.add_field(name="🧑 From Address:", value=tx_from, inline=False)
+                        embed.add_field(name="👉 To Address:", value=tx_to, inline=False)
+                        embed.add_field(name="🔗 Transaction Hash:", value=f"[{tx_hash}]({transaction_url})", inline=False)
+                        embed.set_footer(text=f"Powered by OvoOno Studio")
+                        if channel:
+                            await channel.send(embed=embed)
+                        else:
+                            print(f"Invalid channel for guild_id: {guild_id}")
+
+                except Exception as e:
+                    print(f"Error while processing wallet {wallet_address} in guild {guild_id}: {e}")
 
             # Sleep for a short duration before checking again
             await asyncio.sleep(30)
