@@ -83,7 +83,7 @@ class Friend(commands.Cog):
                 wallet_address = get_wallet_address(guild_id)
                 if wallet_address == 'default_wallet_address':
                     continue
-                wallet_address = w3.to_checks_sum_address(wallet_address)
+                wallet_address = w3.to_checksum_address(wallet_address)
 
                 channel_id = get_price_alert_channel(guild_id)
                 if channel_id == 'default_price_alert_channel':
