@@ -16,7 +16,10 @@ class Bot(commands.Bot):
         for file in os.listdir('./cogs'):
             if file.endswith('.py') and file != '__init__.py':
                 try:
-                    self.load_extension(f"cogs.{file[:-3]}")
+                    self.load_extension(f"cogs.{file[:-3]}") 
+                    print("Welcome to the PS Scanner!")
+                    print(f"Logged in as {self.bot.user} (ID: {self.bot.user.id})")
+                    print(f"Loading cogs files..")
                     print(f"{file[:-3]} Loaded successfully.")
                 except:
                     print(f"Unable to load {file[:-3]}.")
