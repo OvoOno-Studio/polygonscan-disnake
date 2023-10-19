@@ -76,14 +76,17 @@ class Friend(commands.Cog):
     async def keys_alerts(self):  
         await self.bot.wait_until_ready()
         while not self.bot.is_closed():
+            print('Looping guilds for keys_alerts!')
             for guild in self.bot.guilds:
                 guild_id = guild.id
                 wallet_address = get_wallet_address(guild_id)
                 if wallet_address == 'default_wallet_address':
+                    print('Skipping wallet!')
                     continue
                 wallet_address = self.w3.to_checksum_address(wallet_address)
                 channel_id = get_price_alert_channel(guild_id)
                 if channel_id == 'default_price_alert_channel':
+                    print('Skipping channel!')
                     continue
                 channel = self.bot.get_channel(channel_id)
 
@@ -139,6 +142,9 @@ class Friend(commands.Cog):
                             await channel.send(embed=embed)
                         else:
                             print(f"Invalid channel for guild_id: {guild_id}")
+                        
+                    print(f'Sleeping loop aftet guild id: {guild_id}')
+                    await asyncio.sleep(2)
 
                 except Exception as e:
                     print(f"Error while processing wallet {wallet_address} in guild {guild_id}: {e}")
