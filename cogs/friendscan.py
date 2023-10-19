@@ -74,77 +74,80 @@ class Friend(commands.Cog):
                     print(f"Error sending message: {e}")
                 
     async def keys_alerts(self):
-        await self.bot.wait_until_ready() 
+        await self.bot.wait_until_ready()
 
-        async with aiohttp.ClientSession() as session:
-            while not self.bot.is_closed():
-                # First, check for new transactions for all guilds
-                for guild in self.bot.guilds:
-                    guild_id = guild.id
-                    wallet_address = get_wallet_address(guild_id)
-                    if wallet_address == 'default_wallet_address':
-                        continue
-                    wallet_address = self.w3.to_checksum_address(wallet_address)
-                    # Send the alert
-                    channel_id = get_price_alert_channel(guild_id)
-                    if channel_id == 'default_price_alert_channel':
-                        continue
-                    channel = self.bot.get_channel(channel_id)
-                    params = {
-                        "module": "account",
-                        "action": "txlist",
-                        "address": wallet_address,
-                        "startblock": "0",
-                        "endblock": "99999999",
-                        "page": "1",
-                        "offset": "10",
-                        "sort": "desc",
-                        "apikey": API3Key
-                    }
-                    print(f'Checking key trades for {wallet_address} in Server with ID: {guild_id}')
-                    async with session.get(self.basescan_api, params=params) as response: 
-                        data = response.json() 
-                        print(f'Data for wallet:', wallet_address)
-                        print(data)
-                        if data["status"] != "1":
-                            print(f"Error fetching transactions for {wallet_address}: {data['message']}")
-                            continue
+        while not self.bot.is_closed():
+            # First, check for new transactions for all guilds
+            for guild in self.bot.guilds:
+                guild_id = guild.id
+                wallet_address = get_wallet_address(guild_id)
+                if wallet_address == 'default_wallet_address':
+                    continue
+                wallet_address = self.w3.to_checksum_address(wallet_address)
+                # Send the alert
+                channel_id = get_price_alert_channel(guild_id)
+                if channel_id == 'default_price_alert_channel':
+                    continue
+                channel = self.bot.get_channel(channel_id)
+                params = {
+                    "module": "account",
+                    "action": "txlist",
+                    "address": wallet_address,
+                    "startblock": "0",
+                    "endblock": "99999999",
+                    "page": "1",
+                    "offset": "10",
+                    "sort": "desc",
+                    "apikey": API3Key
+                }
+                print(f'Checking key trades for {wallet_address} in Server with ID: {guild_id}')
 
-                        latest_tx = data["result"][0]
-                        tx_hash = latest_tx["hash"]
+                # Use run_in_executor to run the synchronous requests.get in a separate thread
+                loop = asyncio.get_event_loop()
+                response = await loop.run_in_executor(None, requests.get, self.basescan_api, params)
+                data = response.json()
 
-                        # Check if you've already alerted for this transaction for this guild
-                        if self.last_alerted_tx.get(guild_id) != tx_hash:
-                            # Update the last alerted transaction hash for this guild
-                            self.last_alerted_tx[guild_id] = tx_hash 
+                print(f'Data for wallet:', wallet_address)
+                print(data)
+                if data["status"] != "1":
+                    print(f"Error fetching transactions for {wallet_address}: {data['message']}")
+                    continue
 
-                            tx_from = latest_tx["from"]
-                            tx_to = latest_tx["to"]
-                            transaction_url = f"https://basescan.org/tx/{tx_hash}"
+                latest_tx = data["result"][0]
+                tx_hash = latest_tx["hash"]
 
-                            print(f"New key trade for wallet {wallet_address}:")
-                            print({
-                                "hash": tx_hash,
-                                "from": tx_from,
-                                "to": tx_to
-                            })
+                # Check if you've already alerted for this transaction for this guild
+                if self.last_alerted_tx.get(guild_id) != tx_hash:
+                    # Update the last alerted transaction hash for this guild
+                    self.last_alerted_tx[guild_id] = tx_hash
 
-                            embed = disnake.Embed(
-                                title="🚨 Keys trade alert! 🚨",
-                                description="Incoming or outgoing transaction detected!",
-                                color=0x9C84EF)
-                            embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
-                            embed.add_field(name="🧑From Address:", value=tx_from, inline=False)
-                            embed.add_field(name="👉 To Address:", value=tx_to, inline=False)
-                            embed.add_field(name="🔗 Transaction Hash:", value=f"[{tx_hash}]({transaction_url})", inline=False)
-                            embed.set_footer(text=f"Powered by OvoOno Studio")
-                            if channel:
-                                await channel.send(embed=embed)
-                            else:
-                                print(f"Invalid channel for guild_id: {guild_id}")
+                    tx_from = latest_tx["from"]
+                    tx_to = latest_tx["to"]
+                    transaction_url = f"https://basescan.org/tx/{tx_hash}"
 
-                # Sleep for a short duration before checking again
-                await asyncio.sleep(30)
+                    print(f"New key trade for wallet {wallet_address}:")
+                    print({
+                        "hash": tx_hash,
+                        "from": tx_from,
+                        "to": tx_to
+                    })
+
+                    embed = disnake.Embed(
+                        title="🚨 Keys trade alert! 🚨",
+                        description="Incoming or outgoing transaction detected!",
+                        color=0x9C84EF)
+                    embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
+                    embed.add_field(name="🧑From Address:", value=tx_from, inline=False)
+                    embed.add_field(name="👉 To Address:", value=tx_to, inline=False)
+                    embed.add_field(name="🔗 Transaction Hash:", value=f"[{tx_hash}]({transaction_url})", inline=False)
+                    embed.set_footer(text=f"Powered by OvoOno Studio")
+                    if channel:
+                        await channel.send(embed=embed)
+                    else:
+                        print(f"Invalid channel for guild_id: {guild_id}")
+
+            # Sleep for a short duration before checking again
+            await asyncio.sleep(30)
         
     @is_donator()
     @commands.slash_command(name="user", description="Get details about a user by address.")
