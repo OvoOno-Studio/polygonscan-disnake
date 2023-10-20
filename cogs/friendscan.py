@@ -74,23 +74,26 @@ class Friend(commands.Cog):
                     print(f"Error sending message: {e}")
                 
     async def keys_alerts(self):  
-        await self.bot.wait_until_ready()
-
+        await self.bot.wait_until_ready() 
         # Create a new filter to listen for new blocks
         new_block_filter = self.w3.eth.filter('latest')
 
         while not self.bot.is_closed():
-            print('Waiting for new blocks for keys_alerts!')
-
+            #print('Waiting for new blocks for keys_alerts!') 
             # Poll the filter for new blocks
-            for block_hash in new_block_filter.get_new_entries():
+            new_block_entries = new_block_filter.get_new_entries()
+            if not new_block_entries:
+                # Recreate the filter if there are no new entries
+                new_block_filter = self.w3.eth.filter('latest')
+                new_block_entries = new_block_filter.get_new_entries()
+            for block_hash in new_block_entries:
                 block = self.w3.eth.get_block(block_hash, full_transactions=True)
 
                 for guild in self.bot.guilds:
                     guild_id = guild.id
                     wallet_address = get_wallet_address(guild_id)
                     if wallet_address == 'default_wallet_address':
-                        print('Skipping wallet!')
+                        # print('Skipping wallet!')
                         continue
                     wallet_address = self.w3.to_checksum_address(wallet_address)
 
@@ -103,7 +106,7 @@ class Friend(commands.Cog):
 
                             channel_id = get_price_alert_channel(guild_id)
                             if channel_id == 'default_price_alert_channel':
-                                print('Skipping channel!')
+                                # print('Skipping channel!')
                                 continue
                             channel = self.bot.get_channel(channel_id)
 
@@ -114,14 +117,7 @@ class Friend(commands.Cog):
 
                                 tx_from = tx["from"]
                                 tx_to = tx["to"]
-                                transaction_url = f"https://basescan.org/tx/{tx_hash}"
-
-                                print(f"New key trade for wallet {wallet_address}:")
-                                print({
-                                    "hash": tx_hash,
-                                    "from": tx_from,
-                                    "to": tx_to
-                                })
+                                transaction_url = f"https://basescan.org/tx/{tx_hash}" 
 
                                 embed = disnake.Embed(
                                     title="🚨 Keys trade alert! 🚨",
@@ -135,10 +131,9 @@ class Friend(commands.Cog):
                                 if channel:
                                     await channel.send(embed=embed)
                                 else:
-                                    print(f"Invalid channel for guild_id: {guild_id}")
-                await asyncio.sleep(2)
+                                    print(f"Invalid channel for guild_id: {guild_id}") 
             # Sleep for a short duration before checking again
-            await asyncio.sleep(30)
+            await asyncio.sleep(10)
         
     @is_donator()
     @commands.slash_command(name="user", description="Get details about a user by address.")
