@@ -28,6 +28,10 @@ class Friend(commands.Cog):
 
     async def check_transactions(self):
         await self.bot.wait_until_ready()
+        if len(self.new_influencers) == 5:
+            print('No need to check data. Sleeping...')
+            await asyncio.sleep(30)
+            return
         while not self.bot.is_closed():
             try:
                 latest_block = self.w3.eth.block_number
@@ -76,7 +80,7 @@ class Friend(commands.Cog):
         print(len(self.new_influencers))
         if len(self.new_influencers) == 5:
             print('Already full!')
-            await asyncio.sleep(60) 
+            await asyncio.sleep(30) 
             return
         
         user_data = {
@@ -91,11 +95,7 @@ class Friend(commands.Cog):
             return
 
         # Add the user to the list
-        self.new_influencers.append(user_data)
-
-        # Ensure the list doesn't exceed 100 entries
-        if len(self.new_influencers) == 5:
-            self.new_influencers.pop(0)  # Remove the oldest entry
+        self.new_influencers.append(user_data) 
 
     async def verify_x_users(self): 
         await self.bot.wait_until_ready()  # Ensure the bot is ready before starting the loop
@@ -104,12 +104,12 @@ class Friend(commands.Cog):
             if len(self.new_influencers)  < 3:
                 print('Not enough not data!')
                 print('Sleeping for 360 seconds')
-                await asyncio.sleep(360)
+                await asyncio.sleep(30)
                 continue
             
             x_handler = self.new_influencers
             for user in x_handler:
-                handler = user["twitterName"]
+                handler = user["twitterUsername"]
                 verified_user = await self.verify_user_by_twitter_handle(handler)
                 if verified_user:
                     print(f"User {handler} is verified!")
