@@ -3,7 +3,8 @@ import asyncio
 import requests
 import csv
 import io
-import disnake 
+import disnake
+import urllib.parse
 from requests_oauthlib import OAuth1Session
 from config import get_transaction_channel, get_price_alert_channel, get_wallet_address
 from disnake.ext import commands 
@@ -120,12 +121,12 @@ class Friend(commands.Cog):
 
     async def verify_user_by_twitter_handle(self, handle): 
         fields = "created_at,description"
-        endpoint = f"/users/lookup.json?screen_name={handle}"
-        params = {"user.fields": fields}
+        endpoint = f"/users/lookup.json?screen_name={urllib.parse.quote(handle)}" 
         url = f"https://api.twitter.com/1.1/{endpoint}"
-
+        print(url)
+        print(twitter_bearer)
         headers = {
-            'Authorization': f"Bearer {twitter_bearer}",
+            'Authorization': f'Bearer {twitter_bearer}',
             'Content-Type': 'application/json',
         }
 
