@@ -4,10 +4,11 @@ import requests
 import csv
 import io
 import disnake 
+from requests_oauthlib import OAuth1Session
 from config import get_transaction_channel, get_price_alert_channel, get_wallet_address
 from disnake.ext import commands 
 from disnake import Option, OptionType 
-from config import jwt, API3Key, twitter_bearer
+from config import jwt, API3Key, twitter_bearer, consumer_key, consumer_secret
 from checks import is_donator
 from web3 import Web3
 
@@ -108,24 +109,59 @@ class Friend(commands.Cog):
             else:
                 print(f"User {handler} is not verified or does not exist.")
 
-    async def verify_user_by_twitter_handle(self, handle):
-        endpoint = f"https://api.twitter.com/2/users/by/username/{handle}"
-        url = endpoint 
-        headers = {
-            'Authorization': f"Bearer {twitter_bearer}",
-            'Content-Type': 'application/json',
-        }
+    async def verify_user_by_twitter_handle(self, handle): 
+        fields = "created_at,description"
+        params = {"user.fields": fields}
 
-        async with self.session.get(url, headers=headers) as response:
-            if response.status != 200:
-                print(f"Failed to connect to Twitter API, status code: {response.status}")
-                return None
+        request_token_url = "https://api.twitter.com/oauth/request_token"
+        oauth = OAuth1Session(consumer_key, client_secret=consumer_secret)  
+        try:
+            fetch_response = oauth.fetch_request_token(request_token_url)
+        except ValueError:
+            print(
+                "There may have been an issue with the consumer_key or consumer_secret you entered."
+            )
 
-            json_data = await response.json()
-            if "data" in json_data:
-                return json_data["data"]
-            return None
+        resource_owner_key = fetch_response.get("oauth_token")
+        resource_owner_secret = fetch_response.get("oauth_token_secret")
+        print("Got OAuth token: %s" % resource_owner_key)
 
+        # # Get authorization
+        base_authorization_url = "https://api.twitter.com/oauth/authorize"
+        authorization_url = oauth.authorization_url(base_authorization_url)
+        print("Please go here and authorize: %s" % authorization_url)
+        verifier = input("Paste the PIN here: ")
+
+        # Get the access token
+        access_token_url = "https://api.twitter.com/oauth/access_token"
+        oauth = OAuth1Session(
+            consumer_key,
+            client_secret=consumer_secret,
+            resource_owner_key=resource_owner_key,
+            resource_owner_secret=resource_owner_secret,
+            verifier=verifier,
+        )
+        oauth_tokens = oauth.fetch_access_token(access_token_url)
+
+        access_token = oauth_tokens["oauth_token"]
+        access_token_secret = oauth_tokens["oauth_token_secret"]
+
+        # Make the request
+        oauth = OAuth1Session(
+            consumer_key,
+            client_secret=consumer_secret,
+            resource_owner_key=access_token,
+            resource_owner_secret=access_token_secret,
+        )
+
+        response = oauth.get(f"https://api.twitter.com/2/users/{handle}", params=params)
+
+        if response.status_code != 200:
+            raise Exception(
+                "Request returned an error: {} {}".format(response.status_code, response.text)
+            )
+
+        print("Response code: {}".format(response.status_code))
 
     async def send_embedded_message(self, transaction):
         # Create an embedded message with transaction details
