@@ -83,7 +83,7 @@ class Friend(commands.Cog):
             print('Waiting for new blocks for keys_alerts!')
 
             # Poll the filter for new blocks
-            for block_hash in new_block_filter.get_all_entries():
+            for block_hash in new_block_filter.get_new_entries():
                 block = self.w3.eth.get_block(block_hash, full_transactions=True)
 
                 for guild in self.bot.guilds:
