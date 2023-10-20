@@ -98,18 +98,23 @@ class Friend(commands.Cog):
             self.new_influencers.pop(0)  # Remove the oldest entry
 
     async def verify_x_users(self): 
-        print('Running Twitter verification.')
-        if len(self.new_influencers)  < 5:
-            return
-        
-        x_handler = self.new_influencers
-        for user in x_handler:
-            handler = user["twitterName"]
-            verified_user = await self.verify_user_by_twitter_handle(handler)
-            if verified_user:
-                print(f"User {handler} is verified!")
-            else:
-                print(f"User {handler} is not verified or does not exist.")
+        await self.bot.wait_until_ready()  # Ensure the bot is ready before starting the loop
+        while not self.bot.is_closed():
+            print('Running Twitter verification.')
+            if len(self.new_influencers)  < 3:
+                print('Not enough not data!')
+                continue
+            
+            x_handler = self.new_influencers
+            for user in x_handler:
+                handler = user["twitterName"]
+                verified_user = await self.verify_user_by_twitter_handle(handler)
+                if verified_user:
+                    print(f"User {handler} is verified!")
+                else:
+                    print(f"User {handler} is not verified or does not exist.")
+            
+            await asyncio.sleep(60)  # Sleep for 60 seconds before the next verification run
 
     async def verify_user_by_twitter_handle(self, handle): 
         fields = "created_at,description"
