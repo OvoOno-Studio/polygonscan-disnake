@@ -56,15 +56,15 @@ class Friend(commands.Cog):
                 for tx in block['transactions']:
                     tx_to = tx['to']
                     tx_value = int(tx['value'])
-
+                    tx_from = tx['from']
                     # Check the destination address and value of the transaction
                     if (
                         tx_to.lower() == self.wallet_address.lower()
                         and tx_value == 0
                     ):
-                        await self.fetch_user_by_wallet(tx['from'])
+                        await self.fetch_user_by_wallet(tx_from)
 
-                await asyncio.sleep(10)
+                await asyncio.sleep(30)
             except Exception as e:
                 print(f"Error checking transactions: {e}")
 
