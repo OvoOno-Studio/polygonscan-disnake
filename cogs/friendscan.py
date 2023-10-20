@@ -118,18 +118,18 @@ class Friend(commands.Cog):
             
             await asyncio.sleep(10)  # Sleep for 60 seconds before the next verification run
 
-    async def verify_user_by_twitter_handle(self, handle): 
-        fields = "created_at,description"
+    async def verify_user_by_twitter_handle(self, handle):  
         endpoint = f"users/lookup.json?screen_name={urllib.parse.quote(handle)}" 
         url = f"https://api.twitter.com/1.1/{endpoint}" 
         headers = {
             'Authorization': f'Bearer {twitter_bearer}',
+            'User-Agent': 'PScanner/1.0.1',
             'Content-Type': 'application/json',
         }
-
+        print(headers)
         async with self.session.get(url, headers=headers) as response:
             if response.status != 200:
-                print(f"Failed to connect to Twitter API, status code: {response.status}")
+                print(f"Failed to connect to Twitter API, status code: {response.status}, response: {await response.text()}")
                 return None
 
             json_data = await response.json()
