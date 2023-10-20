@@ -18,7 +18,7 @@ class Bot(commands.Bot):
             if file.endswith('.py') and file != '__init__.py':
                 try:
                     self.load_extension(f"cogs.{file[:-3]}")  
-                    print(f"{file[:-3]} Loaded successfully.")
+                    print(f"{file[:-3]}.cog loaded successfully!")
                 except:
                     print(f"Unable to load {file[:-3]}.")
                     print(traceback.format_exc())

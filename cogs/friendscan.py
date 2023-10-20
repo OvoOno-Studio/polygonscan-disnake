@@ -83,63 +83,62 @@ class Friend(commands.Cog):
             print('Waiting for new blocks for keys_alerts!')
 
             # Poll the filter for new blocks
-            if self.w3.eth.has_filter(new_block_filter.filter_id):
-                for block_hash in new_block_filter.get_new_entries():
-                    block = self.w3.eth.get_block(block_hash, full_transactions=True) 
+            for block_hash in new_block_filter.get_all_entries():
+                block = self.w3.eth.get_block(block_hash, full_transactions=True)
 
-                    for guild in self.bot.guilds:
-                        guild_id = guild.id
-                        wallet_address = get_wallet_address(guild_id)
-                        if wallet_address == 'default_wallet_address':
-                            print('Skipping wallet!')
-                            continue
-                        wallet_address = self.w3.to_checksum_address(wallet_address)
+                for guild in self.bot.guilds:
+                    guild_id = guild.id
+                    wallet_address = get_wallet_address(guild_id)
+                    if wallet_address == 'default_wallet_address':
+                        print('Skipping wallet!')
+                        continue
+                    wallet_address = self.w3.to_checksum_address(wallet_address)
 
-                        for tx in block['transactions']:
-                            # Check if the transaction involves the specific wallet address for the guild
-                            if tx['to'] == wallet_address or tx['from'] == wallet_address:
-                                # Process the transaction
-                                tx_hash = tx['hash'].hex()
-                                print(f'Wallet: {wallet_address} Tx Hash: {tx_hash} ')
+                    for tx in block['transactions']:
+                        # Check if the transaction involves the specific wallet address for the guild
+                        if tx['to'] == wallet_address or tx['from'] == wallet_address:
+                            # Process the transaction
+                            tx_hash = tx['hash'].hex()
+                            print(f'Wallet: {wallet_address} Tx Hash: {tx_hash} ')
 
-                                channel_id = get_price_alert_channel(guild_id)
-                                if channel_id == 'default_price_alert_channel':
-                                    print('Skipping channel!')
-                                    continue
-                                channel = self.bot.get_channel(channel_id)
+                            channel_id = get_price_alert_channel(guild_id)
+                            if channel_id == 'default_price_alert_channel':
+                                print('Skipping channel!')
+                                continue
+                            channel = self.bot.get_channel(channel_id)
 
-                                # Check if you've already alerted for this transaction for this guild
-                                if self.last_alerted_tx.get(guild_id) != tx_hash:
-                                    # Update the last alerted transaction hash for this guild
-                                    self.last_alerted_tx[guild_id] = tx_hash
+                            # Check if you've already alerted for this transaction for this guild
+                            if self.last_alerted_tx.get(guild_id) != tx_hash:
+                                # Update the last alerted transaction hash for this guild
+                                self.last_alerted_tx[guild_id] = tx_hash
 
-                                    tx_from = tx["from"]
-                                    tx_to = tx["to"]
-                                    transaction_url = f"https://basescan.org/tx/{tx_hash}"
+                                tx_from = tx["from"]
+                                tx_to = tx["to"]
+                                transaction_url = f"https://basescan.org/tx/{tx_hash}"
 
-                                    print(f"New key trade for wallet {wallet_address}:")
-                                    print({
-                                        "hash": tx_hash,
-                                        "from": tx_from,
-                                        "to": tx_to
-                                    })
+                                print(f"New key trade for wallet {wallet_address}:")
+                                print({
+                                    "hash": tx_hash,
+                                    "from": tx_from,
+                                    "to": tx_to
+                                })
 
-                                    embed = disnake.Embed(
-                                        title="🚨 Keys trade alert! 🚨",
-                                        description="Incoming or outgoing transaction detected!",
-                                        color=0x9C84EF)
-                                    embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
-                                    embed.add_field(name="🧑 From Address:", value=tx_from, inline=False)
-                                    embed.add_field(name="👉 To Address:", value=tx_to, inline=False)
-                                    embed.add_field(name="🔗 Transaction Hash:", value=f"[{tx_hash}]({transaction_url})", inline=False)
-                                    embed.set_footer(text=f"Powered by OvoOno Studio")
-                                    if channel:
-                                        await channel.send(embed=embed)
-                                    else:
-                                        print(f"Invalid channel for guild_id: {guild_id}")
-                    await asyncio.sleep(1)
-                # Sleep for a short duration before checking again
-                await asyncio.sleep(30)
+                                embed = disnake.Embed(
+                                    title="🚨 Keys trade alert! 🚨",
+                                    description="Incoming or outgoing transaction detected!",
+                                    color=0x9C84EF)
+                                embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
+                                embed.add_field(name="🧑 From Address:", value=tx_from, inline=False)
+                                embed.add_field(name="👉 To Address:", value=tx_to, inline=False)
+                                embed.add_field(name="🔗 Transaction Hash:", value=f"[{tx_hash}]({transaction_url})", inline=False)
+                                embed.set_footer(text=f"Powered by OvoOno Studio")
+                                if channel:
+                                    await channel.send(embed=embed)
+                                else:
+                                    print(f"Invalid channel for guild_id: {guild_id}")
+                await asyncio.sleep(2)
+            # Sleep for a short duration before checking again
+            await asyncio.sleep(30)
         
     @is_donator()
     @commands.slash_command(name="user", description="Get details about a user by address.")
