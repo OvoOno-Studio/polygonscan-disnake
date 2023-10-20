@@ -65,8 +65,8 @@ class Friend(commands.Cog):
             if status_code != 200:
                 print(f"Failed to connect to FT API, status code: {status_code}, message: {response_text}")
                 if status_code == 404 and "Address/User not found." in response_text:
-                    await asyncio.sleep(1)
-                    return  # Skip this wallet and proceed to the next one
+                    await asyncio.sleep(5)
+                    return
                 return None
 
             json_data = await response.json()
@@ -74,9 +74,9 @@ class Friend(commands.Cog):
 
     async def store_user_from_response(self, response):
         print(len(self.new_influencers))
-        if len(self.new_influencers) > 4:
+        if len(self.new_influencers) == 5:
             print('Already full!')
-            await asyncio.sleep(3) 
+            await asyncio.sleep(60) 
             return
         
         user_data = {
@@ -94,16 +94,17 @@ class Friend(commands.Cog):
         self.new_influencers.append(user_data)
 
         # Ensure the list doesn't exceed 100 entries
-        if len(self.new_influencers) > 5:
+        if len(self.new_influencers) == 5:
             self.new_influencers.pop(0)  # Remove the oldest entry
 
     async def verify_x_users(self): 
-        if len(self.new_influencers) < 4:
+        print('Running Twitter verification.')
+        if len(self.new_influencers)  < 5:
             return
         
         x_handler = self.new_influencers
         for user in x_handler:
-            handler = user["twitterUsername"]
+            handler = user["twitterName"]
             verified_user = await self.verify_user_by_twitter_handle(handler)
             if verified_user:
                 print(f"User {handler} is verified!")
@@ -112,7 +113,7 @@ class Friend(commands.Cog):
 
     async def verify_user_by_twitter_handle(self, handle): 
         fields = "created_at,description"
-        endpoint = f"/users/by/username/{handle}"
+        endpoint = f"/users/lookup.json?screen_name={handle}"
         params = {"user.fields": fields}
         url = f"https://api.twitter.com/1.1/{endpoint}"
 
@@ -121,7 +122,7 @@ class Friend(commands.Cog):
             'Content-Type': 'application/json',
         }
 
-        async with self.session.get(url, headers=headers, params=params) as response:
+        async with self.session.get(url, headers=headers) as response:
             if response.status != 200:
                 print(f"Failed to connect to Twitter API, status code: {response.status}")
                 return None
