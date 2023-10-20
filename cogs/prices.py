@@ -10,7 +10,6 @@ class Moni(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.session = aiohttp.ClientSession()
-        self.api_url = "https://api.coingecko.com/api/v3/simple/price?ids=matic-network&vs_currencies=usd&include_24hr_change=true"
         self.polygon_scan_api_url = f"https://api.polygonscan.com/api?module=account&action=tokentx&apikey={APIKey}" 
         self.guild_data = {} 
         self.previous_matic_price = None
@@ -42,7 +41,7 @@ class Moni(commands.Cog):
 
     async def get_coin_data(self):
         try:
-            async with self.session.get("https://api.coingecko.com/api/v3/coins/matic-network") as response:
+            async with self.session.get("https://api.coingecko.com/api/v3/coins/ethereum") as response:
                 if response.status != 200:
                     print(f"Failed to fetch coin data, status code: {response.status}, message: {await response.text()}")
                     return None
@@ -72,8 +71,7 @@ class Moni(commands.Cog):
                 self.previous_matic_price = current_price
                 return
 
-            price_change = (current_price - self.previous_matic_price) / self.previous_matic_price * 100 
-            direction = "up" if price_change >= 0 else "down"
+            price_change = (current_price - self.previous_matic_price) / self.previous_matic_price * 100  
             arrow_emoji = "🟢" if price_change >= 0 else "🔴"
             
             price_high_24h = coin_data['market_data']['high_24h']['usd']
@@ -89,7 +87,7 @@ class Moni(commands.Cog):
                     await channel.send(
                         f".\n\n"
                         f"🚨 **PRICE CHANGE ALERT** 🚨\n\n"
-                        f"💵 **MATIC Price:** ${current_price:.2f} {arrow_emoji} ({abs(price_change):.2f}% change)\n"
+                        f"💵 **ETH Price:** ${current_price:.2f} {arrow_emoji} ({abs(price_change):.2f}% change)\n"
                         f"📈 **24h High:** ${price_high_24h:.2f}\n"
                         f"📉 **24h Low:** ${price_low_24h:.2f}\n"
                         f"💼 **24h Volume:** ${volume_24h:.2f}\n"
@@ -132,7 +130,7 @@ class Moni(commands.Cog):
                     continue
  
                 arrow_emoji = "🟢" if price_change_percent > 0 else "🔴"
-                status_text = f"MATIC: ${price:.2f} {arrow_emoji}({price_change_percent:.2f}%)"
+                status_text = f"ETH: ${price:.2f} {arrow_emoji}({price_change_percent:.2f}%)"
                 await self.bot.change_presence(
                     status=disnake.Status.online,
                     activity=disnake.Activity(
@@ -145,7 +143,7 @@ class Moni(commands.Cog):
                 print(f"Error updating presence: {e}")
                 await asyncio.sleep(1)  # Add delay here
 
-            await asyncio.sleep(30)
+            await asyncio.sleep(600)
 
     async def limited_get(self, url):
         async with self.semaphore:  # Limit the number of concurrent requests
