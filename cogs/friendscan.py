@@ -121,9 +121,7 @@ class Friend(commands.Cog):
     async def verify_user_by_twitter_handle(self, handle): 
         fields = "created_at,description"
         endpoint = f"users/lookup.json?screen_name={urllib.parse.quote(handle)}" 
-        url = f"https://api.twitter.com/1.1/{endpoint}"
-        print(url)
-        print(twitter_bearer)
+        url = f"https://api.twitter.com/1.1/{endpoint}" 
         headers = {
             'Authorization': f'Bearer {twitter_bearer}',
             'Content-Type': 'application/json',
