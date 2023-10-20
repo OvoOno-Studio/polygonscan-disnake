@@ -21,30 +21,30 @@ class Friend(commands.Cog):
         self.wallet_address = '0xCF205808Ed36593aa40a44F10c7f7C2F67d4A4d4' 
         self.last_alerted_tx = {}
         self.new_wallets = []
-        # self.bot.loop.create_task(self.check_transactions())
+        self.bot.loop.create_task(self.check_transactions())
         # self.bot.loop.create_task(self.keys_alerts())
-        self.bot.loop.create_task(self.new_influencers())
+        #self.bot.loop.create_task(self.new_influencers())
 
-    async def new_influencers(self):
-        await self.bot.wait_until_ready()
-        while not self.bot.is_closed():
-            try:
-                latest_block = self.w3.eth.block_number
-                start_block = max(0, latest_block - 440)
+    # async def new_influencers(self):
+    #     await self.bot.wait_until_ready()
+    #     while not self.bot.is_closed():
+    #         try:
+    #             latest_block = self.w3.eth.block_number
+    #             start_block = max(0, latest_block - 440)
 
-                for block_num in range(start_block, latest_block + 1):
-                    block = self.w3.eth.get_block(block_num, full_transactions=True)
-                    for tx in block['transactions']:
-                        tx_to = tx.get('to')
-                        tx_value = int(tx['value'])
+    #             for block_num in range(start_block, latest_block + 1):
+    #                 block = self.w3.eth.get_block(block_num, full_transactions=True)
+    #                 for tx in block['transactions']:
+    #                     tx_to = tx.get('to')
+    #                     tx_value = int(tx['value'])
 
-                        # Check if the transaction has a 'to' field and if it matches the desired conditions
-                        if tx_to and tx_to.lower() == self.wallet_address.lower() and tx_value == 0:
-                            self.new_wallets.append(tx['from'])
+    #                     # Check if the transaction has a 'to' field and if it matches the desired conditions
+    #                     if tx_to and tx_to.lower() == self.wallet_address.lower() and tx_value == 0:
+    #                         self.new_wallets.append(tx['from'])
 
-                await asyncio.sleep(600)  # Sleep for 10 minutes
-            except Exception as e:
-                print(f"Error in new_influencers: {e}")
+    #             await asyncio.sleep(600)  # Sleep for 10 minutes
+    #         except Exception as e:
+    #             print(f"Error in new_influencers: {e}")
 
     async def check_transactions(self):
         await self.bot.wait_until_ready()
@@ -62,11 +62,31 @@ class Friend(commands.Cog):
                         tx_to.lower() == self.wallet_address.lower()
                         and tx_value == 0
                     ):
-                        await self.send_embedded_message(tx)
+                        await self.fetch_user_by_wallet(tx['from'])
 
                 await asyncio.sleep(10)
             except Exception as e:
                 print(f"Error checking transactions: {e}")
+
+    @staticmethod
+    async def fetch_user_by_wallet(self, wallet):
+        endpoint = f'/users/{wallet}'
+        url = self.friend_api + endpoint
+        headers = {
+                'Authorization': str(jwt),
+                'Content-Type': 'application/json',
+                'Accept': 'application json',
+                'Referer': 'https://www.friend.tech/'
+            }
+
+        async with self.session.get(url, headers=headers) as response:
+            if response.status != 200:
+                print(f"Failed to connect to API, status code: {response.status}, message: {await response.text()}")
+                return None
+
+            json_data = await response.json()
+            print(json_data)
+
 
     async def send_embedded_message(self, transaction):
         # Create an embedded message with transaction details
