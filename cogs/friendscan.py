@@ -35,10 +35,10 @@ class Friend(commands.Cog):
                 for block_num in range(start_block, latest_block + 1):
                     block = self.w3.eth.get_block(block_num, full_transactions=True)
                     for tx in block['transactions']:
-                        tx_to = tx['to']
+                        tx_to = tx.get('to')
                         tx_value = int(tx['value'])
 
-                        # Check the destination address and value of the transaction
+                        # Check if the transaction has a 'to' field and if it matches the desired conditions
                         if tx_to and tx_to.lower() == self.wallet_address.lower() and tx_value == 0:
                             self.new_wallets.append(tx['from'])
 
