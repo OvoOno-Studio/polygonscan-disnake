@@ -149,7 +149,7 @@ class Friend(commands.Cog):
                     return
 
                 # Check if user follows more than 60% of the number of their followers
-                if user_data['friends_count'] > 0.6 * user_data['followers_count']:
+                if user_data['friends_count'] > 0.8 * user_data['followers_count']:
                     print('User has not positive followers ratio! Skipping...')
                     return
 
@@ -160,27 +160,23 @@ class Friend(commands.Cog):
                     return
 
                 # If none of the checks are true, print the user
-                print(user_data)
+                self.send_embedded_message(user_data)
 
             return user_data
 
-    async def send_embedded_message(self, transaction):
+    async def send_embedded_message(self, user_data):
         # Create an embedded message with transaction details
         embed = disnake.Embed(
-            title="🚨 New user registered! 🚨",
+            title="🚨 New 𝕏 Influencer spotted! 🚨",
             color=0x9C84EF,
-            description="New 'Buy Shares' 💰 transaction method with 0 ETH."
+            description=f"{user_data['screen_name']} joined FriendTech."
         )
-        embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
-        embed.add_field(name="🧑 From Address", value=transaction['from'], inline=False)
-        embed.add_field(name="👉 To Address", value=transaction['to'], inline=False)
-
-        # Format the transaction hash as a clickable link
-        transaction_hash = transaction['hash'].hex()
-        transaction_url = f"https://basescan.org/tx/{transaction_hash}"
-        embed.add_field(name="Transaction Hash", value=f"[{transaction_hash}]({transaction_url})", inline=False)
-
-        embed.add_field(name="Gas Price", value=f"{transaction['gasPrice']} Wei", inline=False) 
+        embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png") 
+        embed.set_thumbnail(url=f"{user_data['profile_image_url']}")
+        embed.add_field(name="Name:", value=f"{user_data['name']}", inline=True)
+        embed.add_field(name="Followers:", value=f"{user_data['followers_count']}", inline=True)
+        embed.add_field(name="Following:", value=f"{user_data['friends_count']}", inline=True)
+        embed.set_image(url=f"{user_data['profile_banner_url']}")
 
         for guild in self.bot.guilds:
             channel_id = get_transaction_channel(guild.id)
