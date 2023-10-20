@@ -8,7 +8,8 @@ import urllib.parse
 from config import get_transaction_channel, get_price_alert_channel, get_wallet_address
 from disnake.ext import commands 
 from disnake import Option, OptionType 
-from config import jwt, API3Key, twitter_bearer, consumer_key, consumer_secret
+from config import jwt, twitter_bearer
+from datetime import datetime, timedelta
 from checks import is_donator
 from web3 import Web3
 
@@ -28,7 +29,7 @@ class Friend(commands.Cog):
 
     async def check_transactions(self):
         await self.bot.wait_until_ready()
-        if len(self.new_influencers) == 5:
+        if len(self.new_influencers) == 20:
             print('No need to check data. Sleeping...')
             await asyncio.sleep(30)
             return
@@ -78,8 +79,9 @@ class Friend(commands.Cog):
 
     async def store_user_from_response(self, response):
         print(len(self.new_influencers))
-        if len(self.new_influencers) == 5:
-            print('Already full!')
+        if len(self.new_influencers) == 20:
+            print('Data full! Printing...')
+            print(self.new_influencers)
             await asyncio.sleep(30) 
             return
         
@@ -87,7 +89,8 @@ class Friend(commands.Cog):
             "address": response.get("address"),
             "twitterUsername": response.get("twitterUsername"),
             "twitterName": response.get("twitterName"),
-            "twitterPfpUrl": response.get("twitterPfpUrl")
+            "twitterPfpUrl": response.get("twitterPfpUrl"),
+            "verified": False
         }
 
         # Check if the user is already in the list
@@ -101,7 +104,7 @@ class Friend(commands.Cog):
         await self.bot.wait_until_ready()  # Ensure the bot is ready before starting the loop
         while not self.bot.is_closed():
             print('Running Twitter verification.')
-            if len(self.new_influencers)  < 3:
+            if len(self.new_influencers)  < 15:
                 print('Not enough not data!')
                 print('Sleeping for 360 seconds')
                 await asyncio.sleep(30)
@@ -110,12 +113,17 @@ class Friend(commands.Cog):
             x_handler = self.new_influencers
             for user in x_handler:
                 handler = user["twitterUsername"]
+                if user['verified'] == True:
+                    print('User already checked!')
+                    continue
                 verified_user = await self.verify_user_by_twitter_handle(handler)
                 if verified_user:
-                    print(f"User {handler} is verified!")
+                    print(f"User {handler} is fetched!")
+                    user["verified"] = True
                 else:
-                    print(f"User {handler} is not verified or does not exist.")
-            
+                    print(f"User {handler} does not exist.")
+                await asyncio.sleep(1.7)
+            self.new_influencers = []
             await asyncio.sleep(10)  # Sleep for 60 seconds before the next verification run
 
     async def verify_user_by_twitter_handle(self, handle):  
@@ -125,17 +133,36 @@ class Friend(commands.Cog):
             'Authorization': f'Bearer {twitter_bearer}',
             'User-Agent': 'PScanner/1.0.1',
             'Content-Type': 'application/json',
-        }
-        print(headers)
+        } 
         async with self.session.get(url, headers=headers) as response:
             if response.status != 200:
                 print(f"Failed to connect to Twitter API, status code: {response.status}, response: {await response.text()}")
                 return None
 
             json_data = await response.json()
-            if "data" in json_data:
-                return json_data["data"]
-            return None
+            user_data = json_data[0] if json_data else None
+
+            if user_data:
+                # Check if user has 0 followers
+                if user_data['followers_count'] == 0:
+                    print('User has not any followers! Skipping...')
+                    return
+
+                # Check if user follows more than 60% of the number of their followers
+                if user_data['friends_count'] > 0.6 * user_data['followers_count']:
+                    print('User has not positive followers ratio! Skipping...')
+                    return
+
+                # Check if the user's account is younger than 3 months
+                account_creation_date = datetime.strptime(user_data['created_at'], '%a %b %d %H:%M:%S +0000 %Y')
+                three_months_ago = datetime.utcnow() - timedelta(days=90)
+                if account_creation_date > three_months_ago:
+                    return
+
+                # If none of the checks are true, print the user
+                print(user_data)
+
+            return user_data
 
     async def send_embedded_message(self, transaction):
         # Create an embedded message with transaction details
