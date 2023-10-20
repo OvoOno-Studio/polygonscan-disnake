@@ -30,7 +30,7 @@ class Friend(commands.Cog):
         while not self.bot.is_closed():
             try:
                 # Fetch the last 440 transactions for the wallet address
-                transactions = self.w3.eth.get_transaction_receipt(self.wallet_address, 'latest', -440)
+                transactions = self.w3.eth.get_transaction_receipt(self.wallet_address, -440)
 
                 for tx in transactions:
                     tx_to = tx['to']
