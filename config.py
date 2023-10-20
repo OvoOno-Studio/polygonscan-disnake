@@ -13,6 +13,7 @@ APIKey = os.getenv('API_KEY')
 API2Key = os.getenv('API2_KEY')
 API3Key = os.getenv('API3_KEY')
 jwt = os.getenv('JWT')
+twitter_bearer = os.getenv('TWITTER_BEARER')
 # Upgrate.Chat API 
 BearerToken = os.getenv('TOKEN')
 ClientID = os.getenv('CLIENT')

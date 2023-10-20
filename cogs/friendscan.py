@@ -7,7 +7,7 @@ import disnake
 from config import get_transaction_channel, get_price_alert_channel, get_wallet_address
 from disnake.ext import commands 
 from disnake import Option, OptionType 
-from config import jwt, API3Key
+from config import jwt, API3Key, twitter_bearer
 from checks import is_donator
 from web3 import Web3
 
@@ -73,8 +73,7 @@ class Friend(commands.Cog):
     async def store_user_from_response(self, response):
         print(len(self.new_influencers))
         if len(self.new_influencers) > 19:
-            print('Already full!')
-            print(self.new_influencers)
+            print('Already full!') 
             return
         
         user_data = {
@@ -94,6 +93,41 @@ class Friend(commands.Cog):
         # Ensure the list doesn't exceed 100 entries
         if len(self.new_influencers) > 20:
             self.new_influencers.pop(0)  # Remove the oldest entry
+
+    async def verify_x_users(self, handler):
+        if handler is None:
+            return
+        if len(self.new_influencers) < 20:
+            return
+        
+        x_handler = handler
+        users = self.new_influencers
+
+        # Verify the user by their Twitter handle
+        verified_user = await self.verify_user_by_twitter_handle(x_handler)
+        if verified_user:
+            print(f"User {x_handler} is verified!")
+        else:
+            print(f"User {x_handler} is not verified or does not exist.")
+
+    async def verify_user_by_twitter_handle(self, handle):
+        endpoint = f"https://api.twitter.com/2/users/by/username/{handle}"
+        url = endpoint 
+        headers = {
+            'Authorization': f"Bearer {twitter_bearer}",
+            'Content-Type': 'application/json',
+        }
+
+        async with self.session.get(url, headers=headers) as response:
+            if response.status != 200:
+                print(f"Failed to connect to Twitter API, status code: {response.status}")
+                return None
+
+            json_data = await response.json()
+            if "data" in json_data:
+                return json_data["data"]
+            return None
+
 
     async def send_embedded_message(self, transaction):
         # Create an embedded message with transaction details
