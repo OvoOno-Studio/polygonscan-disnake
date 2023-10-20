@@ -42,7 +42,7 @@ class Friend(commands.Cog):
                     ):
                         await self.fetch_user_by_wallet(tx_from)
 
-                await asyncio.sleep(5)
+                await asyncio.sleep(10)
             except Exception as e:
                 print(f"Error checking transactions: {e}")
 
@@ -70,6 +70,7 @@ class Friend(commands.Cog):
             await self.store_user_from_response(json_data)
 
     async def store_user_from_response(self, response):
+        print(len(self.new_influencers))
         if len(self.new_influencers) > 99:
             print('Already full!')
             print(self.new_influencers)
