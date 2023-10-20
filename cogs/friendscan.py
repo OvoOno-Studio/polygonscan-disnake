@@ -22,6 +22,7 @@ class Friend(commands.Cog):
         self.last_alerted_tx = {}
         self.new_influencers = []
         self.bot.loop.create_task(self.check_transactions())
+        self.bot.loop.create_task(self.verify_x_users())
         # self.bot.loop.create_task(self.keys_alerts())
 
     async def check_transactions(self):
@@ -94,21 +95,20 @@ class Friend(commands.Cog):
         if len(self.new_influencers) > 20:
             self.new_influencers.pop(0)  # Remove the oldest entry
 
-    async def verify_x_users(self, handler):
+    async def verify_x_users(self):
         if handler is None:
             return
         if len(self.new_influencers) < 20:
             return
         
-        x_handler = handler
-        users = self.new_influencers
-
-        # Verify the user by their Twitter handle
-        verified_user = await self.verify_user_by_twitter_handle(x_handler)
-        if verified_user:
-            print(f"User {x_handler} is verified!")
-        else:
-            print(f"User {x_handler} is not verified or does not exist.")
+        x_handler = self.new_influencers
+        for user in x_handler:
+            handler = user["twitterUsername"]
+            verified_user = await self.verify_user_by_twitter_handle(handler)
+            if verified_user:
+                print(f"User {handler} is verified!")
+            else:
+                print(f"User {handler} is not verified or does not exist.")
 
     async def verify_user_by_twitter_handle(self, handle):
         endpoint = f"https://api.twitter.com/2/users/by/username/{handle}"
