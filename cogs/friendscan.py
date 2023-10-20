@@ -22,7 +22,7 @@ class Friend(commands.Cog):
         self.last_alerted_tx = {}
         self.new_wallets = []
         # self.bot.loop.create_task(self.check_transactions())
-        self.bot.loop.create_task(self.keys_alerts())
+        # self.bot.loop.create_task(self.keys_alerts())
         self.bot.loop.create_task(self.new_influencers())
 
     async def new_influencers(self):
