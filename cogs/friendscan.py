@@ -103,6 +103,8 @@ class Friend(commands.Cog):
             print('Running Twitter verification.')
             if len(self.new_influencers)  < 3:
                 print('Not enough not data!')
+                print('Sleeping for 360 seconds')
+                await asyncio.sleep(360)
                 continue
             
             x_handler = self.new_influencers
@@ -114,7 +116,7 @@ class Friend(commands.Cog):
                 else:
                     print(f"User {handler} is not verified or does not exist.")
             
-            await asyncio.sleep(60)  # Sleep for 60 seconds before the next verification run
+            await asyncio.sleep(10)  # Sleep for 60 seconds before the next verification run
 
     async def verify_user_by_twitter_handle(self, handle): 
         fields = "created_at,description"
