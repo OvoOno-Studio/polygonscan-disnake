@@ -29,7 +29,7 @@ class Friend(commands.Cog):
 
     async def check_transactions(self):
         await self.bot.wait_until_ready()
-        if len(self.new_influencers) == 20:
+        if len(self.new_influencers) == 100:
             print('No need to check data. Sleeping...')
             await asyncio.sleep(30)
             return
@@ -68,9 +68,9 @@ class Friend(commands.Cog):
             response_text = await response.text()
 
             if status_code != 200:
-                print(f"Failed to connect to FT API, status code: {status_code}, message: {response_text}")
+                #print(f"Failed to connect to FT API, status code: {status_code}, message: {response_text}")
                 if status_code == 404 and "Address/User not found." in response_text:
-                    await asyncio.sleep(5)
+                    await asyncio.sleep(0.5)
                     return
                 return None
 
@@ -79,7 +79,7 @@ class Friend(commands.Cog):
 
     async def store_user_from_response(self, response):
         print(len(self.new_influencers))
-        if len(self.new_influencers) == 20:
+        if len(self.new_influencers) == 100:
             print('Data full! Printing...')
             print(self.new_influencers)
             await asyncio.sleep(30) 
@@ -104,9 +104,9 @@ class Friend(commands.Cog):
         await self.bot.wait_until_ready()  # Ensure the bot is ready before starting the loop
         while not self.bot.is_closed():
             print('Running Twitter verification.')
-            if len(self.new_influencers)  < 15:
-                print('Not enough not data!')
-                print('Sleeping for 360 seconds')
+            if len(self.new_influencers)  < 50:
+                #print('Not enough not data!')
+                #print('Sleeping for 360 seconds')
                 await asyncio.sleep(30)
                 continue
             
@@ -122,9 +122,9 @@ class Friend(commands.Cog):
                     user["verified"] = True
                 else:
                     print(f"User {handler} does not exist.")
-                await asyncio.sleep(1.7)
+                await asyncio.sleep(.8)
             self.new_influencers = []
-            await asyncio.sleep(10)  # Sleep for 60 seconds before the next verification run
+            await asyncio.sleep(5)  # Sleep for 60 seconds before the next verification run
 
     async def verify_user_by_twitter_handle(self, handle):  
         endpoint = f"users/lookup.json?screen_name={urllib.parse.quote(handle)}" 
@@ -149,14 +149,15 @@ class Friend(commands.Cog):
                     return
 
                 # Check if user follows more than 60% of the number of their followers
-                if user_data['friends_count'] > 0.8 * user_data['followers_count']:
-                    print('User has not positive followers ratio! Skipping...')
-                    return
+                # if user_data['friends_count'] > 0.8 * user_data['followers_count']:
+                #     print('User has not positive followers ratio! Skipping...')
+                #     return
 
                 # Check if the user's account is younger than 3 months
                 account_creation_date = datetime.strptime(user_data['created_at'], '%a %b %d %H:%M:%S +0000 %Y')
                 three_months_ago = datetime.utcnow() - timedelta(days=90)
                 if account_creation_date > three_months_ago:
+                    print('Account too young!')
                     return
 
                 # If none of the checks are true, print the user
