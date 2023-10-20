@@ -160,7 +160,7 @@ class Friend(commands.Cog):
                     return
 
                 # If none of the checks are true, print the user
-                self.send_embedded_message(user_data)
+                await self.send_embedded_message(user_data)
 
             return user_data
 
