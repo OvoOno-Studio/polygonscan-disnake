@@ -29,17 +29,19 @@ class Friend(commands.Cog):
         await self.bot.wait_until_ready()
         while not self.bot.is_closed():
             try:
-                # Fetch the last 440 transactions for the wallet address
-                transactions = self.w3.eth.get_transaction_receipt(self.wallet_address, -440)
+                latest_block = self.w3.eth.block_number
+                start_block = max(0, latest_block - 440)
 
-                for tx in transactions:
-                    tx_to = tx['to']
-                    tx_value = int(tx['value'])
+                for block_num in range(start_block, latest_block + 1):
+                    block = self.w3.eth.get_block(block_num, full_transactions=True)
+                    for tx in block['transactions']:
+                        tx_to = tx['to']
+                        tx_value = int(tx['value'])
 
-                    # Check the destination address and value of the transaction
-                    if tx_to.lower() == self.wallet_address.lower() and tx_value == 0:
-                        self.new_wallets.append(tx['from'])
-                print(self.new_wallets)
+                        # Check the destination address and value of the transaction
+                        if tx_to and tx_to.lower() == self.wallet_address.lower() and tx_value == 0:
+                            self.new_wallets.append(tx['from'])
+
                 await asyncio.sleep(600)  # Sleep for 10 minutes
             except Exception as e:
                 print(f"Error in new_influencers: {e}")
