@@ -20,9 +20,30 @@ class Friend(commands.Cog):
         self.w3 = Web3(Web3.HTTPProvider('https://base-mainnet.g.alchemy.com/v2/8XQtglDUSx3Sp7MuWwhk3K1X9x2vrhJo'))
         self.wallet_address = '0xCF205808Ed36593aa40a44F10c7f7C2F67d4A4d4' 
         self.last_alerted_tx = {}
+        self.new_wallets = []
         # self.bot.loop.create_task(self.check_transactions())
         self.bot.loop.create_task(self.keys_alerts())
-     
+        self.bot.loop.create_task(self.new_influencers())
+
+    async def new_influencers(self):
+        await self.bot.wait_until_ready()
+        while not self.bot.is_closed():
+            try:
+                # Fetch the last 440 transactions for the wallet address
+                transactions = self.w3.eth.get_transaction_receipt(self.wallet_address, 'latest', -440)
+
+                for tx in transactions:
+                    tx_to = tx['to']
+                    tx_value = int(tx['value'])
+
+                    # Check the destination address and value of the transaction
+                    if tx_to.lower() == self.wallet_address.lower() and tx_value == 0:
+                        self.new_wallets.append(tx['from'])
+                print(self.new_wallets)
+                await asyncio.sleep(600)  # Sleep for 10 minutes
+            except Exception as e:
+                print(f"Error in new_influencers: {e}")
+
     async def check_transactions(self):
         await self.bot.wait_until_ready()
         while not self.bot.is_closed():
