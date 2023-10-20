@@ -15,9 +15,9 @@ class Moni(commands.Cog):
         self.previous_matic_price = None
         self.last_known_transaction = None
         self.semaphore = asyncio.Semaphore(4)  
-        self.bot.loop.create_task(self.price_check_and_alert())
+        # self.bot.loop.create_task(self.price_check_and_alert())
         self.bot.loop.create_task(self.update_crypto_presence())
-        self.bot.loop.create_task(self.monitor_wallet_transactions())
+        #self.bot.loop.create_task(self.monitor_wallet_transactions())
 
     @commands.slash_command(name="set_transaction_channel", description="Set the channel for transaction alerts.")
     async def set_transaction_channel(self, ctx, channel: disnake.TextChannel):

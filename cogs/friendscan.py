@@ -42,7 +42,7 @@ class Friend(commands.Cog):
                     ):
                         await self.fetch_user_by_wallet(tx_from)
 
-                await asyncio.sleep(10)
+                await asyncio.sleep(0.5)
             except Exception as e:
                 print(f"Error checking transactions: {e}")
 
@@ -63,6 +63,7 @@ class Friend(commands.Cog):
             if status_code != 200:
                 print(f"Failed to connect to API, status code: {status_code}, message: {response_text}")
                 if status_code == 404 and "Address/User not found." in response_text:
+                    await asyncio.sleep(1)
                     return  # Skip this wallet and proceed to the next one
                 return None
 
@@ -71,7 +72,7 @@ class Friend(commands.Cog):
 
     async def store_user_from_response(self, response):
         print(len(self.new_influencers))
-        if len(self.new_influencers) > 99:
+        if len(self.new_influencers) > 19:
             print('Already full!')
             print(self.new_influencers)
             return
@@ -91,7 +92,7 @@ class Friend(commands.Cog):
         self.new_influencers.append(user_data)
 
         # Ensure the list doesn't exceed 100 entries
-        if len(self.new_influencers) > 100:
+        if len(self.new_influencers) > 20:
             self.new_influencers.pop(0)  # Remove the oldest entry
 
     async def send_embedded_message(self, transaction):

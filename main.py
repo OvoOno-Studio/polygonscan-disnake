@@ -11,9 +11,10 @@ import os, traceback
 
 class Bot(commands.Bot):
     def __init__(self):
-        print("Welcome to the PS Scanner!") 
+        print("Welcome to the PS Scanner!")
+        print("---------------------------------------------------------")
         super().__init__(command_prefix=commands.when_mentioned_or("ps-"), intents=disnake.Intents.all()) 
-        print(f"Loading cogs files..")
+        print("Loading cogs files..")
         for file in os.listdir('./cogs'):
             if file.endswith('.py') and file != '__init__.py':
                 try:
