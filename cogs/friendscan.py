@@ -67,8 +67,7 @@ class Friend(commands.Cog):
                 await asyncio.sleep(30)
             except Exception as e:
                 print(f"Error checking transactions: {e}")
-
-    @staticmethod
+                
     async def fetch_user_by_wallet(self, wallet):
         endpoint = f'/users/{wallet}'
         url = self.friend_api + endpoint
