@@ -95,9 +95,7 @@ class Friend(commands.Cog):
         if len(self.new_influencers) > 20:
             self.new_influencers.pop(0)  # Remove the oldest entry
 
-    async def verify_x_users(self):
-        if handler is None:
-            return
+    async def verify_x_users(self): 
         if len(self.new_influencers) < 20:
             return
         
