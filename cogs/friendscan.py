@@ -5,7 +5,6 @@ import csv
 import io
 import disnake
 import urllib.parse
-from requests_oauthlib import OAuth1Session
 from config import get_transaction_channel, get_price_alert_channel, get_wallet_address
 from disnake.ext import commands 
 from disnake import Option, OptionType 
@@ -121,7 +120,7 @@ class Friend(commands.Cog):
 
     async def verify_user_by_twitter_handle(self, handle): 
         fields = "created_at,description"
-        endpoint = f"/users/lookup.json?screen_name={urllib.parse.quote(handle)}" 
+        endpoint = f"users/lookup.json?screen_name={urllib.parse.quote(handle)}" 
         url = f"https://api.twitter.com/1.1/{endpoint}"
         print(url)
         print(twitter_bearer)
