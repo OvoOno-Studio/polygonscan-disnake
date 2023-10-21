@@ -25,7 +25,7 @@ class Friend(commands.Cog):
         self.new_influencers = []
         self.bot.loop.create_task(self.check_transactions())
         self.bot.loop.create_task(self.verify_x_users())
-        # self.bot.loop.create_task(self.keys_alerts())
+        self.bot.loop.create_task(self.keys_alerts())
 
     async def check_transactions(self):
         await self.bot.wait_until_ready()
@@ -91,6 +91,10 @@ class Friend(commands.Cog):
             "verified": False
         }
 
+        if response.get("holderCount") < 10 and response.get("holdingCount"):
+            print('Not new account..')
+            return 
+
         # Check if the user is already in the list
         if any(user["address"] == user_data["address"] for user in self.new_influencers):
             return
@@ -100,9 +104,8 @@ class Friend(commands.Cog):
 
     async def verify_x_users(self): 
         await self.bot.wait_until_ready()  # Ensure the bot is ready before starting the loop
-        while not self.bot.is_closed():
-            print('Running Twitter verification.')
-            if len(self.new_influencers)  < 44:
+        while not self.bot.is_closed(): 
+            if len(self.new_influencers) < 44:
                 #print('Not enough not data!')
                 #print('Sleeping for 360 seconds')
                 await asyncio.sleep(30)
@@ -122,7 +125,7 @@ class Friend(commands.Cog):
                     print(f"User {handler} does not exist.")
                 await asyncio.sleep(.8)
             self.new_influencers = []
-            await asyncio.sleep(5)  # Sleep for 60 seconds before the next verification run
+            await asyncio.sleep(60)  # Sleep for 60 seconds before the next verification run
 
     async def verify_user_by_twitter_handle(self, handle):  
         endpoint = f"users/lookup.json?screen_name={urllib.parse.quote(handle)}" 
