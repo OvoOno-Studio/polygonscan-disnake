@@ -29,7 +29,7 @@ class Friend(commands.Cog):
 
     async def check_transactions(self):
         await self.bot.wait_until_ready()
-        if len(self.new_influencers) == 33:
+        if len(self.new_influencers) == 44:
             print('No need to check data. Sleeping...')
             await asyncio.sleep(30)
             return
@@ -79,7 +79,7 @@ class Friend(commands.Cog):
 
     async def store_user_from_response(self, response):
         print(len(self.new_influencers))
-        if len(self.new_influencers) == 33:
+        if len(self.new_influencers) == 44:
             print('Data full! Printing...') 
             await asyncio.sleep(30) 
             return
@@ -88,7 +88,6 @@ class Friend(commands.Cog):
             "address": response.get("address"),
             "twitterUsername": response.get("twitterUsername"),
             "twitterName": response.get("twitterName"),
-            "twitterPfpUrl": response.get("twitterPfpUrl"),
             "verified": False
         }
 
@@ -103,7 +102,7 @@ class Friend(commands.Cog):
         await self.bot.wait_until_ready()  # Ensure the bot is ready before starting the loop
         while not self.bot.is_closed():
             print('Running Twitter verification.')
-            if len(self.new_influencers)  < 30:
+            if len(self.new_influencers)  < 44:
                 #print('Not enough not data!')
                 #print('Sleeping for 360 seconds')
                 await asyncio.sleep(30)
@@ -171,12 +170,15 @@ class Friend(commands.Cog):
             color=0x9C84EF,
             description=f"{user_data['description']}"
         )
+        
         embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png") 
         embed.set_thumbnail(url=f"{user_data['profile_image_url']}")
         embed.add_field(name="Name:", value=f"{user_data['name']}", inline=True)
         embed.add_field(name="Followers:", value=f"{user_data['followers_count']}", inline=True)
         embed.add_field(name="Following:", value=f"{user_data['friends_count']}", inline=True)
-        embed.set_image(url=f"{user_data['profile_banner_url']}")
+        banner_url = user_data['profile_banner_url']
+        if banner_url:
+            embed.set_image(url=f"{banner_url}")
 
         for guild in self.bot.guilds:
             channel_id = get_transaction_channel(guild.id)
