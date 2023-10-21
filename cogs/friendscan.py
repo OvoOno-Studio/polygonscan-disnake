@@ -29,7 +29,7 @@ class Friend(commands.Cog):
 
     async def check_transactions(self):
         await self.bot.wait_until_ready()
-        if len(self.new_influencers) == 100:
+        if len(self.new_influencers) == 33:
             print('No need to check data. Sleeping...')
             await asyncio.sleep(30)
             return
@@ -49,7 +49,7 @@ class Friend(commands.Cog):
                     ):
                         await self.fetch_user_by_wallet(tx_from)
 
-                await asyncio.sleep(0.5)
+                await asyncio.sleep(0.8)
             except Exception as e:
                 print(f"Error checking transactions: {e}")
 
@@ -79,7 +79,7 @@ class Friend(commands.Cog):
 
     async def store_user_from_response(self, response):
         print(len(self.new_influencers))
-        if len(self.new_influencers) == 100:
+        if len(self.new_influencers) == 33:
             print('Data full! Printing...')
             print(self.new_influencers)
             await asyncio.sleep(30) 
@@ -104,7 +104,7 @@ class Friend(commands.Cog):
         await self.bot.wait_until_ready()  # Ensure the bot is ready before starting the loop
         while not self.bot.is_closed():
             print('Running Twitter verification.')
-            if len(self.new_influencers)  < 50:
+            if len(self.new_influencers)  < 32:
                 #print('Not enough not data!')
                 #print('Sleeping for 360 seconds')
                 await asyncio.sleep(30)
