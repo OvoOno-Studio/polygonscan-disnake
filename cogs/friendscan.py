@@ -221,7 +221,7 @@ class Friend(commands.Cog):
 
                         for guild in self.bot.guilds:
                             guild_id = guild.id
-                            wallet_address = self.get_wallet_address(guild_id)  # Assuming this is a method of the class
+                            wallet_address = get_wallet_address(guild_id)  # Assuming this is a method of the class
 
                             if wallet_address == 'default_wallet_address':
                                 continue
