@@ -177,8 +177,8 @@ class Friend(commands.Cog):
         embed.add_field(name="Followers:", value=f"{user_data['followers_count']}", inline=True)
         embed.add_field(name="Following:", value=f"{user_data['friends_count']}", inline=True)
         banner_url = user_data['profile_banner_url']
-        if banner_url:
-            embed.set_image(url=f"{banner_url}")
+        # if banner_url:
+        #     embed.set_image(url=f"{banner_url}")
 
         for guild in self.bot.guilds:
             channel_id = get_transaction_channel(guild.id)
