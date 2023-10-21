@@ -170,13 +170,15 @@ class Friend(commands.Cog):
             color=0x9C84EF,
             description=f"{user_data['description']}"
         )
-        
+        friend_url = f'https://friend.tech/{user_data["screen_name"]}'
         embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png") 
         embed.set_thumbnail(url=f"{user_data['profile_image_url']}")
-        embed.add_field(name="Name:", value=f"{user_data['name']}", inline=True)
+        embed.add_field(name="Name:", value=f"{[{user_data['name']}]({friend_url})}", inline=True)
         embed.add_field(name="Followers:", value=f"{user_data['followers_count']}", inline=True)
         embed.add_field(name="Following:", value=f"{user_data['friends_count']}", inline=True)
         banner_url = user_data['profile_banner_url']
+        print('Banner is:')
+        print(banner_url)
         # if banner_url:
         #     embed.set_image(url=f"{banner_url}")
 
@@ -219,7 +221,7 @@ class Friend(commands.Cog):
                         if tx['to'] == wallet_address or tx['from'] == wallet_address:
                             # Process the transaction
                             tx_hash = tx['hash'].hex()
-                            print(f'Wallet: {wallet_address} Tx Hash: {tx_hash} ')
+                            # print(f'Wallet: {wallet_address} Tx Hash: {tx_hash} ')
 
                             channel_id = get_price_alert_channel(guild_id)
                             if channel_id == 'default_price_alert_channel':
@@ -237,8 +239,8 @@ class Friend(commands.Cog):
                                 transaction_url = f"https://basescan.org/tx/{tx_hash}" 
 
                                 embed = disnake.Embed(
-                                    title="🚨 Keys trade alert! 🚨",
-                                    description="Incoming or outgoing transaction detected!",
+                                    title=" Keys trade alert! 🚨",
+                                    description="Incoming transaction for: ",
                                     color=0x9C84EF)
                                 embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
                                 embed.add_field(name="🧑 From Address:", value=tx_from, inline=False)
