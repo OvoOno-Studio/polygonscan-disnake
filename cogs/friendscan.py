@@ -80,8 +80,7 @@ class Friend(commands.Cog):
     async def store_user_from_response(self, response):
         print(len(self.new_influencers))
         if len(self.new_influencers) == 33:
-            print('Data full! Printing...')
-            print(self.new_influencers)
+            print('Data full! Printing...') 
             await asyncio.sleep(30) 
             return
         
@@ -104,7 +103,7 @@ class Friend(commands.Cog):
         await self.bot.wait_until_ready()  # Ensure the bot is ready before starting the loop
         while not self.bot.is_closed():
             print('Running Twitter verification.')
-            if len(self.new_influencers)  < 32:
+            if len(self.new_influencers)  < 30:
                 #print('Not enough not data!')
                 #print('Sleeping for 360 seconds')
                 await asyncio.sleep(30)
@@ -168,9 +167,9 @@ class Friend(commands.Cog):
     async def send_embedded_message(self, user_data):
         # Create an embedded message with transaction details
         embed = disnake.Embed(
-            title="🚨 New 𝕏 Influencer spotted! 🚨",
+            title="New 𝕏 Influencer spotted! 🚨",
             color=0x9C84EF,
-            description=f"{user_data['screen_name']} joined FriendTech."
+            description=f"{user_data['description']}"
         )
         embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png") 
         embed.set_thumbnail(url=f"{user_data['profile_image_url']}")
