@@ -88,10 +88,12 @@ class Friend(commands.Cog):
             "address": response.get("address"),
             "twitterUsername": response.get("twitterUsername"),
             "twitterName": response.get("twitterName"),
+            "holderCount": response.get("holderCount"),
+            "holdingCount": response.get("holdingCount"),
             "verified": False
         }
 
-        if response.get("holderCount") < 10 and response.get("holdingCount"):
+        if response.get("holderCount") > 10 and response.get("holdingCount") > 10:
             print('Not new account..')
             return 
 
@@ -176,10 +178,10 @@ class Friend(commands.Cog):
         friend_url = f'https://friend.tech/{user_data["screen_name"]}'
         embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png") 
         embed.set_thumbnail(url=f"{user_data['profile_image_url']}")
-        embed.add_field(name="Name:", value=f"[{user_data['name']}]({friend_url})", inline=True)
-        embed.add_field(name="Followers:", value=f"{user_data['followers_count']}", inline=True)
-        embed.add_field(name="Following:", value=f"{user_data['friends_count']}", inline=True)
-        banner_url = user_data['profile_banner_url']
+        embed.add_field(name="𝕏 Handler:", value=f"[{user_data['screen_name']}]({friend_url})", inline=True)
+        embed.add_field(name="𝕏 Name:", value=f"{user_data['name']}", inline=True)
+        embed.add_field(name="Followers:", value=f"{user_data['followers_count']}", inline=True) 
+
         # print('Banner is:')
         # print(banner_url)
         # if banner_url:
