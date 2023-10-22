@@ -13,6 +13,10 @@ class BaseCog(commands.Cog):
         elif isinstance(error, commands.MissingPermissions):
             await ctx.send("**You dont have all the requirements or permissions for using this command :angry:**")
 
+    @commands.Cog.listener()
+    async def on_slash_command_error(self, ctx, error):
+        print(f"Slash command error: {error}")
+
     @commands.command()
     async def ping(self, ctx):
         await ctx.send (f"📶 {round(self.bot.latency * 1000)}ms") 
