@@ -27,16 +27,19 @@ class Moni(commands.Cog):
 
     @commands.slash_command(name="set_price_alert_channel", description="Set the channel for price alerts.")
     async def set_price_alert_channel(self, ctx, channel: disnake.TextChannel):
+        await ctx.response.defer()
         set_price_alert_channel(ctx.guild.id, channel.id)
         await ctx.response.send_message(f"Price alert channel has been set to {channel.mention}")
 
     @commands.slash_command(name="set_wallet_address", description="Set the wallet address for monitoring incoming transactions.")
     async def set_wallet_address(self, ctx, address: str):
+        await ctx.response.defer()
         set_wallet_address(ctx.guild.id, address)
         await ctx.response.send_message(f"Wallet address has been set to `{address}`")
 
     @commands.slash_command(name="set_moni_token", description="Set the ERC20 Token for monitoring.")
     async def set_moni_token(self, ctx, token: str):
+        await ctx.response.defer()
         set_moni_token(ctx.guild.id, token)
         await ctx.response.send_message(f"Token for monitoring has been set to `{token}`")
 

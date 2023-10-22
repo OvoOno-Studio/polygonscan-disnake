@@ -5,7 +5,7 @@ import csv
 import io
 import disnake
 import urllib.parse
-from config import get_transaction_channel, get_price_alert_channel, get_wallet_address
+from config import get_price_alert_channel, get_wallet_address
 from disnake.ext import commands 
 from disnake import Option, OptionType 
 from config import jwt, twitter_bearer
@@ -25,7 +25,7 @@ class Friend(commands.Cog):
         self.new_influencers = []
         self.bot.loop.create_task(self.check_transactions())
         self.bot.loop.create_task(self.verify_x_users())
-        # self.bot.loop.create_task(self.keys_alerts())
+        self.bot.loop.create_task(self.keys_alerts())
 
     async def check_transactions(self):
         await self.bot.wait_until_ready()
@@ -189,7 +189,7 @@ class Friend(commands.Cog):
         #     embed.set_image(url=f"{banner_url}")
 
         for guild in self.bot.guilds:
-            channel_id = get_transaction_channel(guild.id)
+            channel_id =(guild.id)
             channel = self.bot.get_channel(channel_id)
             
             if channel is not None:
