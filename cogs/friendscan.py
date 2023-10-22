@@ -180,6 +180,7 @@ class Friend(commands.Cog):
         embed.add_field(name="𝕏 Handler:", value=f"[{user_data['screen_name']}]({friend_url})", inline=True)
         embed.add_field(name="𝕏 Name:", value=f"{user_data['name']}", inline=True)
         embed.add_field(name="Followers:", value=f"{user_data['followers_count']}", inline=True) 
+        embed.set_footer(text=f"Powered by OvoOno Studio")
         # if user_data.get('profile_banner_url'):
         #     embed.set_image(url=f"{user_data['profile_banner_url']}")
         # print('Banner is:')
@@ -200,6 +201,30 @@ class Friend(commands.Cog):
     def confirmations(self, tx_hash):
         tx = self.w3.eth.get_transaction(tx_hash)
         return self.w3.eth.block_number - tx.blockNumber
+    
+    async def get_user_pfpurl(self, address):
+        endpoint = f'/users/{address}'
+        url = self.friend_api + endpoint
+        headers = {
+                'Authorization': str(jwt),
+                'Content-Type': 'application/json',
+                'Accept': 'application json',
+                'Referer': 'https://www.friend.tech/'
+            }
+
+        async with self.session.get(url, headers=headers) as response:
+            status_code = response.status
+            response_text = await response.text()
+
+            if status_code != 200:
+                #print(f"Failed to connect to FT API, status code: {status_code}, message: {response_text}")
+                if status_code == 404 and "Address/User not found." in response_text:
+                    await asyncio.sleep(.5)
+                    return
+                return None
+
+            json_data = await response.json()
+            return json_data['twitterPfpUrl']
 
     async def keys_alerts(self):  
         await self.bot.wait_until_ready()
@@ -230,7 +255,6 @@ class Friend(commands.Cog):
                                 continue
 
                             wallet_address = self.w3.to_checksum_address(wallet_address)
-                            
                             if tx.to.lower() == wallet_address.lower() or tx['from'].lower() == wallet_address.lower(): 
                                 if tx.to.lower() == wallet_address.lower():
                                     # This is an incoming transaction
@@ -244,32 +268,32 @@ class Friend(commands.Cog):
                                 if channel_id == 'default_price_alert_channel':
                                     continue
 
-                                channel = self.bot.get_channel(channel_id)
-
+                                channel = self.bot.get_channel(channel_id) 
+                                twitter_profile_url = self.get_user_pfpurl(wallet_address)
                                 if self.last_alerted_tx.get(guild_id) != tx_hash:
                                     self.last_alerted_tx[guild_id] = tx_hash
 
                                     tx_from = tx["from"]
                                     tx_to = tx["to"]
                                     transaction_url = f"https://basescan.org/tx/{tx_hash}" 
-
+                                    
                                     embed = disnake.Embed(
                                         title="Keys trade alert! 🚨",
                                         description=f"{description}",
                                         color=0x9C84EF)
+                                    embed.set_thumbnail(url=f"{twitter_profile_url}")
                                     embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
-                                    embed.add_field(name="🧑 From Address:", value=tx_from, inline=False)
-                                    embed.add_field(name="👉 To Address:", value=tx_to, inline=False)
+                                    embed.add_field(name="🧑 From Address:", value=f'[{tx_from}]("https://basescan.org/address/{tx_from}")', inline=False)
+                                    embed.add_field(name="👉 To Address:", value=f'[{tx_to}]("https://basescan.org/address/{tx_to}")', inline=False)
                                     embed.add_field(name="🔗 Transaction Hash:", value=f"[{tx_hash}]({transaction_url})", inline=False)
                                     embed.set_footer(text=f"Powered by OvoOno Studio")
 
                                     if channel:
                                         await channel.send(embed=embed)
                                     else:
-                                        print(f"Invalid channel for guild_id: {guild_id}")
-
-                        # Mark this transaction as processed
+                                        print(f"Invalid channel for guild_id: {guild_id}") 
                         processed_txs.add(tx_hash)
+                        await asyncio.sleep(2.2)
 
             except Exception as e:
                 print(f"Error while fetching new blocks: {e}")
