@@ -49,7 +49,7 @@ class Friend(commands.Cog):
                     ):
                         await self.fetch_user_by_wallet(tx_from)
 
-                await asyncio.sleep(0.8)
+                await asyncio.sleep(1)
             except Exception as e:
                 print(f"Error checking transactions: {e}")
 
@@ -70,7 +70,7 @@ class Friend(commands.Cog):
             if status_code != 200:
                 #print(f"Failed to connect to FT API, status code: {status_code}, message: {response_text}")
                 if status_code == 404 and "Address/User not found." in response_text:
-                    await asyncio.sleep(0.5)
+                    await asyncio.sleep(.5)
                     return
                 return None
 
@@ -110,7 +110,7 @@ class Friend(commands.Cog):
             if len(self.new_influencers) < 21:
                 #print('Not enough not data!')
                 #print('Sleeping for 360 seconds')
-                await asyncio.sleep(30)
+                await asyncio.sleep(60)
                 continue
             
             x_handler = self.new_influencers
@@ -209,7 +209,8 @@ class Friend(commands.Cog):
 
         while not self.bot.is_closed():
             try:
-                block = self.w3.eth.get_block('latest')
+                latest_block = self.w3.eth.block_number
+                block = self.w3.eth.get_block(latest_block, full_transactions=True)
                 print("Searching in block " + str(block.number))
 
                 if block and block.transactions:
@@ -223,7 +224,7 @@ class Friend(commands.Cog):
 
                             if wallet_address == 'default_wallet_address':
                                 continue
-
+                                    
                             wallet_address = self.w3.to_checksum_address(wallet_address)
                             
                             if tx.to == wallet_address:
