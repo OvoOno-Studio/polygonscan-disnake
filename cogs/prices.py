@@ -24,12 +24,14 @@ class Moni(commands.Cog):
         await ctx.response.defer()
         set_transaction_channel(ctx.guild.id, channel.id)
         await ctx.response.send_message(f"Transaction channel has been set to {channel.mention}")
+        await ctx.edit_original_message(embed='PScanner is thinking..')
 
     @commands.slash_command(name="set_price_alert_channel", description="Set the channel for price alerts.")
     async def set_price_alert_channel(self, ctx, channel: disnake.TextChannel):
         await ctx.response.defer()
         set_price_alert_channel(ctx.guild.id, channel.id)
         await ctx.response.send_message(f"Price alert channel has been set to {channel.mention}")
+        await ctx.edit_original_message(embed='PScanner is thinking..')
 
     @commands.slash_command(name="set_wallet_address", description="Set the wallet address for monitoring incoming transactions.")
     async def set_wallet_address(self, ctx, address: str):

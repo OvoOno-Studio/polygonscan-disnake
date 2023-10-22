@@ -29,7 +29,7 @@ class Friend(commands.Cog):
 
     async def check_transactions(self):
         await self.bot.wait_until_ready()
-        if len(self.new_influencers) == 44:
+        if len(self.new_influencers) == 22:
             print('No need to check data. Sleeping...')
             await asyncio.sleep(30)
             return
@@ -79,8 +79,8 @@ class Friend(commands.Cog):
 
     async def store_user_from_response(self, response):
         print(len(self.new_influencers))
-        if len(self.new_influencers) == 44:
-            print('Data full! Printing...') 
+        if len(self.new_influencers) == 22:
+            print('Data full!') 
             await asyncio.sleep(30) 
             return
         
@@ -107,7 +107,7 @@ class Friend(commands.Cog):
     async def verify_x_users(self): 
         await self.bot.wait_until_ready()  # Ensure the bot is ready before starting the loop
         while not self.bot.is_closed(): 
-            if len(self.new_influencers) < 44:
+            if len(self.new_influencers) < 21:
                 #print('Not enough not data!')
                 #print('Sleeping for 360 seconds')
                 await asyncio.sleep(30)
@@ -269,6 +269,7 @@ class Friend(commands.Cog):
     @is_donator()
     @commands.slash_command(name="user", description="Get details about a user by address.")
     async def user_by_address(self, ctx, user_wallet):
+        await ctx.response.defer()
         if user_wallet is None:
             await ctx.send("Please provide a valid user_wallet.")
             return
@@ -314,6 +315,7 @@ class Friend(commands.Cog):
         except Exception as e:
             print(f"Error in user_by_address: {e}")
             await ctx.send('User not found!')
+        await ctx.edit_original_message(embed='PScanner is thinking..')
         
     @is_donator()
     @commands.slash_command(name="holdings_activity", description="Gets a history of trades for a user.")
@@ -506,6 +508,7 @@ class Friend(commands.Cog):
             )
         ])
     async def lists(self, ctx, filters): 
+        await ctx.response.defer()
         if filters is None:
             return
         
@@ -535,6 +538,9 @@ class Friend(commands.Cog):
         except Exception as e:
             print(f"Error in lists: {e}")
             return None
+        
+        # Once done, edit the deferred response
+        await ctx.edit_original_message(embed='PScanner is thinking..')
     
     @staticmethod
     async def send_csv_as_dm(ctx, json_data, filename):
