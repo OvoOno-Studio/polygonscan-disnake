@@ -181,7 +181,8 @@ class Friend(commands.Cog):
         embed.add_field(name="𝕏 Handler:", value=f"[{user_data['screen_name']}]({friend_url})", inline=True)
         embed.add_field(name="𝕏 Name:", value=f"{user_data['name']}", inline=True)
         embed.add_field(name="Followers:", value=f"{user_data['followers_count']}", inline=True) 
-
+        if user_data['profile_banner_url']:
+            embed.set_image(url=f"{user_data['profile_banner_url']}")
         # print('Banner is:')
         # print(banner_url)
         # if banner_url:
