@@ -197,7 +197,11 @@ class Friend(commands.Cog):
                     await channel.send(embed=embed)
                 except Exception as e:
                     print(f"Error sending message: {e}")
-                
+                    
+    def confirmations(self, tx_hash):
+        tx = self.w3.eth.get_transaction(tx_hash)
+        return self.w3.eth.block_number - tx.blockNumber
+
     async def keys_alerts(self):  
         await self.bot.wait_until_ready()
 
@@ -205,22 +209,13 @@ class Friend(commands.Cog):
 
         while not self.bot.is_closed():
             try:
-                new_block_filter = self.w3.eth.filter('latest')
-                new_block_entries = new_block_filter.get_new_entries()
+                block = self.w3.eth.get_block('latest')
+                print("Searching in block " + str(block.number))
 
-                if not new_block_entries:
-                    new_block_filter = self.w3.eth.filter('latest')
-                    new_block_entries = new_block_filter.get_new_entries()
-
-                for block_hash in new_block_entries:
-                    block = self.w3.eth.get_block(block_hash, full_transactions=True)
-
-                    for tx in block['transactions']:
-                        tx_hash = tx['hash'].hex()
-
-                        # Skip if this transaction has been processed
-                        if tx_hash in processed_txs:
-                            continue
+                if block and block.transactions:
+                    for transaction in block.transactions:
+                        tx_hash = transaction.hex()  # the hashes are stored in a hexBytes format
+                        tx = self.w3.eth.get_transaction(tx_hash)
 
                         for guild in self.bot.guilds:
                             guild_id = guild.id
@@ -231,8 +226,9 @@ class Friend(commands.Cog):
 
                             wallet_address = self.w3.to_checksum_address(wallet_address)
 
-                            if tx['to'] == wallet_address or tx['from'] == wallet_address:
-                                channel_id = self.get_price_alert_channel(guild_id)  # Assuming this is a method of the class
+                            if tx.to == wallet_address and tx.value == 0:
+                                print(f"Transaction found in block {block.number} for guild {guild_id} with {self.confirmations(tx_hash)} confirmations.")
+                                channel_id = get_price_alert_channel(guild_id) 
 
                                 if channel_id == 'default_price_alert_channel':
                                     continue
@@ -248,7 +244,7 @@ class Friend(commands.Cog):
 
                                     embed = disnake.Embed(
                                         title="Keys trade alert! 🚨",
-                                        description="Incoming transaction for: ",
+                                        description=f"Incoming transaction for: {self.w3.fromWei(tx['value'], 'ether')} ETH",
                                         color=0x9C84EF)
                                     embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
                                     embed.add_field(name="🧑 From Address:", value=tx_from, inline=False)
