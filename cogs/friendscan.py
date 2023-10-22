@@ -210,11 +210,17 @@ class Friend(commands.Cog):
             try:
                 latest_block = self.w3.eth.block_number
                 block = self.w3.eth.get_block(latest_block, full_transactions=True)
-                print("Searching in block " + str(block.number))
+                print(f"Searching in block {block.number} with {len(block.transactions)} transactions")
 
                 if block and block.transactions:
                     for transaction in block.transactions:
                         tx_hash = transaction['hash'].hex()
+
+                        # Check if this transaction has already been processed
+                        if tx_hash in processed_txs:
+                            print(f"Transaction {tx_hash} already processed. Skipping.")
+                            continue
+
                         tx = self.w3.eth.get_transaction(tx_hash)
 
                         for guild in self.bot.guilds:
@@ -225,8 +231,7 @@ class Friend(commands.Cog):
 
                             wallet_address = self.w3.to_checksum_address(wallet_address)
                             
-                            if tx.to.lower() == wallet_address.lower() or tx['from'].lower() == wallet_address.lower():
-                                # ... handle the transaction ...
+                            if tx.to.lower() == wallet_address.lower() or tx['from'].lower() == wallet_address.lower(): 
                                 if tx.to.lower() == wallet_address.lower():
                                     # This is an incoming transaction
                                     description = f"Incoming transaction for: {self.w3.fromWei(tx['value'], 'ether')} ETH"
@@ -270,7 +275,7 @@ class Friend(commands.Cog):
                 print(f"Error while fetching new blocks: {e}")
 
             # Sleep for a duration based on Ethereum's average block time (around 15 seconds)
-            await asyncio.sleep(15)
+            await asyncio.sleep(7)
         
     @is_donator()
     @commands.slash_command(name="user", description="Get details about a user by address.")
