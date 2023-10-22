@@ -219,14 +219,14 @@ class Friend(commands.Cog):
 
                         for guild in self.bot.guilds:
                             guild_id = guild.id
-                            wallet_address = get_wallet_address(guild_id)  # Assuming this is a method of the class
+                            wallet_address = get_wallet_address(guild_id) 
 
                             if wallet_address == 'default_wallet_address':
                                 continue
 
                             wallet_address = self.w3.to_checksum_address(wallet_address)
                             
-                            if tx.to == wallet_address or tx['from'] == wallet_address:
+                            if tx.to == wallet_address:
                                 print(f"Transaction found in block {block.number} for guild {guild_id} with {self.confirmations(tx_hash)} confirmations.")
                                 channel_id = get_price_alert_channel(guild_id) 
 
