@@ -276,15 +276,15 @@ class Friend(commands.Cog):
                                     tx_from = tx["from"]
                                     tx_to = tx["to"]
                                     transaction_url = f"https://basescan.org/tx/{tx_hash}" 
-                                    
+                                    address_url = f"https://basescan.org/address/"
                                     embed = disnake.Embed(
                                         title="Keys trade alert! 🚨",
                                         description=f"{description}",
                                         color=0x9C84EF)
                                     embed.set_thumbnail(url=f"{twitter_profile_url}")
                                     embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
-                                    embed.add_field(name="🧑 From Address:", value=f'[{tx_from}]("https://basescan.org/address/{tx_from}")', inline=False)
-                                    embed.add_field(name="👉 To Address:", value=f'[{tx_to}]("https://basescan.org/address/{tx_to}")', inline=False)
+                                    embed.add_field(name="🧑 From Address:", value=f'[{tx_from}]({address_url}{tx_from}")', inline=False)
+                                    embed.add_field(name="👉 To Address:", value=f'[{tx_to}]({address_url}{tx_to}")', inline=False)
                                     embed.add_field(name="🔗 Transaction Hash:", value=f"[{tx_hash}]({transaction_url})", inline=False)
                                     embed.set_footer(text=f"Powered by OvoOno Studio")
 
