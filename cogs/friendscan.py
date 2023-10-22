@@ -22,6 +22,7 @@ class Friend(commands.Cog):
         self.wallet_address = '0xCF205808Ed36593aa40a44F10c7f7C2F67d4A4d4' 
         self.last_alerted_tx = {}
         self.new_influencers = []
+        self.last_processed_block = None
         self.bot.loop.create_task(self.check_transactions())
         self.bot.loop.create_task(self.verify_x_users())
         self.bot.loop.create_task(self.keys_alerts())
@@ -233,8 +234,12 @@ class Friend(commands.Cog):
 
         while not self.bot.is_closed():
             try:
-                latest_block = self.w3.eth.block_number
-                block = self.w3.eth.get_block(latest_block, full_transactions=True)
+                # latest_block = self.w3.eth.block_number
+                # block = self.w3.eth.get_block(latest_block, full_transactions=True)
+                if self.last_processed_block is None:
+                    self.last_processed_block = self.w3.eth.block_number
+
+                block = self.w3.eth.get_block(self.last_processed_block + 1, full_transactions=True)
                 print(f"Searching in block {block.number} with {len(block.transactions)} transactions")
 
                 if block and block.transactions:
@@ -295,6 +300,7 @@ class Friend(commands.Cog):
                         processed_txs.add(tx_hash)
                         await asyncio.sleep(2.2)
 
+                self.last_processed_block = block.number
             except Exception as e:
                 print(f"Error while fetching new blocks: {e}")
 
