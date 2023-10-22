@@ -25,7 +25,7 @@ class Friend(commands.Cog):
         self.new_influencers = []
         self.bot.loop.create_task(self.check_transactions())
         self.bot.loop.create_task(self.verify_x_users())
-        self.bot.loop.create_task(self.keys_alerts())
+        # self.bot.loop.create_task(self.keys_alerts())
 
     async def check_transactions(self):
         await self.bot.wait_until_ready()
