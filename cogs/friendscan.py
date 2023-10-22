@@ -269,7 +269,7 @@ class Friend(commands.Cog):
                                     continue
 
                                 channel = self.bot.get_channel(channel_id) 
-                                twitter_profile_url = self.get_user_pfpurl(wallet_address)
+                                twitter_profile_url = await self.get_user_pfpurl(wallet_address)
                                 if self.last_alerted_tx.get(guild_id) != tx_hash:
                                     self.last_alerted_tx[guild_id] = tx_hash
 
