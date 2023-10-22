@@ -94,7 +94,7 @@ class Friend(commands.Cog):
         }
 
         if response.get("holderCount") > 10 and response.get("holdingCount") > 10:
-            print('Not new account..')
+            # print('Not new account..')
             return 
 
         # Check if the user is already in the list
@@ -181,7 +181,7 @@ class Friend(commands.Cog):
         embed.add_field(name="𝕏 Handler:", value=f"[{user_data['screen_name']}]({friend_url})", inline=True)
         embed.add_field(name="𝕏 Name:", value=f"{user_data['name']}", inline=True)
         embed.add_field(name="Followers:", value=f"{user_data['followers_count']}", inline=True) 
-        if user_data['profile_banner_url']:
+        if user_data.get('profile_banner_url'):
             embed.set_image(url=f"{user_data['profile_banner_url']}")
         # print('Banner is:')
         # print(banner_url)
@@ -225,8 +225,8 @@ class Friend(commands.Cog):
                                 continue
 
                             wallet_address = self.w3.to_checksum_address(wallet_address)
-
-                            if tx.to == wallet_address and tx.value == 0:
+                            
+                            if tx.to == wallet_address or tx['from'] == wallet_address:
                                 print(f"Transaction found in block {block.number} for guild {guild_id} with {self.confirmations(tx_hash)} confirmations.")
                                 channel_id = get_price_alert_channel(guild_id) 
 
