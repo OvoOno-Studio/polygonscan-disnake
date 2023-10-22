@@ -14,15 +14,15 @@ from web3 import Web3
 
 class Friend(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot = bot  
+        self.new_influencers = []
+        self.last_alerted_tx = {}
+        self.last_processed_block = None
         self.session = aiohttp.ClientSession()
         self.friend_api = 'https://prod-api.kosetto.com'
         self.basescan_api = 'https://api.basescan.org/api'
         self.w3 = Web3(Web3.HTTPProvider('https://base-mainnet.g.alchemy.com/v2/8XQtglDUSx3Sp7MuWwhk3K1X9x2vrhJo'))
         self.wallet_address = '0xCF205808Ed36593aa40a44F10c7f7C2F67d4A4d4' 
-        self.last_alerted_tx = {}
-        self.new_influencers = []
-        self.last_processed_block = None
         self.bot.loop.create_task(self.check_transactions())
         self.bot.loop.create_task(self.verify_x_users())
         self.bot.loop.create_task(self.keys_alerts())
@@ -298,7 +298,7 @@ class Friend(commands.Cog):
                                     else:
                                         print(f"Invalid channel for guild_id: {guild_id}") 
                         processed_txs.add(tx_hash)
-                        await asyncio.sleep(2.2)
+                        await asyncio.sleep(1.7)
 
                 self.last_processed_block = block.number
             except Exception as e:
