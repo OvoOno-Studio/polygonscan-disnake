@@ -21,6 +21,7 @@ class Moni(commands.Cog):
 
     @commands.slash_command(name="set_transaction_channel", description="Set the channel for transaction alerts.")
     async def set_transaction_channel(self, ctx, channel: disnake.TextChannel):
+        await ctx.response.defer()
         set_transaction_channel(ctx.guild.id, channel.id)
         await ctx.response.send_message(f"Transaction channel has been set to {channel.mention}")
 
