@@ -225,7 +225,14 @@ class Friend(commands.Cog):
 
                             wallet_address = self.w3.to_checksum_address(wallet_address)
                             
-                            if tx.to.lower() == wallet_address.lower():
+                            if tx.to.lower() == wallet_address.lower() or tx['from'].lower() == wallet_address.lower():
+                                # ... handle the transaction ...
+                                if tx.to.lower() == wallet_address.lower():
+                                    # This is an incoming transaction
+                                    description = f"Incoming transaction for: {self.w3.fromWei(tx['value'], 'ether')} ETH"
+                                else:
+                                    # This is an outgoing transaction
+                                    description = f"Outgoing transaction of: {self.w3.fromWei(tx['value'], 'ether')} ETH"
                                 print(f"Transaction found in block {block.number} for guild {guild_id} with {self.confirmations(tx_hash)} confirmations.")
                                 channel_id = get_price_alert_channel(guild_id) 
 
