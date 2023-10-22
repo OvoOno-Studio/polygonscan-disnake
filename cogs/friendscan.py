@@ -22,8 +22,8 @@ class Friend(commands.Cog):
         self.wallet_address = '0xCF205808Ed36593aa40a44F10c7f7C2F67d4A4d4' 
         self.last_alerted_tx = {}
         self.new_influencers = []
-        # self.bot.loop.create_task(self.check_transactions())
-        # self.bot.loop.create_task(self.verify_x_users())
+        self.bot.loop.create_task(self.check_transactions())
+        self.bot.loop.create_task(self.verify_x_users())
         self.bot.loop.create_task(self.keys_alerts())
 
     async def check_transactions(self):
