@@ -189,7 +189,7 @@ class Friend(commands.Cog):
         #     embed.set_image(url=f"{banner_url}")
 
         for guild in self.bot.guilds:
-            channel_id =(guild.id)
+            channel_id = get_price_alert_channel(guild.id)
             channel = self.bot.get_channel(channel_id)
             
             if channel is not None:
