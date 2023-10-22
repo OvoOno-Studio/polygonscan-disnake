@@ -214,7 +214,7 @@ class Friend(commands.Cog):
 
                 if block and block.transactions:
                     for transaction in block.transactions:
-                        tx_hash = transaction.hex()  # the hashes are stored in a hexBytes format
+                        tx_hash = transaction['hash'].hex()
                         tx = self.w3.eth.get_transaction(tx_hash)
 
                         for guild in self.bot.guilds:
