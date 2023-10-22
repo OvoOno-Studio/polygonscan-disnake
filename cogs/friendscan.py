@@ -250,7 +250,7 @@ class Friend(commands.Cog):
 
                                     embed = disnake.Embed(
                                         title="Keys trade alert! 🚨",
-                                        description=f"Incoming transaction for: {self.w3.fromWei(tx['value'], 'ether')} ETH",
+                                        description=f"{description}",
                                         color=0x9C84EF)
                                     embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
                                     embed.add_field(name="🧑 From Address:", value=tx_from, inline=False)
