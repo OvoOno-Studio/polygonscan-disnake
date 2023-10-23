@@ -260,7 +260,7 @@ class Friend(commands.Cog):
                                 continue
 
                             wallet_address = self.w3.to_checksum_address(wallet_address)
-                            if tx.to.lower() == wallet_address.lower() or tx['from'].lower() == wallet_address.lower(): 
+                            if tx.to and wallet_address and tx.to.lower() == wallet_address.lower() or tx['from'] and wallet_address and tx['from'].lower() == wallet_address.lower():
                                 if tx.to.lower() == wallet_address.lower():
                                     # This is an incoming transaction
                                     description = f"Incoming transaction for: {self.w3.from_wei(tx['value'], 'ether')} ETH"
@@ -293,11 +293,11 @@ class Friend(commands.Cog):
                                     embed.add_field(name="🔗 Transaction Hash:", value=f"[{tx_hash}]({transaction_url})", inline=False)
                                     embed.set_footer(text=f"Powered by OvoOno Studio")
 
-                                    if channel:
+                                    if channel: 
+                                        processed_txs.add(tx_hash)
                                         await channel.send(embed=embed)
                                     else:
-                                        print(f"Invalid channel for guild_id: {guild_id}") 
-                        processed_txs.add(tx_hash)
+                                        print(f"Invalid channel for guild_id: {guild_id}")
                         await asyncio.sleep(1.7)
 
                 self.last_processed_block = block.number
