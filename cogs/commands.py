@@ -237,7 +237,6 @@ class Scrape(commands.Cog):
     async def checkTrx(self, ctx: commands.Context, hash: str): 
         author = ctx.author.mention
         api_key = self.key
-        counter = 0
         endpoint = f'https://api.polygonscan.com/api?module=transaction&action=gettxreceiptstatus&txhash={str(hash)}&apikey={str(api_key)}'
         response = requests.get(endpoint)  
         data = json.loads(response.text)
@@ -310,7 +309,7 @@ class Scrape(commands.Cog):
         response = requests.get(endpoint)  
         data = json.loads(response.text)
         author = ctx.author.mention
-        print(f"User - {author} trigger command getTrx for {address} wallet address.")
+        # print(f"User - {author} trigger command getTrx for {address} wallet address.")
         await ctx.send(f"Listing last {offset} internal transactions for **{address}** - sent DM to {author}")
         embed = disnake.Embed(
             title=f"{str(offset)} transactions of {str(address)}",
@@ -403,30 +402,53 @@ class Scrape(commands.Cog):
         await ctx.author.send(message)
 
     """
-    Define abi() - Returns the contract Application Binary Interface ( ABI ) of a verified smart contract. 
+    Define abi() - Returns the contract Application Binary Interface (ABI) of a verified smart contract. 
     """
-    @commands.command()
-    async def abi(self, ctx: commands.Context, address: str):
+    @commands.slash_command(
+        name="abi",
+        description="Returns the contract Application Binary Interface (ABI) of a verified smart contract.",
+        options=[
+            disnake.Option(
+                "address", "Contract address.", 
+                type=disnake.OptionType.string, 
+                required=True
+            ),
+            disnake.Option(
+                name="blockchain",
+                description="Choose Ethereum or Polygon",
+                type=OptionType.string,
+                choices=["ethereum", "polygon"],
+                required=True
+            )
+        ]
+    )
+    async def abi(self, ctx: commands.Context, inter, address: str, blockchain: str):
         key = APIKey
-        url = f"https://api.polygonscan.com/api?module=contract&action=getabi&address={str(address)}&apikey={str(key)}"
+        key2 = API2Key
+
+        if blockchain.lower() == "ethereum":
+            url = f"https://api.etherscan.io/api?module=contract&action=getabi&address={str(address)}&apikey={str(key2)}"
+            blockchain_name = "Ethereum"
+        elif blockchain.lower() == "polygon":
+            url = f"https://api.polygonscan.com/api?module=contract&action=getabi&address={str(address)}&apikey={str(key)}"
+            blockchain_name = "Polygon"
+        else:
+            await inter.response.send_message("Invalid blockchain choice, choose either Ethereum or Polygon")
+            return
+        
         response = requests.get(url)
         data = json.loads(response.text)
 
-        # Parse the 'result' string into a Python object
         abi = json.loads(data['result'])
         pretty_abi = json.dumps(abi, indent=4)
-        
-        # Create a temporary file
         temp_file = f'abi_{address}.json'
 
-        # Write the ABI to the file
         with open(temp_file, 'w') as f:
             f.write(pretty_abi)
 
-        # Send the file in a direct message to the user
         try:
             with open(temp_file, 'rb') as f:
-                await ctx.send(f"Sending ABI JSON  for **{address}** - sent DM to {ctx.author}") 
+                await ctx.send(f"Sending ABI JSON for **{address} on {blockchain_name} blockchain** - sent DM to {ctx.author}") 
                 await ctx.author.send(file=disnake.File(f))
         except Exception as e:
             print(f"An error occurred when trying to send a message: {e}")
