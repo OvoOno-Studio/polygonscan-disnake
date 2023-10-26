@@ -311,10 +311,10 @@ class Scrape(commands.Cog):
                     type=OptionType.string,
                     choices=["ethereum", "polygon"],
                     required=True
-                )
+                ),
                 disnake.Option(
                     name="offset",
-                    description="Choose offset."
+                    description="Choose offset.",
                     type=disnake.OptionType.string,
                     required=True
                 )
