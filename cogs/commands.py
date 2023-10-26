@@ -296,17 +296,43 @@ class Scrape(commands.Cog):
     """
     Define getTrx() - function that will fetch all normal transactions for specific address. 
     """
-    @commands.command()
-    async def getTrx(self, ctx: commands.Context, address: str, offset: str):
+    @commands.slash_command(
+            name="getTrx",
+            description="Fetch all normal transaction for specific address.",
+            options=[
+                disnake.Option(
+                    "address", "Wallet.", 
+                    type=disnake.OptionType.string, 
+                    required=True
+                ),
+                disnake.Option(
+                    name="blockchain",
+                    description="Choose Ethereum or Polygon",
+                    type=OptionType.string,
+                    choices=["ethereum", "polygon"],
+                    required=True
+                )
+            ]
+    )
+    async def getTrx(self, ctx: commands.Context, address: str, blockchain: str, offset: str):
         if(int(offset) > 25):
             await ctx.send(f"Maximum offset must be lower then 25! Aborting the command.")
             return
         
-        author = ctx.author.mention
-        api_key = self.key    
-        counter = 0
-        endpoint = f'https://api.polygonscan.com/api?module=account&action=txlist&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(api_key)}'
-        response = requests.get(endpoint)  
+        key = APIKey
+        key2 = API2Key
+        author = ctx.author.mention 
+        counter = 0 
+        
+        if blockchain.lower() == "ethereum":
+            url = f"https://api.etherscan.io/api?module=account&action=txlist&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(key2)}" 
+        elif blockchain.lower() == "polygon":
+            url = f"https://api.polygonscan.com/api?module=account&action=txlist&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(key)}" 
+        else:
+            await ctx.response.send_message("Invalid blockchain choice, choose either Ethereum or Polygon")
+            return 
+        
+        response = requests.get(url)  
         data = json.loads(response.text)
         author = ctx.author.mention
         # print(f"User - {author} trigger command getTrx for {address} wallet address.")
@@ -399,18 +425,17 @@ class Scrape(commands.Cog):
             description="Returns a contract's deployer address and transaction hash it was created, up to 5 at a time.",
             options=[
                 disnake.Option(
+                    "address", "Contract address.", 
+                    type=disnake.OptionType.string, 
+                    required=True
+                ),
+                disnake.Option(
                     name="blockchain",
                     description="Choose Ethereum or Polygon",
                     type=OptionType.string,
                     choices=["ethereum", "polygon"],
                     required=True
-                ),
-                disnake.Option(
-                    "address", "Contract address.", 
-                    type=disnake.OptionType.string, 
-                    required=True
                 )
-                
             ]
     )
     async def creator(self, ctx, address: str, blockchain: str):
