@@ -338,15 +338,42 @@ class Scrape(commands.Cog):
     """
     Define balance() - get amount in WEI for single address. 
     """
-    @commands.command()
-    async def balance(self, ctx: commands.Context, address: str): 
-        api_key = self.key
-        author = ctx.author.mention
-        endpoint = f'https://api.polygonscan.com/api?module=account&action=balance&address={str(address)}&apikey={str(api_key)}'
-        response = requests.get(endpoint)  
+    @commands.slash_command(
+            name="balance",
+            description="get amount in WEI for wallet",
+            options=[
+                disnake.Option(
+                    "address", "Wallet.", 
+                    type=disnake.OptionType.string, 
+                    required=True
+                ),
+                disnake.Option(
+                    name="blockchain",
+                    description="Choose Ethereum or Polygon",
+                    type=OptionType.string,
+                    choices=["ethereum", "polygon"],
+                    required=True
+                )
+            ]
+    )
+    async def balance(self, inter, ctx, address: str, blockchain: str):
+        await ctx.response.defer() 
+        key = APIKey
+        key2 = API2Key
+
+        if blockchain.lower() == "ethereum":
+            url = f"https://api.etherscan.io/api?module=account&action=balance&address={str(address)}&apikey={str(key2)}" 
+        elif blockchain.lower() == "polygon":
+            url = f"https://api.polygonscan.com/api?module=account&action=balance&address={str(address)}&apikey={str(key)}" 
+        else:
+            await inter.response.send_message("Invalid blockchain choice, choose either Ethereum or Polygon")
+            return
+        
+        author = ctx.author.mention 
+        response = requests.get(url)  
         data = json.loads(response.text) 
-        amount = float(data['result']) / ( 10 ** 18 ) # Convert WEI to MATIC  
-        await ctx.send(f"Sending MATIC balance for **{address}** - sent DM to {author}") 
+        amount = float(data['result']) / ( 10 ** 18 )
+        await ctx.send(f"Sending {blockchain} balance for **{address}** - sent DM to {author}") 
         embed = disnake.Embed(
             title=f"Get balance for {str(address)}",
             description="Return amount in WEI (converted) for single address",
@@ -354,7 +381,7 @@ class Scrape(commands.Cog):
             timestamp=datetime.now()
         ) 
         embed.add_field(
-            name="Amount in MATIC:",
+            name="Amount:",
             value=amount,
             inline=False
         )   
@@ -362,26 +389,47 @@ class Scrape(commands.Cog):
             text=f"Requested by {ctx.author}"
         ) 
 
-        await ctx.author.send(embed=embed) 
-
+        await ctx.author.send(embed=embed)
     
     """
     Define creator() - Returns a contract's deployer address and transaction hash it was created, up to 5 at a time. 
     """    
-    @commands.command()
-    async def creator(self, ctx: commands.Context, *addresses: str):
-        author = ctx.author.mention
-
-        # Concatenate all addresses into a comma-separated string
+    @commands.slash_command(
+            name="creator",
+            description="Returns a contract's deployer address and transaction hash it was created, up to 5 at a time.",
+            options=[
+                disnake.Option(
+                    "address", "Contract address.", 
+                    type=disnake.OptionType.string, 
+                    required=True
+                ),
+                disnake.Option(
+                    name="blockchain",
+                    description="Choose Ethereum or Polygon",
+                    type=OptionType.string,
+                    choices=["ethereum", "polygon"],
+                    required=True
+                )
+            ]
+    )
+    async def creator(self, inter, ctx, *addresses: str, blockchain: str):
+        await ctx.response.defer()
         addresses_str = ','.join(addresses)
+        key = APIKey
+        key2 = API2Key
 
-        # Fetch the contract creation data from the API
-        url = f"https://api.polygonscan.com/api?module=contract&action=getcontractcreation&contractaddresses={addresses_str}&apikey={str(APIKey)}"
+        if blockchain.lower() == "ethereum":
+            url = f"https://api.etherscan.io/api?module=contract&action=getcontractcreation&contractaddresses={addresses_str}&apikey={str(key2)}" 
+        elif blockchain.lower() == "polygon":
+            url = f"https://api.polygonscan.com/api?module=contract&action=getcontractcreation&contractaddresses={addresses_str}&apikey={str(key)}" 
+        else:
+            await inter.response.send_message("Invalid blockchain choice, choose either Ethereum or Polygon")
+            return
+ 
         response = requests.get(url)
         data = json.loads(response.text)
-        results = data['result']
-
-        message = f"**Contract Creator and Creation Tx Hash**\n"
+        results = data['result'] 
+        message = "**Contract Creator and Creation Tx Hash**\n"
 
         # Loop through results to format the message
         for result in results:
@@ -422,7 +470,8 @@ class Scrape(commands.Cog):
             )
         ]
     )
-    async def abi(self, ctx: commands.Context, inter, address: str, blockchain: str):
+    async def abi(self, inter, ctx, address: str, blockchain: str):
+        await ctx.response.defer()
         key = APIKey
         key2 = API2Key
 
@@ -443,12 +492,17 @@ class Scrape(commands.Cog):
         pretty_abi = json.dumps(abi, indent=4)
         temp_file = f'abi_{address}.json'
 
+        embed = Embed(title=f"ABI Verification for {address}")
+        embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
+        embed.add_field(text=f"Sending ABI JSON for **{address} on {blockchain_name} blockchain**")
+        embed.set_footer(text=f"Requested by {ctx.author}")
+
         with open(temp_file, 'w') as f:
             f.write(pretty_abi)
 
         try:
             with open(temp_file, 'rb') as f:
-                await ctx.send(f"Sending ABI JSON for **{address} on {blockchain_name} blockchain** - sent DM to {ctx.author}") 
+                await ctx.send(embed=embed) 
                 await ctx.author.send(file=disnake.File(f))
         except Exception as e:
             print(f"An error occurred when trying to send a message: {e}")
@@ -479,11 +533,11 @@ class Scrape(commands.Cog):
         if blockchain.lower() == "ethereum":
             url = f"https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey={key2}"
             blockchain_name = "Ethereum"
-            color = Color.blue()  # You can choose a color to represent Ethereum
+            color = Color.blue()
         elif blockchain.lower() == "polygon":
             url = f"https://api.polygonscan.com/api?module=gastracker&action=gasoracle&apikey={key}"
             blockchain_name = "Polygon"
-            color = Color.red()  # You can choose a color to represent Polygon
+            color = Color.red()
         else:
             await inter.response.send_message("Invalid blockchain choice, choose either Ethereum or Polygon")
             return
@@ -514,7 +568,7 @@ class Scrape(commands.Cog):
         embed.add_field(name="Suggested Base Fee", value=data['result']['suggestBaseFee'], inline=False)
         embed.add_field(name="Gas Used Ratio", value=data['result']['gasUsedRatio'], inline=False)
         embed.add_field(name="Conclusion", value=f"Gas is {conclusion}", inline=False)
-        embed.set_footer(text=f"Powered by OvoOno Studio")
+        embed.set_footer(text="Powered by OvoOno Studio")
         
         if 'UsdPrice' in data['result']:
             embed.add_field(name="USD Price", value=f"${data['result']['UsdPrice']}", inline=True)

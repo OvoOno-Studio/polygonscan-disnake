@@ -78,7 +78,7 @@ class Friend(commands.Cog):
             await self.store_user_from_response(json_data)
 
     async def store_user_from_response(self, response):
-        print(len(self.new_influencers))
+        # print(len(self.new_influencers))
         if len(self.new_influencers) == 22:
             print('Data full!') 
             await asyncio.sleep(30) 
@@ -240,7 +240,7 @@ class Friend(commands.Cog):
                     self.last_processed_block = self.w3.eth.block_number
 
                 block = self.w3.eth.get_block(self.last_processed_block + 1, full_transactions=True)
-                print(f"Searching in block {block.number} with {len(block.transactions)} transactions")
+                # print(f"Searching in block {block.number} with {len(block.transactions)} transactions")
 
                 if block and block.transactions:
                     for transaction in block.transactions:
@@ -291,7 +291,7 @@ class Friend(commands.Cog):
                                     embed.add_field(name="🧑 From Address:", value=f'[{tx_from}]({address_url}{tx_from})', inline=False)
                                     embed.add_field(name="👉 To Address:", value=f'[{tx_to}]({address_url}{tx_to})', inline=False)
                                     embed.add_field(name="🔗 Transaction Hash:", value=f"[{tx_hash}]({transaction_url})", inline=False)
-                                    embed.set_footer(text=f"Powered by OvoOno Studio")
+                                    embed.set_footer(text="Powered by OvoOno Studio")
 
                                     if channel: 
                                         processed_txs.add(tx_hash)
