@@ -494,7 +494,7 @@ class Scrape(commands.Cog):
 
         embed = Embed(title=f"ABI Verification for {address}")
         embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
-        embed.add_field(text=f"Sending ABI JSON for **{address} on {blockchain_name} blockchain**")
+        embed.add_field(name="Message:", value=f"Sending ABI JSON for **{address} on {blockchain_name} blockchain**")
         embed.set_footer(text=f"Requested by {ctx.author}")
 
         with open(temp_file, 'w') as f:
