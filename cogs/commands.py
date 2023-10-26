@@ -356,7 +356,7 @@ class Scrape(commands.Cog):
                 )
             ]
     )
-    async def balance(self, inter, ctx, address: str, blockchain: str):
+    async def balance(self, ctx, address: str, blockchain: str):
         await ctx.response.defer() 
         key = APIKey
         key2 = API2Key
@@ -366,7 +366,7 @@ class Scrape(commands.Cog):
         elif blockchain.lower() == "polygon":
             url = f"https://api.polygonscan.com/api?module=account&action=balance&address={str(address)}&apikey={str(key)}" 
         else:
-            await inter.response.send_message("Invalid blockchain choice, choose either Ethereum or Polygon")
+            await ctx.response.send_message("Invalid blockchain choice, choose either Ethereum or Polygon")
             return
         
         author = ctx.author.mention 
@@ -412,7 +412,7 @@ class Scrape(commands.Cog):
                 )
             ]
     )
-    async def creator(self, inter, ctx, *addresses: str, blockchain: str):
+    async def creator(self, ctx, *addresses: str, blockchain: str):
         await ctx.response.defer()
         addresses_str = ','.join(addresses)
         key = APIKey
@@ -423,7 +423,7 @@ class Scrape(commands.Cog):
         elif blockchain.lower() == "polygon":
             url = f"https://api.polygonscan.com/api?module=contract&action=getcontractcreation&contractaddresses={addresses_str}&apikey={str(key)}" 
         else:
-            await inter.response.send_message("Invalid blockchain choice, choose either Ethereum or Polygon")
+            await ctx.response.send_message("Invalid blockchain choice, choose either Ethereum or Polygon")
             return
  
         response = requests.get(url)
@@ -470,7 +470,7 @@ class Scrape(commands.Cog):
             )
         ]
     )
-    async def abi(self, inter, ctx, address: str, blockchain: str):
+    async def abi(self, ctx, address: str, blockchain: str):
         await ctx.response.defer()
         key = APIKey
         key2 = API2Key
@@ -482,7 +482,7 @@ class Scrape(commands.Cog):
             url = f"https://api.polygonscan.com/api?module=contract&action=getabi&address={str(address)}&apikey={str(key)}"
             blockchain_name = "Polygon"
         else:
-            await inter.response.send_message("Invalid blockchain choice, choose either Ethereum or Polygon")
+            await ctx.response.send_message("Invalid blockchain choice, choose either Ethereum or Polygon")
             return
         
         response = requests.get(url)
