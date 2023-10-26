@@ -314,7 +314,8 @@ class Scrape(commands.Cog):
                 )
             ]
     )
-    async def get_trx(self, ctx: commands.Context, address: str, blockchain: str, offset: str):
+    async def get_trx(self, ctx, address: str, blockchain: str, offset: str):
+        await ctx.response.defer() 
         if(int(offset) > 25):
             await ctx.send(f"Maximum offset must be lower then 25! Aborting the command.")
             return
