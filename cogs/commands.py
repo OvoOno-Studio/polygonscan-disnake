@@ -404,7 +404,7 @@ class Scrape(commands.Cog):
                     type=OptionType.string,
                     choices=["ethereum", "polygon"],
                     required=True
-                )
+                ),
                 disnake.Option(
                     "address", "Contract address.", 
                     type=disnake.OptionType.string, 
