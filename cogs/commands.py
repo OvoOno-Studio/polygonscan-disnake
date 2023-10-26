@@ -399,29 +399,30 @@ class Scrape(commands.Cog):
             description="Returns a contract's deployer address and transaction hash it was created, up to 5 at a time.",
             options=[
                 disnake.Option(
-                    "address", "Contract address.", 
-                    type=disnake.OptionType.string, 
-                    required=True
-                ),
-                disnake.Option(
                     name="blockchain",
                     description="Choose Ethereum or Polygon",
                     type=OptionType.string,
                     choices=["ethereum", "polygon"],
                     required=True
                 )
+                disnake.Option(
+                    "address", "Contract address.", 
+                    type=disnake.OptionType.string, 
+                    required=True
+                )
+                
             ]
     )
-    async def creator(self, ctx, *addresses: str, blockchain: str):
+    async def creator(self, ctx, address: str, blockchain: str):
         await ctx.response.defer()
-        addresses_str = ','.join(addresses)
+        addresses_str = address
         key = APIKey
         key2 = API2Key
 
         if blockchain.lower() == "ethereum":
-            url = f"https://api.etherscan.io/api?module=contract&action=getcontractcreation&contractaddresses={addresses_str}&apikey={str(key2)}" 
+            url = f"https://api.etherscan.io/api?module=contract&action=getcontractcreation&contractaddresses={str(addresses_str)}&apikey={str(key2)}" 
         elif blockchain.lower() == "polygon":
-            url = f"https://api.polygonscan.com/api?module=contract&action=getcontractcreation&contractaddresses={addresses_str}&apikey={str(key)}" 
+            url = f"https://api.polygonscan.com/api?module=contract&action=getcontractcreation&contractaddresses={str(addresses_str)}&apikey={str(key)}" 
         else:
             await ctx.response.send_message("Invalid blockchain choice, choose either Ethereum or Polygon")
             return
