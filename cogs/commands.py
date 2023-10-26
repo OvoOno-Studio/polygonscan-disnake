@@ -297,7 +297,7 @@ class Scrape(commands.Cog):
     Define getTrx() - function that will fetch all normal transactions for specific address. 
     """
     @commands.slash_command(
-            name="getTrx",
+            name="get_trx",
             description="Fetch all normal transaction for specific address.",
             options=[
                 disnake.Option(
@@ -314,7 +314,7 @@ class Scrape(commands.Cog):
                 )
             ]
     )
-    async def getTrx(self, ctx: commands.Context, address: str, blockchain: str, offset: str):
+    async def get_trx(self, ctx: commands.Context, address: str, blockchain: str, offset: str):
         if(int(offset) > 25):
             await ctx.send(f"Maximum offset must be lower then 25! Aborting the command.")
             return
@@ -323,7 +323,7 @@ class Scrape(commands.Cog):
         key2 = API2Key
         author = ctx.author.mention 
         counter = 0 
-        
+
         if blockchain.lower() == "ethereum":
             url = f"https://api.etherscan.io/api?module=account&action=txlist&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(key2)}" 
         elif blockchain.lower() == "polygon":
