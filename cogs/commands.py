@@ -271,9 +271,28 @@ class Scrape(commands.Cog):
     """
     Define getTrxHash() - return a link to for specific transaction hash.
     """
-    @commands.command()
-    async def getTrxHash(self, ctx: commands.Context, hash: str): 
-        author = ctx.author.mention 
+    @commands.slash_command(
+            name='get_trx_hash',
+            description='Return a link for transaction hash.',
+            options=[
+                disnake.Option(
+                    name="blockchain",
+                    description="Choose Ethereum or Polygon",
+                    type=OptionType.string,
+                    choices=["ethereum", "polygon"],
+                    required=True
+                ),
+            ]
+    )
+    async def get_trx_hash(self, ctx, hash: str, blockchain: str): 
+        author = ctx.author.mention
+        author = ctx.author.mention
+
+        if blockchain.lower() == "ethereum":
+            value = f'https://etherscan.io/tx/{str(hash)}'
+        if blockchain.lower() == "polygon":
+            value = f'https://polygonscan.com/tx/{str(hash)}'
+        
         # await ctx.send(f'https://polygonscan.com/tx/{str(hash)}') 
         print(f"User - {author} trigger command getTrxHash for {hash} transaction.")
         await ctx.send(f"Generating link for transaction with {str(hash)} - sent DM to {author}")
@@ -285,7 +304,7 @@ class Scrape(commands.Cog):
         ) 
         embed.add_field(
             name="Link of Transaction Hash:",
-            value=f'https://polygonscan.com/tx/{str(hash)}',
+            value=f'{value}',
             inline=False
         )   
         embed.set_footer(
