@@ -15,7 +15,7 @@ class Moni(commands.Cog):
         self.previous_matic_price = None
         self.last_known_transaction = None
         self.semaphore = asyncio.Semaphore(4)  
-        # self.bot.loop.create_task(self.price_check_and_alert())
+        self.bot.loop.create_task(self.price_check_and_alert())
         self.bot.loop.create_task(self.update_crypto_presence())
         #self.bot.loop.create_task(self.monitor_wallet_transactions())
 
@@ -83,20 +83,20 @@ class Moni(commands.Cog):
             volume_24h = coin_data['market_data']['total_volume']['usd']
             market_cap = coin_data['market_data']['market_cap']['usd']
 
+            embed = disnake.Embed(title="🚨 **PRICE ALERT** 🚨\n\n", color=0x9C84EF) 
+            embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png") 
+            embed.set_footer(text="Powered by OvoOno Studio")
             for guild in self.bot.guilds:
                 price_alert_channel_id = get_price_alert_channel(guild.id)
                 channel = self.bot.get_channel(price_alert_channel_id)
                 if channel is not None:
-                    print(f'Sending price alert to: {channel}')
-                    await channel.send(
-                        f".\n\n"
-                        f"🚨 **PRICE CHANGE ALERT** 🚨\n\n"
-                        f"💵 **ETH Price:** ${current_price:.2f} {arrow_emoji} ({abs(price_change):.2f}% change)\n"
-                        f"📈 **24h High:** ${price_high_24h:.2f}\n"
-                        f"📉 **24h Low:** ${price_low_24h:.2f}\n"
-                        f"💼 **24h Volume:** ${volume_24h:.2f}\n"
-                        f"💰 **Market Cap:** ${market_cap:.2f}\n"
-                    )
+                    # print(f'Sending price alert to: {channel}') 
+                    embed.add_field(name="💵 **Price:**", value=f'${current_price:.2f} {arrow_emoji} ({abs(price_change):.2f}% change)', inline=False)
+                    embed.add_field(name="📈 **24h High:**", value=f'${price_high_24h:.2f}', inline=True)
+                    embed.add_field(name="📉 **24h Low:**", value=f'${price_low_24h:.2f}', inline=True)
+                    embed.add_field(name="💼 **24h Volume:**", value=f'${volume_24h:.2f}', inline=True)
+                    embed.add_field(name="💰 **Market Cap:**", value=f'${market_cap:.2f}', inline=True)
+                    await channel.send(embed=embed)
                 else:
                     print('No channel optimized')
 
@@ -107,7 +107,7 @@ class Moni(commands.Cog):
 
     async def price_check_and_alert(self):
         await self.bot.wait_until_ready()
-        
+        print('price_check_and_alert triggered.')
         while not self.bot.is_closed():
             try:
                 current_price, _, _, _, _, _, _ = await self.get_crypto_price_data()
@@ -125,7 +125,7 @@ class Moni(commands.Cog):
     
     async def update_crypto_presence(self):
         await self.bot.wait_until_ready()
-
+        print('update_crypto_presence triggered.')
         while not self.bot.is_closed():
             try:
                 price, price_change_percent, coin_data, *_ = await self.get_crypto_price_data()

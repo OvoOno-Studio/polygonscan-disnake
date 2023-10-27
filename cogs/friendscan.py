@@ -29,6 +29,7 @@ class Friend(commands.Cog):
 
     async def check_transactions(self):
         await self.bot.wait_until_ready()
+        print('check_transactions triggered.')
         if len(self.new_influencers) == 22:
             print('No need to check data. Sleeping...')
             await asyncio.sleep(30)
@@ -105,7 +106,8 @@ class Friend(commands.Cog):
         self.new_influencers.append(user_data) 
 
     async def verify_x_users(self): 
-        await self.bot.wait_until_ready()  # Ensure the bot is ready before starting the loop
+        await self.bot.wait_until_ready()
+        print('verify_x_users triggered.')
         while not self.bot.is_closed(): 
             if len(self.new_influencers) < 21:
                 #print('Not enough not data!')
@@ -229,8 +231,8 @@ class Friend(commands.Cog):
 
     async def keys_alerts(self):  
         await self.bot.wait_until_ready()
-
-        processed_txs = set()  # To keep track of processed transactions
+        print('keys_alerts triggered.')
+        processed_txs = set()
 
         while not self.bot.is_closed():
             try:
