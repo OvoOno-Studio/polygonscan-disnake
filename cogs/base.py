@@ -22,14 +22,14 @@ class BaseCog(commands.Cog):
     async def ping(self, ctx):
         await ctx.send (f"📶 {round(self.bot.latency * 1000)}ms") 
 
-    @commands.command()
-    async def help(self, ctx):
-        embed = disnake.Embed(
-            title=" Introduction",
-            color=0x9C84EF,
-            description=f"This is help message."
-        )
-        await ctx.send(embed=embed)
+    # @commands.command()
+    # async def help(self, ctx):
+    #     embed = disnake.Embed(
+    #         title=" Introduction",
+    #         color=0x9C84EF,
+    #         description=f"This is help message."
+    #     )
+    #     await ctx.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(BaseCog(bot))
