@@ -1,14 +1,14 @@
 import json
 import requests
 import disnake
-import time 
+import time  
+import csv
+import io
+import os
 from disnake.ext import commands
 from disnake.ext.commands import has_permissions
 from disnake import Option, OptionType, Embed, Color
 from datetime import datetime
-import csv
-import io
-import os
 from io import StringIO
 from config import APIKey, API2Key
 from checks import is_donator 
@@ -22,15 +22,15 @@ class Scrape(commands.Cog):
     def get_token_holders(token_address, blockchain, page_size=100, num_pages=40):
         holders = set()  
         key = APIKey
-        key2 = API2Key 
-
-        if blockchain.lower() == "ethereum":
-            url = f"https://api.etherscan.io/api?module=account&action=tokentx&contractaddress={token_address}&page={page}&offset={page_size}&sort=desc&apikey={str(key2)}" 
-        elif blockchain.lower() == "polygon":
-            url = f"https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={token_address}&page={page}&offset={page_size}&sort=desc&apikey={str(key)}" 
-        else: 
-            return
+        key2 = API2Key  
+        
         for page in range(1, num_pages + 1): 
+            if blockchain.lower() == "ethereum":
+                url = f"https://api.etherscan.io/api?module=account&action=tokentx&contractaddress={token_address}&page={page}&offset={page_size}&sort=desc&apikey={str(key2)}" 
+            elif blockchain.lower() == "polygon":
+                url = f"https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={token_address}&page={page}&offset={page_size}&sort=desc&apikey={str(key)}" 
+            else: 
+                return
             response = requests.get(url)
             data = json.loads(response.text)
 
