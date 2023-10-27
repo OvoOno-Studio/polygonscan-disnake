@@ -19,11 +19,18 @@ class Scrape(commands.Cog):
         self.key = str(APIKey)
 
     @staticmethod
-    def get_token_holders(token_address, num_transactions=1000, page_size=100, num_pages=40):
-        holders = set() 
-        key = str(APIKey)
-        for page in range(1, num_pages + 1):
-            url = f'https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={token_address}&page={page}&offset={page_size}&sort=desc&apikey={key}'
+    def get_token_holders(token_address, blockchain, page_size=100, num_pages=40):
+        holders = set()  
+        key = APIKey
+        key2 = API2Key 
+
+        if blockchain.lower() == "ethereum":
+            url = f"https://api.etherscan.io/api?module=account&action=tokentx&contractaddress={token_address}&page={page}&offset={page_size}&sort=desc&apikey={str(key2)}" 
+        elif blockchain.lower() == "polygon":
+            url = f"https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={token_address}&page={page}&offset={page_size}&sort=desc&apikey={str(key)}" 
+        else: 
+            return
+        for page in range(1, num_pages + 1): 
             response = requests.get(url)
             data = json.loads(response.text)
 
@@ -57,13 +64,31 @@ class Scrape(commands.Cog):
     Define get_token_holder - send CSV file as DM of token holders wallets .
     """
     @is_donator()
-    @commands.slash_command(name='get_token_holders', description="Send CSV file of token holders as DM")
-    async def get_token_holder(self, ctx, token_address: str = None):
+    @commands.slash_command(
+        name='get_token_holder', 
+        description="Send CSV file of token holders as DM",
+        options=[
+            disnake.Option(
+                    'token_address', 'Token Smart Contract',
+                    type=disnake.OptionType.string, 
+                    required=True
+                ),
+            disnake.Option(
+                name="blockchain",
+                description="Choose Ethereum or Polygon",
+                type=OptionType.string,
+                choices=["ethereum", "polygon"],
+                required=True
+            ),
+        ]
+    )
+    async def get_token_holder(self, ctx, token_address: str, blockchain: str):
+        await ctx.response.defer()
         if token_address is None:
             await ctx.send("Please provide a valid token address.")
             return
 
-        holders = self.get_token_holders(token_address)
+        holders = self.get_token_holders(token_address, blockchain)
         if holders is None:
             await ctx.send("Failed to fetch token holders. Please check the token address and try again.")
         else:
