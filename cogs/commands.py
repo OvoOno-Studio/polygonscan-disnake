@@ -276,6 +276,11 @@ class Scrape(commands.Cog):
             description='Return a link for transaction hash.',
             options=[
                 disnake.Option(
+                    'hash', 'Transaction hash.',
+                    type=disnake.OptionType.string, 
+                    required=True
+                ),
+                disnake.Option(
                     name="blockchain",
                     description="Choose Ethereum or Polygon",
                     type=OptionType.string,
