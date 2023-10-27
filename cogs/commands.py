@@ -233,14 +233,40 @@ class Scrape(commands.Cog):
     """
     Define checkTrx() - check status of transaction by hash.
     """
-    @commands.command() 
-    async def checkTrx(self, ctx: commands.Context, hash: str): 
-        author = ctx.author.mention
-        api_key = self.key
-        endpoint = f'https://api.polygonscan.com/api?module=transaction&action=gettxreceiptstatus&txhash={str(hash)}&apikey={str(api_key)}'
-        response = requests.get(endpoint)  
+    @commands.slash_command(
+            name='check_trx',
+            description='Check status of transaction by hash.',
+            options=[
+                disnake.Option(
+                    'hash', 'Transaction Hash',
+                    type=disnake.OptionType.string, 
+                    required=True
+                ),
+                disnake.Option(
+                    name="blockchain",
+                    description="Choose Ethereum or Polygon",
+                    type=OptionType.string,
+                    choices=["ethereum", "polygon"],
+                    required=True
+                ),
+            ]
+    ) 
+    async def check_trx(self, ctx, hash: str, blockchain: str):
+        await ctx.response.defer() 
+        key = APIKey
+        key2 = API2Key
+        author = ctx.author.mention 
+
+        if blockchain.lower() == "ethereum":
+            url = f"https://api.etherscan.io/api?module=transaction&action=gettxreceiptstatus&txhash={str(hash)}&apikey={str(key2)}" 
+        elif blockchain.lower() == "polygon":
+            url = f"https://api.polygonscan.com/api?module=transaction&action=gettxreceiptstatus&txhash={str(hash)}&apikey={str(key)}" 
+        else:
+            await ctx.response.send_message("Invalid blockchain choice, choose either Ethereum or Polygon")
+            return
+        response = requests.get(url)  
         data = json.loads(response.text)
-        print(f"User - {author} trigger command checkTrx for {hash} transaction.")
+        # print(f"User - {author} trigger command checkTrx for {hash} transaction.")
         await ctx.send(f"Return status of transaction with {str(hash)} - sent DM to {author}") 
 
         status = ''
@@ -251,7 +277,7 @@ class Scrape(commands.Cog):
         
         embed = disnake.Embed(
             title=f"Status of transaction with hash {str(hash)}",
-            description="Return status code of transaction.",
+            description=f"Return status code of transaction on {str(blockchain)}.",
             color=0x9C84EF,
             timestamp=datetime.now()
         )
@@ -263,7 +289,7 @@ class Scrape(commands.Cog):
         )
 
         embed.set_footer(
-            text=f"Requested by {ctx.author}"
+            text="Powered by OvoOno Studio"
         )
          
         await ctx.author.send(embed=embed) 
@@ -290,8 +316,7 @@ class Scrape(commands.Cog):
             ]
     )
     async def get_trx_hash(self, ctx, hash: str, blockchain: str): 
-        author = ctx.author.mention
-        author = ctx.author.mention
+        author = ctx.author.mention 
 
         if blockchain.lower() == "ethereum":
             value = f'https://etherscan.io/tx/{str(hash)}'
