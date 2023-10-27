@@ -45,7 +45,8 @@ class Friend(commands.Cog):
                     tx_from = tx['from']
                     # Check the destination address and value of the transaction
                     if (
-                        tx_to.lower() == self.wallet_address.lower()
+                        tx_to is not None
+                        and tx_to.lower() == self.wallet_address.lower()
                         and tx_value == 0
                     ):
                         await self.fetch_user_by_wallet(tx_from)
