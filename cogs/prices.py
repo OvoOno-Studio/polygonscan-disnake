@@ -23,13 +23,13 @@ class Moni(commands.Cog):
     async def set_transaction_channel(self, ctx, channel: disnake.TextChannel):
         await ctx.response.defer()
         set_transaction_channel(ctx.guild.id, channel.id)
-        await ctx.edit_original_message(content=f"Transaction channel has been set to {channel.mention}") 
+        await ctx.followup.send(content=f"Transaction channel has been set to {channel.mention}") 
 
     @commands.slash_command(name="set_price_alert_channel", description="Set the channel for price alerts.")
     async def set_price_alert_channel(self, ctx, channel: disnake.TextChannel):
         await ctx.response.defer()
         set_price_alert_channel(ctx.guild.id, channel.id)
-        await ctx.edit_original_message(content=f"Price alert channel has been set to {channel.mention}") 
+        await ctx.followup.send(content=f"Price alert channel has been set to {channel.mention}") 
 
     @commands.slash_command(name="set_wallet_address", description="Set the wallet address for monitoring incoming transactions.")
     async def set_wallet_address(self, ctx, address: str):
@@ -191,7 +191,7 @@ class Moni(commands.Cog):
 
                     last_transaction = None
                     for transaction in transactions:
-                        if transaction["to"].lower() == self.guild_data[guild_id]["wallet_address"].lower():
+                        if transaction["to"].lower() == self.guild_data[guild_id]["wallet_address"].lower() or transaction["from"].lower() == self.guild_data[guild_id]["wallet_address"]:
                             last_transaction = transaction
                             print(f"Found transaction for {self.guild_data[guild_id]['wallet_address']} with hash {transaction['hash']}")
                             await asyncio.sleep(3)  # Add delay here
@@ -266,7 +266,7 @@ class Moni(commands.Cog):
         try:
             channel = await self.bot.fetch_channel(self.guild_data[guild_id]["transaction_channel_id"])
             if channel:
-                # print(f"Sending message to channel {channel.id}")  # Debugging print statement
+                print(f"Sending message to channel {channel.id}")  # Debugging print statement
                 message = (
                     f"🚨 New incoming {self.guild_data[guild_id]['moni_token']} token transaction to `{self.guild_data[guild_id]['wallet_address']}` 🚨\n"
                     f"💰 Value: {float(transaction['value'])} {self.guild_data[guild_id]['moni_token']} \n"
