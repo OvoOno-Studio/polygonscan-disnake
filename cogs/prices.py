@@ -17,7 +17,7 @@ class Moni(commands.Cog):
         self.semaphore = asyncio.Semaphore(4)  
         self.bot.loop.create_task(self.price_check_and_alert())
         self.bot.loop.create_task(self.update_crypto_presence())
-        #self.bot.loop.create_task(self.monitor_wallet_transactions())
+        self.bot.loop.create_task(self.monitor_wallet_transactions())
 
     @commands.slash_command(name="set_transaction_channel", description="Set the channel for transaction alerts.")
     async def set_transaction_channel(self, ctx, channel: disnake.TextChannel):
@@ -35,13 +35,13 @@ class Moni(commands.Cog):
     async def set_wallet_address(self, ctx, address: str):
         await ctx.response.defer()
         set_wallet_address(ctx.guild.id, address)
-        await ctx.response.send_message(f"Wallet address has been set to `{address}`")
+        await ctx.followup.send(content=f"Wallet address for monitoring has been set to {address}")
 
     @commands.slash_command(name="set_moni_token", description="Set the ERC20 Token for monitoring.")
     async def set_moni_token(self, ctx, token: str):
         await ctx.response.defer()
         set_moni_token(ctx.guild.id, token)
-        await ctx.response.send_message(f"Token for monitoring has been set to `{token}`")
+        await ctx.followup.send(f"Token for monitoring has been set to `{token}`")
 
     async def get_coin_data(self):
         try:
@@ -237,12 +237,14 @@ class Moni(commands.Cog):
             moni_contract  = '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174'
         if self.guild_data[guild_id]["moni_token"] == 'DAI':
             moni_contract  = '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063'
+        if self.guild_data[guild_id]["moni_token"] == 'SNAKE':
+            moni_contract = '0xF9978935B557140de50c82D10ab046D33D57B5e5'
 
         url = f"{self.polygon_scan_api_url}&address={self.guild_data[guild_id]['wallet_address']}&contractaddress={moni_contract}&sort=desc"
         try:
             json_data = await self.limited_get(url)
             if json_data and "result" in json_data:
-                #print(f'Transaction fetched for Guild: {guild_id}')
+                print(f'Transaction fetched for Guild: {guild_id}')
                 return json_data["result"]
             else:
                 #print(f"Error in fetch_wallet_transactions: {json_data}")
