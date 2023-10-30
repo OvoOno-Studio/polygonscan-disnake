@@ -191,7 +191,7 @@ class Moni(commands.Cog):
 
                     last_transaction = None
                     for transaction in transactions:
-                        if transaction["to"].lower() == self.guild_data[guild_id]["wallet_address"].lower() or transaction["from"].lower() == self.guild_data[guild_id]["wallet_address"]:
+                        if transaction["to"].lower() == self.guild_data[guild_id]["wallet_address"].lower() or transaction["from"].lower() == self.guild_data[guild_id]["wallet_address"].lower():
                             last_transaction = transaction
                             print(f"Found transaction for {self.guild_data[guild_id]['wallet_address']} with hash {transaction['hash']}")
                             await asyncio.sleep(3)  # Add delay here
