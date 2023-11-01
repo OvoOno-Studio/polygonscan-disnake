@@ -30,6 +30,7 @@
     },
     "ethereum": {
         "ERC20": {
+            "WETH": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
             "USDT": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
             "BNB": "0xB8c77482e45F1F44dE1745F52C74426C631bDD52",
             "USDC": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
@@ -39,7 +40,11 @@
 
         },
         "ERC721": {
-            "CRYPTOPUNK": "0x..."
+            "DREADFULZ": "0x81Ae0bE3A8044772D04F32398bac1E1B4B215aa8",
+            "BAYC": "0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D",
+            "MAYC": "0x60E4d786628Fea6478F785A6d7e704777c86a7c6",
+            "CLONEX": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+            "MIL": "0x5Af0D9827E0c53E4799BB226655A1de152A425a5"
         },
         "ERC1155": {
             "SOMEITEMS": "0x..."

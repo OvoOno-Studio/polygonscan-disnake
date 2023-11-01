@@ -25,7 +25,12 @@ class Moni(commands.Cog):
     async def set_transaction_channel(self, ctx, channel: disnake.TextChannel):
         await ctx.response.defer()
         set_transaction_channel(ctx.guild.id, channel.id)
-        await ctx.followup.send(content=f"Transaction channel has been set to {channel.mention}") 
+        embed = disnake.Embed(title="Transaction channel is updated!", color=0x9C84EF) 
+        embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png") 
+        embed.set_thumbnail(url=f"{ctx.guild.icon_url}")
+        embed.add_field(name="Channel ID:", value=f"{channel.mention}", inline=True)
+        embed.set_footer(text="Powered by OvoOno Studio")
+        await ctx.followup.send(embed=embed) 
 
     @commands.slash_command(name="set_price_alert_channel", description="Set the channel for price alerts.")
     async def set_price_alert_channel(self, ctx, channel: disnake.TextChannel):
