@@ -14,7 +14,9 @@ class Moni(commands.Cog):
         self.guild_data = {} 
         self.previous_matic_price = None
         self.last_known_transaction = None
-        self.semaphore = asyncio.Semaphore(4)  
+        self.semaphore = asyncio.Semaphore(4)   
+        
+    def start_tasks(self):
         self.bot.loop.create_task(self.price_check_and_alert())
         self.bot.loop.create_task(self.update_crypto_presence())
         self.bot.loop.create_task(self.monitor_wallet_transactions())

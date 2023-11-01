@@ -23,7 +23,13 @@ class Bot(commands.Bot):
                 except:
                     print(f"Unable to load {file[:-3]}.")
                     print(traceback.format_exc())
-
+    
+    async def on_ready(self):
+        print(f'{self.user.name} is ready!')
+        print(f'Looping tasks..') 
+        for cog in self.cogs.values():
+            if hasattr(cog, "start_tasks"):
+                cog.start_tasks() # type: ignore
 def main():
     bot = Bot()
     bot.run(DiscordToken)
