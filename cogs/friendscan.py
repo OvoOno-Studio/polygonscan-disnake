@@ -420,6 +420,8 @@ class Friend(commands.Cog):
     @is_donator()
     @commands.slash_command(name="search_friends", description="Search users by their twitter handle.")
     async def search_friends(self, ctx, username):
+        await ctx.response.defer()
+        
         if username is None:
             await ctx.send("Please provide a valid username!")
             return
@@ -470,8 +472,8 @@ class Friend(commands.Cog):
 
                 # Send the CSV file as a direct message (DM)
                 file = disnake.File(csv_data, filename="friends.csv") # type: ignore
-                await ctx.author.send(file=file, content=f"Search results for: {username}.")
-                await ctx.send(embed=embed)
+                await ctx.author.followup.send(file=file, content=f"Search results for: {username}.")
+                await ctx.followup.send(embed=embed)
 
         except Exception as e:
             print(f"Error in search_friends: {e}")
