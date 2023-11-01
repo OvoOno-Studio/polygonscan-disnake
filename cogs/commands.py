@@ -175,7 +175,8 @@ class Scrape(commands.Cog):
     async def handle_erc_transactions(self, ctx, address, contract, offset, contract_type, blockchain, counter=0):
         # print(f"Inside handle_erc_transactions - Contract: {contract_type}")  # Add this print statement
         contracts_data = self.load_contract_addresses() 
-        contract_address = contracts_data.get(contract_type, {}).get(contract, None)
+        blockchain_data = contracts_data.get(blockchain.lower(), {})
+        contract_address = blockchain_data.get(contract_type, {}).get(contract, None)
         if not contract_address:
             return await ctx.send(f"Unknown contract '{contract}' for type {contract_type}")
         

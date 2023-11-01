@@ -1,7 +1,7 @@
 """
 Copyright © OvoOno Studio 2022 - https://github.com/OvoOno-Studio/polygonscan-disnake
 Description:
-Discord Bot based on PolygonScan, CoingGecko, Binance APIs and Disnake lib for web scrapping data from PolygonScan. 
+Discord Bot based on EtherScan, PolygonScan, CoinGecko, Binance APIs and Disnake lib.
 Version: 1.0
 """   
 import disnake
@@ -26,10 +26,11 @@ class Bot(commands.Bot):
     
     async def on_ready(self):
         print(f'{self.user.name} is ready!')
-        print(f'Looping tasks..') 
+        print('Looping tasks..') 
         for cog in self.cogs.values():
             if hasattr(cog, "start_tasks"):
                 cog.start_tasks() # type: ignore
+
 def main():
     bot = Bot()
     bot.run(DiscordToken)
