@@ -85,16 +85,16 @@ class Scrape(commands.Cog):
     async def get_token_holder(self, ctx, token_address: str, blockchain: str):
         await ctx.response.defer()
         if token_address is None:
-            await ctx.send("Please provide a valid token address.")
+            await ctx.followup.send(content="Please provide a valid token address.")
             return
 
         holders = self.get_token_holders(token_address, blockchain)
         if holders is None:
-            await ctx.send("Failed to fetch token holders. Please check the token address and try again.")
+            await ctx.followup.send(content="Failed to fetch token holders. Please check the token address and try again.")
         else:
             print("Sending CSV file...") 
             await self.send_csv(ctx, holders)
-            await ctx.send("Token holders list sent as a CSV file in a direct message.")
+            await ctx.followup.send(content="Token holders list sent as a CSV file in a direct message.")
 
     """
     Define load_contract_addresses - load contracts.json file for token/contract addresses.
@@ -172,10 +172,11 @@ class Scrape(commands.Cog):
     """
     Define handle_erc_transactions - check CSV file for transaction.
     """
-    async def handle_erc_transactions(self, ctx, address, contract, offset, contract_type, counter=0):
-        print(f"Inside handle_erc_transactions - Contract: {contract_type}")  # Add this print statement
+    async def handle_erc_transactions(self, ctx, address, contract, offset, contract_type, blockchain, counter=0):
+        # print(f"Inside handle_erc_transactions - Contract: {contract_type}")  # Add this print statement
         contracts_data = self.load_contract_addresses() 
-        contract_address = contracts_data.get(contract_type, {}).get(contract, None)
+        blockchain_data = contracts_data.get(blockchain.lower(), {})
+        contract_address = blockchain_data.get(contract_type, {}).get(contract, None)
         if not contract_address:
             return await ctx.send(f"Unknown contract '{contract}' for type {contract_type}")
         
@@ -187,7 +188,15 @@ class Scrape(commands.Cog):
         if contract_type == "ERC1155":
             action = "token1155tx"
         
-        endpoint = f'https://api.polygonscan.com/api?module=account&action={str(action)}&contractaddress={str(contract_address)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(self.key)}'
+        key = APIKey
+        key2 = API2Key
+            
+        endpoint = '' 
+        if blockchain.lower() == "ethereum": 
+            endpoint = f'https://api.etherscan.io/api?module=account&action={str(action)}&contractaddress={str(contract_address)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(key2)}'
+        if blockchain.lower() == "polygon":
+            endpoint = f'https://api.polygonscan.com/api?module=account&action={str(action)}&contractaddress={str(contract_address)}&address={str(address)}&startblock=0&endblock=99999999&page=1&offset={str(offset)}&sort=desc&apikey={str(key)}'
+        
         r = requests.get(endpoint)
         data = json.loads(r.text) 
 
@@ -343,6 +352,7 @@ class Scrape(commands.Cog):
     async def get_trx_hash(self, ctx, hash: str, blockchain: str): 
         author = ctx.author.mention 
 
+        value = ''
         if blockchain.lower() == "ethereum":
             value = f'https://etherscan.io/tx/{str(hash)}'
         if blockchain.lower() == "polygon":
@@ -691,11 +701,18 @@ class Scrape(commands.Cog):
             description="Return list of ERC-20 transactions, can be filtered by specific smart contract address",
             options=[
                 disnake.Option("address", "Address for scrapping.", type=disnake.OptionType.string, required=True),
-                disnake.Option("contract", "ERC-20 smart contract", type=disnake.OptionType.string, required=True) 
+                disnake.Option("contract", "ERC-20 smart contract", type=disnake.OptionType.string, required=True),
+                disnake.Option(
+                    name="blockchain",
+                    description="Choose Ethereum or Polygon",
+                    type=OptionType.string,
+                    choices=["ethereum", "polygon"],
+                    required=True
+                )
             ]
         ) 
-    async def getErc20(self, ctx, address: str, contract: str = 'SAND', offset: int = 100):
-        await self.handle_erc_transactions(ctx, address, contract, offset, 'ERC20')
+    async def getErc20(self, ctx, address: str, contract: str, blockchain, offset: int = 100):
+        await self.handle_erc_transactions(ctx, address, contract, offset, 'ERC20', blockchain)
 
     """
     Define getErc721() - return list of ERC-721(NFT) transactions, can be filtered by specific smart contract address. 
@@ -706,11 +723,18 @@ class Scrape(commands.Cog):
         description="Return list of ERC-721 transactions, can be filtered by specific smart contract address",
         options=[
             disnake.Option("address", "Address for scrapping.", type=disnake.OptionType.string, required=True),
-            disnake.Option("contract", "ERC-721 smart contract", type=disnake.OptionType.string, required=True)
+            disnake.Option("contract", "ERC-721 smart contract", type=disnake.OptionType.string, required=True),
+            disnake.Option(
+                name="blockchain",
+                description="Choose Ethereum or Polygon",
+                type=OptionType.string,
+                choices=["ethereum", "polygon"],
+                required=True
+            )
         ]
     )
-    async def getErc721(self, ctx, address: str, contract: str, offset: int = 30, contract_type: str = 'ERC721'):
-        await self.handle_erc_transactions(ctx, address, contract, offset, contract_type)
+    async def getErc721(self, ctx, address: str, contract: str, blockchain: str, offset: int = 30, contract_type: str = 'ERC721'):
+        await self.handle_erc_transactions(ctx, address, contract, offset, contract_type, blockchain)
 
     """
     Define getErc1155() - return list of ERC-721 (NFT) transactions, can be filtered by specific smart contract address. 
@@ -721,11 +745,18 @@ class Scrape(commands.Cog):
         description="Return list of ERC-1155 transactions, can be filtered by specific smart contract address",
         options=[
             disnake.Option("address", "Address for scrapping.", type=disnake.OptionType.string, required=True),
-            disnake.Option("contract", "ERC-1155 smart contract", type=disnake.OptionType.string, required=True)
+            disnake.Option("contract", "ERC-1155 smart contract", type=disnake.OptionType.string, required=True),
+            disnake.Option(
+                name="blockchain",
+                description="Choose Ethereum or Polygon",
+                type=OptionType.string,
+                choices=["ethereum", "polygon"],
+                required=True
+            )
         ]
     )
-    async def getErc1155(self, ctx, address: str, contract: str = 'ITEMS', offset: int = 30):
-        await self.handle_erc_transactions(ctx, address, contract, offset, 'ERC1155')
+    async def getErc1155(self, ctx, address: str, contract: str, blockchain: str,  offset: int = 30):
+        await self.handle_erc_transactions(ctx, address, contract, offset, 'ERC1155', blockchain)
     
 def setup(bot):
     bot.add_cog(Scrape(bot))

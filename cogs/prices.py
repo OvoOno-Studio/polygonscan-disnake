@@ -14,7 +14,9 @@ class Moni(commands.Cog):
         self.guild_data = {} 
         self.previous_matic_price = None
         self.last_known_transaction = None
-        self.semaphore = asyncio.Semaphore(4)  
+        self.semaphore = asyncio.Semaphore(4)   
+        
+    def start_tasks(self):
         self.bot.loop.create_task(self.price_check_and_alert())
         self.bot.loop.create_task(self.update_crypto_presence())
         self.bot.loop.create_task(self.monitor_wallet_transactions())
@@ -23,25 +25,45 @@ class Moni(commands.Cog):
     async def set_transaction_channel(self, ctx, channel: disnake.TextChannel):
         await ctx.response.defer()
         set_transaction_channel(ctx.guild.id, channel.id)
-        await ctx.followup.send(content=f"Transaction channel has been set to {channel.mention}") 
+        embed = disnake.Embed(title="Transaction channel is updated!", color=0x9C84EF) 
+        embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png") 
+        embed.set_thumbnail(url=f"{ctx.guild.icon.url}")
+        embed.add_field(name="Channel ID:", value=f"{channel.mention}", inline=True)
+        embed.set_footer(text="Powered by OvoOno Studio")
+        await ctx.followup.send(embed=embed) 
 
     @commands.slash_command(name="set_price_alert_channel", description="Set the channel for price alerts.")
     async def set_price_alert_channel(self, ctx, channel: disnake.TextChannel):
         await ctx.response.defer()
         set_price_alert_channel(ctx.guild.id, channel.id)
-        await ctx.followup.send(content=f"Price alert channel has been set to {channel.mention}") 
+        embed = disnake.Embed(title="Price alert channel is updated!", color=0x9C84EF) 
+        embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png") 
+        embed.set_thumbnail(url=f"{ctx.guild.icon.url}")
+        embed.add_field(name="Channel ID:", value=f"{channel.mention}", inline=True)
+        embed.set_footer(text="Powered by OvoOno Studio")
+        await ctx.followup.send(embed=embed)
 
     @commands.slash_command(name="set_wallet_address", description="Set the wallet address for monitoring incoming transactions.")
     async def set_wallet_address(self, ctx, address: str):
         await ctx.response.defer()
         set_wallet_address(ctx.guild.id, address)
-        await ctx.followup.send(content=f"Wallet address for monitoring has been set to {address}")
+        embed = disnake.Embed(title="Wallet address for monitoring is updated!", color=0x9C84EF) 
+        embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png") 
+        embed.set_thumbnail(url=f"{ctx.guild.icon.url}")
+        embed.add_field(name="Wallet address:", value=f"{address}", inline=True)
+        embed.set_footer(text="Powered by OvoOno Studio")
+        await ctx.followup.send(embed=embed)
 
     @commands.slash_command(name="set_moni_token", description="Set the ERC20 Token for monitoring.")
     async def set_moni_token(self, ctx, token: str):
         await ctx.response.defer()
         set_moni_token(ctx.guild.id, token)
-        await ctx.followup.send(f"Token for monitoring has been set to `{token}`")
+        embed = disnake.Embed(title="Token for monitoring is updated!", color=0x9C84EF) 
+        embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png") 
+        embed.set_thumbnail(url=f"{ctx.guild.icon.url}")
+        embed.add_field(name="Token Name:", value=f"{token}", inline=True)
+        embed.set_footer(text="Powered by OvoOno Studio")
+        await ctx.followup.send(embed=embed)
 
     async def get_coin_data(self):
         try:
