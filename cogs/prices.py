@@ -27,7 +27,7 @@ class Moni(commands.Cog):
         set_transaction_channel(ctx.guild.id, channel.id)
         embed = disnake.Embed(title="Transaction channel is updated!", color=0x9C84EF) 
         embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png") 
-        embed.set_thumbnail(url=f"{ctx.guild.icon_url}")
+        embed.set_thumbnail(url=f"{ctx.guild.icon.url}")
         embed.add_field(name="Channel ID:", value=f"{channel.mention}", inline=True)
         embed.set_footer(text="Powered by OvoOno Studio")
         await ctx.followup.send(embed=embed) 
