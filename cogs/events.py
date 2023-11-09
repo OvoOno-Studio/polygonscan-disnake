@@ -82,8 +82,7 @@ class Events(commands.Cog):
                         title=f"Hey {owner}!",
                         description="You have just installed the BlockScan on your server. Make sure set it!.",
                         color=0x9C84EF
-                    )
-                    embed.set_thumbnail(url=f"{guild.icon.url}")
+                    ) 
                     embed.set_author(name="BlockScan", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/bDrIHdo.png")
                     embed.add_field(
                         name="Set transaction channel",
