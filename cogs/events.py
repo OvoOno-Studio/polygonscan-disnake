@@ -87,22 +87,22 @@ class Events(commands.Cog):
                     embed.add_field(
                         name="Set transaction channel",
                         value='/set_transaction_channel <channel_id>',
-                        inline=True 
+                        inline=False 
                     )
                     embed.add_field(
                         name="Set price alert channel",
                         value='/set_price_alert_channel <channel_id>',
-                        inline=True 
+                        inline=False 
                     )
                     embed.add_field(
                         name="Set wallet address",
                         value='/set_wallet_address <address>',
-                        inline=True 
+                        inline=False 
                     )
                     embed.add_field(
                         name="Set moni token",
                         value='/set_moni_token <token_string>',
-                        inline=True 
+                        inline=False 
                     )
                     embed.set_footer(
                         text="Powered by OvoOno Studio"
