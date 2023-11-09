@@ -610,7 +610,7 @@ class Scrape(commands.Cog):
         temp_file = f'abi_{address}.json'
 
         embed = Embed(title=f"ABI Verification for {address}")
-        embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
+        embed.set_author(name="BlockScan", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/bDrIHdo.png")
         embed.add_field(name="Message:", value=f"Sending ABI JSON for **{address} on {blockchain_name} blockchain**")
         embed.set_footer(text=f"Requested by {ctx.author}")
 
@@ -677,7 +677,7 @@ class Scrape(commands.Cog):
             conclusion = "Medium"
         
         embed = Embed(title=f":fuelpump: {blockchain_name} Gas Oracle", color=color)
-        embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
+        embed.set_author(name="BlockScan", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/bDrIHdo.png")
         embed.add_field(name="Last Block", value=data['result']['LastBlock'], inline=False)
         embed.add_field(name="Safe Gas Price", value=f"{safe_gas} Gwei", inline=True)
         embed.add_field(name="Propose Gas Price", value=f"{propose_gas} Gwei", inline=True)

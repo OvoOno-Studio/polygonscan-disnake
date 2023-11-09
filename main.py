@@ -11,7 +11,7 @@ import os, traceback
 
 class Bot(commands.Bot):
     def __init__(self):
-        print("Welcome to the PS Scanner!")
+        print("Welcome to the BlockScan!")
         print("---------------------------------------------------------")
         super().__init__(command_prefix=commands.when_mentioned_or("ps-"), intents=disnake.Intents.all()) 
         print("Loading cogs files..")

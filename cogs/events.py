@@ -1,5 +1,5 @@
-import asyncio
 import json
+import disnake
 from disnake import Member
 from disnake.ext import commands
 from config import set_price_alert_channel, set_transaction_channel, set_wallet_address
@@ -7,15 +7,7 @@ from config import get_price_alert_channel, get_transaction_channel, get_wallet_
 
 class Events(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot
-        self.bot.loop.create_task(self.check_settings_loop())
-
-    async def check_settings_loop(self):
-        await self.bot.wait_until_ready()
-        while not self.bot.is_closed():
-            for guild in self.bot.guilds:
-                await self.check_and_send_default_settings_alert(guild)
-            await asyncio.sleep(12 * 60 * 60)  # 12 hours
+        self.bot = bot 
     
     @commands.Cog.listener()
     async def on_ready(self):  
@@ -86,12 +78,38 @@ class Events(commands.Cog):
                 # Send a message to the guild owner
                 owner = guild.owner
                 if owner is not None:
+                    embed = disnake.Embed(
+                        title=f"Hey {owner}!",
+                        description="You have just installed the BlockScan on your server. Make sure set it!.",
+                        color=0x9C84EF
+                    )
+                    embed.set_thumbnail(url=f"{guild.icon.url}")
+                    embed.set_author(name="BlockScan", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/bDrIHdo.png")
+                    embed.add_field(
+                        name="Set transaction channel",
+                        value='/set_transaction_channel <channel_id>',
+                        inline=True 
+                    )
+                    embed.add_field(
+                        name="Set price alert channel",
+                        value='/set_price_alert_channel <channel_id>',
+                        inline=True 
+                    )
+                    embed.add_field(
+                        name="Set wallet address",
+                        value='/set_wallet_address <address>',
+                        inline=True 
+                    )
+                    embed.add_field(
+                        name="Set moni token",
+                        value='/set_moni_token <token_string>',
+                        inline=True 
+                    )
+                    embed.set_footer(
+                        text="Powered by OvoOno Studio"
+                    )
                     try:
-                        await owner.send(
-                            f"Hello {owner.name},\n"
-                            f"It seems like your guild {guild.name} is using the default {setting.replace('default_', '')}. "
-                            f"Please change it to your preferred setting. "
-                        )
+                        await owner.send(embed=embed)
                     except Exception as e:
                         print(f"Failed to send message to guild owner {owner.name}: {e}") 
 

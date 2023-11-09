@@ -181,7 +181,7 @@ class Friend(commands.Cog):
             description=f"{user_data['description']}"
         )
         friend_url = f'https://friend.tech/{user_data["screen_name"]}'
-        embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png") 
+        embed.set_author(name="BlockScan", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/bDrIHdo.png") 
         embed.set_thumbnail(url=f"{user_data['profile_image_url']}")
         embed.add_field(name="𝕏 Handler:", value=f"[{user_data['screen_name']}]({friend_url})", inline=True)
         embed.add_field(name="𝕏 Name:", value=f"{user_data['name']}", inline=True)
@@ -292,7 +292,7 @@ class Friend(commands.Cog):
                                         description=f"{description}",
                                         color=0x9C84EF)
                                     embed.set_thumbnail(url=f"{twitter_profile_url}")
-                                    embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
+                                    embed.set_author(name="BlockScan", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/bDrIHdo.png")
                                     embed.add_field(name="🧑 From Address:", value=f'[{tx_from}]({address_url}{tx_from})', inline=False)
                                     embed.add_field(name="👉 To Address:", value=f'[{tx_to}]({address_url}{tx_to})', inline=False)
                                     embed.add_field(name="🔗 Transaction Hash:", value=f"[{tx_hash}]({transaction_url})", inline=False)
@@ -337,7 +337,7 @@ class Friend(commands.Cog):
 
                 # Create an embedded message
                 embed = disnake.Embed(title="User Details", color=0x9C84EF) 
-                embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
+                embed.set_author(name="BlockScan", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/bDrIHdo.png")
                 twitter_username = json_data.get("twitterUsername", "")
                 twitter_url = f"https://x.com/{twitter_username}"
                 # Add fields to the embed for user details
@@ -376,7 +376,7 @@ class Friend(commands.Cog):
                 description="Gets a history of trades for a user.",
                 color=0x9C84EF
             )
-        embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
+        embed.set_author(name="BlockScan", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/bDrIHdo.png")
         embed.add_field(
             name="Response status:",
             value=f'CSV file sent!',
@@ -442,7 +442,7 @@ class Friend(commands.Cog):
                 description="Search users by their twitter handle.",
                 color=0x9C84EF
             )
-            embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
+            embed.set_author(name="BlockScan", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/bDrIHdo.png")
             embed.add_field(
                 name="Response status:",
                 value=f'CSV file sent!',
@@ -488,7 +488,7 @@ class Friend(commands.Cog):
             description="Search users by their twitter handle.",
             color=0x9C84EF
         )
-        embed.set_author(name="PS Scanner", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/97feYXR.png")
+        embed.set_author(name="BlockScan", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/bDrIHdo.png")
         embed.add_field(
             name="Response status:",
             value=f'CSV file sent!',
