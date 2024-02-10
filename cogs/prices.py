@@ -1,10 +1,9 @@
 import aiohttp
 import asyncio
 import disnake
-from disnake.ext import commands
-from disnake.ext.commands import has_permissions
-from config import set_transaction_channel, set_price_alert_channel, set_wallet_address, set_moni_token, APIKey
-from config import get_transaction_channel, get_price_alert_channel, get_wallet_address, get_moni_token
+from disnake.ext import commands 
+from db import set_transaction_channel, set_price_alert_channel, set_wallet_address, set_moni_token, APIKey
+from db import get_transaction_channel, get_price_alert_channel, get_wallet_address, get_moni_token
 
 class Moni(commands.Cog):
     def __init__(self, bot):

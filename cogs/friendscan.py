@@ -4,7 +4,7 @@ import csv
 import io
 import disnake
 import urllib.parse
-from config import get_price_alert_channel, get_wallet_address
+from db import get_price_alert_channel, get_wallet_address
 from disnake.ext import commands 
 from disnake import Option, OptionType 
 from config import jwt, twitter_bearer

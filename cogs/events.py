@@ -2,8 +2,8 @@ import json
 import disnake
 from disnake import Member
 from disnake.ext import commands
-from config import set_price_alert_channel, set_transaction_channel, set_wallet_address
-from config import get_price_alert_channel, get_transaction_channel, get_wallet_address
+from db import set_price_alert_channel, set_transaction_channel, set_wallet_address
+from db import get_price_alert_channel, get_transaction_channel, get_wallet_address
 
 class Events(commands.Cog):
     def __init__(self, bot):

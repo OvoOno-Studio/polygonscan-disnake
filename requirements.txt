@@ -3,3 +3,4 @@ aiohttp
 asyncio 
 requests
 web3
+psycopg2

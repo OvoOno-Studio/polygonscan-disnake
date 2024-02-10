@@ -5,12 +5,11 @@ import disnake
 import seaborn as sns
 from disnake.ext import commands
 from disnake.ext.commands import has_permissions 
-from config import get_signal_pair, set_signal_pair
+from db import get_signal_pair, set_signal_pair
 from datetime import datetime
 import matplotlib.pyplot as plt
 import numpy as np
-from io import BytesIO 
-# import os
+from io import BytesIO  
 
 class Signal(commands.Cog):
     def __init__(self, bot):
