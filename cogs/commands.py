@@ -5,13 +5,13 @@ import time
 import csv
 import io
 import os
-from disnake.ext import commands
-from disnake.ext.commands import has_permissions
+from disnake.ext import commands 
 from disnake import Option, OptionType, Embed, Color
 from datetime import datetime
-from io import StringIO
-from config import APIKey, API2Key
-from checks import is_donator 
+from io import StringIO  
+
+APIKey = os.getenv('API_KEY')
+API2Key = os.getenv('API2_KEY') 
 
 class Scrape(commands.Cog):
     def __init__(self, bot):
