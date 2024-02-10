@@ -25,62 +25,51 @@ def ensure_server_config(server_id):
                 "signal_pair": config[5]
             }
 
-# Set the transaction channel
-def set_transaction_channel(server_id, channel_id):
+def update_config_value(server_id, column_name, value):
     conn = create_connection()
     with conn.cursor() as cur:
-        cur.execute("UPDATE server_configs SET transaction_channel_id = %s WHERE server_id = %s", (channel_id, server_id))
+        if value is None:
+            cur.execute(f"UPDATE server_configs SET {column_name} = NULL WHERE server_id = %s", (server_id,))
+        else:
+            cur.execute(f"UPDATE server_configs SET {column_name} = %s WHERE server_id = %s", (value, server_id))
         conn.commit()
+
+# Set the transaction channel
+def set_transaction_channel(server_id, channel_id):
+    update_config_value(server_id, "transaction_channel_id", channel_id)
 
 # Get the transaction channel
 def get_transaction_channel(server_id):
-    config = ensure_server_config(server_id)
-    return config.get('transaction_channel_id')
+    return ensure_server_config(server_id).get('transaction_channel_id')
 
 # Set the price alert channel
 def set_price_alert_channel(server_id, channel_id):
-    conn = create_connection()
-    with conn.cursor() as cur:
-        cur.execute("UPDATE server_configs SET price_alert_channel_id = %s WHERE server_id = %s", (channel_id, server_id))
-        conn.commit()
+    update_config_value(server_id, "price_alert_channel_id", channel_id)
 
 # Get the price alert channel
 def get_price_alert_channel(server_id):
-    config = ensure_server_config(server_id)
-    return config.get('price_alert_channel_id')
+    return ensure_server_config(server_id).get('price_alert_channel_id')
 
 # Set the wallet address
 def set_wallet_address(server_id, wallet_address):
-    conn = create_connection()
-    with conn.cursor() as cur:
-        cur.execute("UPDATE server_configs SET wallet_address = %s WHERE server_id = %s", (wallet_address, server_id))
-        conn.commit()
+    update_config_value(server_id, "wallet_address", wallet_address)
 
 # Get the wallet address
 def get_wallet_address(server_id):
-    config = ensure_server_config(server_id)
-    return config.get("wallet_address")
+    return ensure_server_config(server_id).get("wallet_address")
 
 # Set the monitoring token
 def set_moni_token(server_id, token):
-    conn = create_connection()
-    with conn.cursor() as cur:
-        cur.execute("UPDATE server_configs SET token = %s WHERE server_id = %s", (token, server_id))
-        conn.commit()
+    update_config_value(server_id, "token", token)
 
 # Get the monitoring token
 def get_moni_token(server_id):
-    config = ensure_server_config(server_id)
-    return config.get("token")
+    return ensure_server_config(server_id).get("token")
 
 # Set the signal pair
 def set_signal_pair(server_id, signal_pair):
-    conn = create_connection()
-    with conn.cursor() as cur:
-        cur.execute("UPDATE server_configs SET signal_pair = %s WHERE server_id = %s", (signal_pair, server_id))
-        conn.commit()
+    update_config_value(server_id, "signal_pair", signal_pair)
 
 # Get the signal pair
 def get_signal_pair(server_id):
-    config = ensure_server_config(server_id)
-    return config.get("signal_pair")
+    return ensure_server_config(server_id).get("signal_pair")
