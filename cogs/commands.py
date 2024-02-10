@@ -644,25 +644,25 @@ class Scrape(commands.Cog):
         ]
     )
     async def gas(self, inter, blockchain: str):
-        key = APIKey
-        key2 = API2Key
-
         if blockchain.lower() == "ethereum":
-            url = f"https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey={key2}"
+            url = f"https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey={API2Key}"
             blockchain_name = "Ethereum"
             color = Color.blue()
         elif blockchain.lower() == "polygon":
-            url = f"https://api.polygonscan.com/api?module=gastracker&action=gasoracle&apikey={key}"
+            url = f"https://api.polygonscan.com/api?module=gastracker&action=gasoracle&apikey={APIKey}"
             blockchain_name = "Polygon"
             color = Color.red()
         else:
             await inter.response.send_message("Invalid blockchain choice, choose either Ethereum or Polygon")
             return
-        
+
         response = requests.get(url)
-        data = json.loads(response.text)
+        if response.status_code != 200:
+            await inter.response.send_message("Failed to retrieve data from the API.")
+            return
 
         try:
+            data = json.loads(response.text)
             safe_gas = float(data['result']['SafeGasPrice'])
             propose_gas = float(data['result']['ProposeGasPrice'])
             fast_gas = float(data['result']['FastGasPrice'])

@@ -12,9 +12,9 @@ class Events(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         # Loop through each guild the bot is in
-        for guild in self.bot.guilds:
-            # Initialize the server's configuration in the database if not already done
-            await self.check_and_send_default_settings_alert(guild)
+        # for guild in self.bot.guilds:
+        #     # Initialize the server's configuration in the database if not already done
+        #     await self.check_and_send_default_settings_alert(guild)
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
