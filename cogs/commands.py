@@ -650,9 +650,9 @@ class Scrape(commands.Cog):
                 return
 
             data = json.loads(response.text)
-            safe_gas = float(data['result']['SafeGasPrice'])
-            propose_gas = float(data['result']['ProposeGasPrice'])
-            fast_gas = float(data['result']['FastGasPrice'])
+            safe_gas = int(data['result']['SafeGasPrice'])
+            propose_gas = int(data['result']['ProposeGasPrice'])
+            fast_gas = int(data['result']['FastGasPrice'])
  
         except ValueError:
             await inter.response.send_message("Unable to retrieve valid gas prices from the API.")
