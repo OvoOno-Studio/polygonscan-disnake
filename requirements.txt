@@ -1,8 +1,6 @@
-disnake
-os 
+disnake 
 traceback
-aiohttp 
-import
+aiohttp  
 asyncio
 json
 requests
