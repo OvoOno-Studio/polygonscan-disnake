@@ -26,7 +26,7 @@ class Scrape(commands.Cog):
         
         for page in range(1, num_pages + 1): 
             if blockchain.lower() == "ethereum":
-                url = f"https://api.etherscan.io/api?module=account&action=tokentx&contractaddress={token_address}&page={page}&offset={page_size}&sort=desc&apikey={str(key2)}" 
+                url = f"https://api.etherscan.io/api?module=account&action=tokentx&contractaddress={token_address}&page={page}&offset={page_size}&sort=desc&apikey={str(key2)}"  
             elif blockchain.lower() == "polygon":
                 url = f"https://api.polygonscan.com/api?module=account&action=tokentx&contractaddress={token_address}&page={page}&offset={page_size}&sort=desc&apikey={str(key)}" 
             else: 
@@ -637,9 +637,11 @@ class Scrape(commands.Cog):
             if blockchain.lower() == "ethereum":
                 url = f"https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey={API2Key}"
                 blockchain_name = "Ethereum" 
+                color = Color.blue()
             elif blockchain.lower() == "polygon":
                 url = f"https://api.polygonscan.com/api?module=gastracker&action=gasoracle&apikey={APIKey}"
                 blockchain_name = "Polygon" 
+                color = Color.red()
             else:
                 await inter.response.send_message("Invalid blockchain choice, choose either Ethereum or Polygon")
                 return
@@ -664,7 +666,7 @@ class Scrape(commands.Cog):
         elif any(gas > 50 for gas in [safe_gas, propose_gas, fast_gas]):
             conclusion = "Medium"
         
-        embed = Embed(title=f":fuelpump: {blockchain_name} Gas Oracle")
+        embed = Embed(title=f":fuelpump: {blockchain_name} Gas Oracle", color=color)
         embed.set_author(name="BlockScan", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/bDrIHdo.png")
         embed.add_field(name="Last Block", value=data['result']['LastBlock'], inline=False)
         embed.add_field(name="Safe Gas Price", value=f"{safe_gas} Gwei", inline=True)
