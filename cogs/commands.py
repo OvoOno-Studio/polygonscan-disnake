@@ -650,6 +650,8 @@ class Scrape(commands.Cog):
                 return
 
             data = json.loads(response.text)
+            print(data)
+            return
             safe_gas = int(data['result']['SafeGasPrice'])
             propose_gas = int(data['result']['ProposeGasPrice'])
             fast_gas = int(data['result']['FastGasPrice'])
