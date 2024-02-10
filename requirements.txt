@@ -4,3 +4,4 @@ asyncio
 requests
 web3
 psycopg2
+seaborn
