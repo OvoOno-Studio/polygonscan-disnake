@@ -62,8 +62,7 @@ class Scrape(commands.Cog):
 
     """
     Define get_token_holder - send CSV file as DM of token holders wallets .
-    """
-    @is_donator()
+    """ 
     @commands.slash_command(
         name='get_token_holder', 
         description="Send CSV file of token holders as DM",
@@ -246,23 +245,13 @@ class Scrape(commands.Cog):
             return chunks
 
         message_chunks = split_message(message_lines)
-
-        if is_donator():
-            print("Calling generate_csv...")
-            # Call the generate_csv() method to create the CSV file
-            csv_file = await self.generate_csv(data, contract_type, contract, address) 
-            await ctx.send(content="User donator ..sending CSV file as DM!") 
-            # Send the CSV file as an attachment
-            await ctx.author.send(file=csv_file) 
-
-            return
-
-        # Send each chunk as a separate message
-        for chunk in message_chunks:
-            try:
-                await ctx.author.send(content=chunk)
-            except Exception as e:
-                print(f"Error while sending formatted message chunk: {e}")
+ 
+        print("Calling generate_csv...")
+        # Call the generate_csv() method to create the CSV file
+        csv_file = await self.generate_csv(data, contract_type, contract, address) 
+        await ctx.send(content="User donator ..sending CSV file as DM!") 
+        # Send the CSV file as an attachment
+        await ctx.author.send(file=csv_file)   
 
     """
     Define checkTrx() - check status of transaction by hash.
@@ -694,8 +683,7 @@ class Scrape(commands.Cog):
 
     """
     Define getErc20() - return list of ERC-20 transactions, can be filtered by specific smart contract address. 
-    """
-    @is_donator()
+    """ 
     @commands.slash_command(
         name="get_erc20_transactions", 
             description="Return list of ERC-20 transactions, can be filtered by specific smart contract address",
@@ -716,8 +704,7 @@ class Scrape(commands.Cog):
 
     """
     Define getErc721() - return list of ERC-721(NFT) transactions, can be filtered by specific smart contract address. 
-    """
-    @is_donator()
+    """ 
     @commands.slash_command(
         name="get_erc_721_transactions",
         description="Return list of ERC-721 transactions, can be filtered by specific smart contract address",
@@ -738,8 +725,7 @@ class Scrape(commands.Cog):
 
     """
     Define getErc1155() - return list of ERC-721 (NFT) transactions, can be filtered by specific smart contract address. 
-    """
-    @is_donator()
+    """ 
     @commands.slash_command(
         name="get_erc_1155_transactions",
         description="Return list of ERC-1155 transactions, can be filtered by specific smart contract address",
