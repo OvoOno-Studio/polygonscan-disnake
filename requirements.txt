@@ -1,6 +1,5 @@
 disnake  
 aiohttp  
-asyncio
-json
+asyncio 
 requests
 web3
