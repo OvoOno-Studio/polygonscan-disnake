@@ -1,7 +1,5 @@
-from dotenv import load_dotenv  
-import os 
-
-load_dotenv()
+ 
+import os  
 
 AppId = os.getenv('APP_ID')
 GuildId = os.getenv('GUILD_ID')
