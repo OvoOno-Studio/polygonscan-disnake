@@ -1,4 +1,3 @@
- 
 import os  
 
 AppId = os.getenv('APP_ID')

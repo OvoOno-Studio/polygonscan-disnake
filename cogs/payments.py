@@ -4,8 +4,7 @@ import time
 import random
 from decimal import Decimal
 from disnake.ext import commands, tasks
-from config import API2Key
-from replit import db
+from config import API2Key 
 
 class Pay(commands.Cog):
     def __init__(self, bot):
