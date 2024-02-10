@@ -7,10 +7,10 @@ from db import get_price_alert_channel, get_transaction_channel, get_wallet_addr
 
 class Events(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot 
-    
+        self.bot = bot
+
     @commands.Cog.listener()
-    async def on_ready(self):  
+    async def on_ready(self):
         # Loop through each guild the bot is in
         for guild in self.bot.guilds:
             # Initialize the server's configuration in the database if not already done
@@ -80,29 +80,29 @@ class Events(commands.Cog):
                 if owner is not None:
                     embed = disnake.Embed(
                         title=f"Hey {owner}!",
-                        description="You have just installed the BlockScan on your server. Make sure set it!.",
+                        description="You have just installed the BlockScan on your server. Make sure to set it up.",
                         color=0x9C84EF
-                    ) 
+                    )
                     embed.set_author(name="BlockScan", url="https://polygonscan-scrapper.ovoono.studio/", icon_url="https://i.imgur.com/bDrIHdo.png")
                     embed.add_field(
                         name="Set transaction channel",
                         value='/set_transaction_channel <channel_id>',
-                        inline=False 
+                        inline=False
                     )
                     embed.add_field(
                         name="Set price alert channel",
                         value='/set_price_alert_channel <channel_id>',
-                        inline=False 
+                        inline=False
                     )
                     embed.add_field(
                         name="Set wallet address",
                         value='/set_wallet_address <address>',
-                        inline=False 
+                        inline=False
                     )
                     embed.add_field(
                         name="Set moni token",
                         value='/set_moni_token <token_string>',
-                        inline=False 
+                        inline=False
                     )
                     embed.set_footer(
                         text="Powered by OvoOno Studio"
@@ -110,7 +110,7 @@ class Events(commands.Cog):
                     try:
                         await owner.send(embed=embed)
                     except Exception as e:
-                        print(f"Failed to send message to guild owner {owner.name}: {e}") 
+                        print(f"Failed to send message to guild owner {owner.name}: {e}")
 
 def setup(bot):
     bot.add_cog(Events(bot))
