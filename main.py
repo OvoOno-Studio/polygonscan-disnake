@@ -5,10 +5,10 @@ Discord Bot based on EtherScan, PolygonScan, CoinGecko, Binance APIs and Disnake
 Version: 1.0
 """   
 import disnake
-from disnake.ext import commands 
-from config import DiscordToken
+from disnake.ext import commands  
 import os, traceback
 
+DiscordToken = os.getenv('DISCORD_TOKEN')
 class Bot(commands.Bot):
     def __init__(self):
         print("Welcome to the BlockScan!")
