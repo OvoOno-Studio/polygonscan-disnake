@@ -10,8 +10,8 @@ from disnake import Option, OptionType, Embed, Color
 from datetime import datetime
 from io import StringIO  
 
-APIKey = os.getenv('API_KEY')
-API2Key = os.getenv('API2_KEY') 
+APIKey = os.getenv('APIKey')
+API2Key = os.getenv('API2Key') 
 
 class Scrape(commands.Cog):
     def __init__(self, bot):
@@ -649,9 +649,7 @@ class Scrape(commands.Cog):
                 await inter.response.send_message("Failed to retrieve data from the API.")
                 return
 
-            data = json.loads(response.text)
-            print(data)
-            return
+            data = json.loads(response.text) 
             safe_gas = int(data['result']['SafeGasPrice'])
             propose_gas = int(data['result']['ProposeGasPrice'])
             fast_gas = int(data['result']['FastGasPrice'])
