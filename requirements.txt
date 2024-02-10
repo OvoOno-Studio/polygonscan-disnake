@@ -1,5 +1,4 @@
-disnake 
-traceback
+disnake  
 aiohttp  
 asyncio
 json
